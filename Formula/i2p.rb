@@ -1,21 +1,24 @@
 class I2p < Formula
   desc "Anonymous overlay network - a network within a network"
   homepage "https://geti2p.net"
-  url "https://download.i2p2.de/releases/0.9.32/i2pinstall_0.9.32.jar"
-  sha256 "2ff82498c5491a138e42991658d0d747f13579392d0d065c65fbe9a94ae18fdf"
+  url "https://download.i2p2.de/releases/0.9.46/i2pinstall_0.9.46.jar"
+  mirror "https://launchpad.net/i2p/trunk/0.9.46/+download/i2pinstall_0.9.46.jar"
+  sha256 "bc8ec63e1df5eba7b22c57a143ff177a1fb208f793f07ecf249f3589029def1e"
 
   bottle :unneeded
 
-  depends_on :java => "1.6+"
+  depends_on "openjdk"
 
   def install
     (buildpath/"path.conf").write "INSTALL_PATH=#{libexec}"
 
-    system "java", "-jar", "i2pinstall_#{version}.jar", "-options", "path.conf"
+    system "#{Formula["openjdk"].opt_bin}/java", "-jar", "i2pinstall_#{version}.jar",
+                                                 "-options", "path.conf", "-language", "eng"
 
-    wrapper_name = "i2psvc-macosx-universal-#{MacOS.prefer_64_bit? ? 64 : 32}"
+    wrapper_name = "i2psvc-macosx-universal-64"
     libexec.install_symlink libexec/wrapper_name => "i2psvc"
-    bin.write_exec_script Dir["#{libexec}/{eepget,i2prouter}"]
+    (bin/"eepget").write_env_script libexec/"eepget", :JAVA_HOME => Formula["openjdk"].opt_prefix
+    (bin/"i2prouter").write_env_script libexec/"i2prouter", :JAVA_HOME => Formula["openjdk"].opt_prefix
     man1.install Dir["#{libexec}/man/*"]
   end
 

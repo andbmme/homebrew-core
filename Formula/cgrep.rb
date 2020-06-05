@@ -5,19 +5,21 @@ class Cgrep < Formula
 
   desc "Context-aware grep for source code"
   homepage "https://github.com/awgn/cgrep"
-  url "https://github.com/awgn/cgrep/archive/v6.6.18.tar.gz"
-  sha256 "e753a4b49eb5895f86798fbcc1b13f4d9dd6b3803bf43ea0274c6be7447f7347"
+  url "https://github.com/awgn/cgrep/archive/v6.6.32.tar.gz"
+  sha256 "c45d680a2a00ef9524fc921e4c10fc7e68f02e57f4d6f1e640b7638a2f49c198"
   head "https://github.com/awgn/cgrep.git"
 
   bottle do
     cellar :any
-    sha256 "ad692cea91721d3a6790393d4abf7d5b1baf7d5836619df9ad306a9aaa95ca82" => :high_sierra
-    sha256 "ba15c5f7e86bbb71aac18461e2865413cfd90d3794f7f3e53ab241eacb2ddcbb" => :sierra
-    sha256 "3427acebbfe2e88072d227cc565b4d577c6900b2694bf39b01a985dbd15f41db" => :el_capitan
+    rebuild 1
+    sha256 "be536847f887c7e81974ee0f2853d35c8432decd34f5be604a41ff37da459012" => :catalina
+    sha256 "39b5aa8e661d3f56f0e7e82bd9d30276ed5a2212a73e7f381070e251f7034e8a" => :mojave
+    sha256 "09ef5c68ea4b09732b75e8aa9859e1b70e54cef0ad963e03b59d32d11a34f3e2" => :high_sierra
   end
 
-  depends_on "ghc" => :build
   depends_on "cabal-install" => :build
+  depends_on "ghc@8.8" => :build
+  depends_on "pkg-config" => :build
   depends_on "pcre"
 
   def install
@@ -25,17 +27,14 @@ class Cgrep < Formula
   end
 
   test do
-    path = testpath/"test.rb"
-    path.write <<~EOS
+    (testpath/"t.rb").write <<~EOS
       # puts test comment.
       puts "test literal."
     EOS
 
-    assert_match ":1",
-      shell_output("script -q /dev/null #{bin}/cgrep --count --comment test #{path}")
-    assert_match ":1",
-      shell_output("script -q /dev/null #{bin}/cgrep --count --literal test #{path}")
-    assert_match ":1",
-      shell_output("script -q /dev/null #{bin}/cgrep --count --code puts #{path}")
+    assert_match ":1", shell_output("#{bin}/cgrep --count --comment test t.rb")
+    assert_match ":1", shell_output("#{bin}/cgrep --count --literal test t.rb")
+    assert_match ":1", shell_output("#{bin}/cgrep --count --code puts t.rb")
+    assert_match ":2", shell_output("#{bin}/cgrep --count puts t.rb")
   end
 end

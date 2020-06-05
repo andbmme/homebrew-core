@@ -1,22 +1,31 @@
 class Gtksourceview3 < Formula
   desc "Text view with syntax, undo/redo, and text marks"
   homepage "https://projects.gnome.org/gtksourceview/"
-  url "https://download.gnome.org/sources/gtksourceview/3.24/gtksourceview-3.24.5.tar.xz"
-  sha256 "0246185fcc20c4734d01419a83f58f251a82e2a902fe60bb0335187fcf658181"
+  url "https://download.gnome.org/sources/gtksourceview/3.24/gtksourceview-3.24.11.tar.xz"
+  sha256 "691b074a37b2a307f7f48edc5b8c7afa7301709be56378ccf9cc9735909077fd"
+  revision 2
 
   bottle do
-    sha256 "09c930da2b0d2d1e4a844eb520e613343a60a9b6b8017ccab2732dc6c498578b" => :high_sierra
-    sha256 "e8f01b660c11773df3468db3005f5ff3c95be7e9697a83783a6551cee2e9dd86" => :sierra
-    sha256 "11aa50e21f27d6bc0c9abf17f73f0e4459a7afbd9a1ce0d16443ed2a69804a9a" => :el_capitan
+    sha256 "ce6588f731be85d7c5ed37e7289e51b2fb36f11d8a737401e0fcc54467beabc4" => :catalina
+    sha256 "6cdc3337652b4fe1b0b2908996744764db42639e974e5f7b38f456329a0cfa3c" => :mojave
+    sha256 "f2a90809d31e0b808072c048ef3a4bdc5cf0f1a363e65646692a783bb74f6c1e" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "gobject-introspection" => :build
   depends_on "intltool" => :build
+  depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
+  depends_on "vala" => :build
   depends_on "gettext"
   depends_on "gtk+3"
 
   def install
+    system "autoreconf", "-fi"
     system "./configure", "--disable-dependency-tracking",
+                          "--enable-vala=yes",
+                          "--enable-introspection=yes",
                           "--prefix=#{prefix}"
     system "make", "install"
   end
@@ -39,6 +48,7 @@ class Gtksourceview3 < Formula
     gettext = Formula["gettext"]
     glib = Formula["glib"]
     gtkx3 = Formula["gtk+3"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libpng = Formula["libpng"]
     pango = Formula["pango"]
@@ -54,6 +64,7 @@ class Gtksourceview3 < Formula
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gtkx3.opt_include}/gtk-3.0
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}/gtksourceview-3.0
       -I#{libepoxy.opt_include}
       -I#{libpng.opt_include}/libpng16

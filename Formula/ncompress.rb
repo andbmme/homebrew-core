@@ -1,19 +1,18 @@
 class Ncompress < Formula
   desc "Fast, simple LZW file compressor"
   homepage "https://github.com/vapier/ncompress"
-  url "https://github.com/vapier/ncompress/archive/v4.2.4.4.tar.gz"
-  sha256 "2670439935e7639c3a767087da99810e45bc3997d0638b3094396043571e5aec"
+  url "https://github.com/vapier/ncompress/archive/v4.2.4.6.tar.gz"
+  sha256 "fb7b6a00060bd4c6e35ba4cc96a5ca7e78c193e6267487dd53376d80e061836b"
   head "https://github.com/vapier/ncompress.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a690145266b23c89bc3d9762cc5f632bb15f685171f939108c1eebdda06a57f5" => :high_sierra
-    sha256 "631c12b675f730ea3a7a170b214f63b1749fabb2d632ce76d76de4c8706cdf79" => :sierra
-    sha256 "a046e625feb4e7dbf26136b6ba949f9883de14674571f2291794daf98106558f" => :el_capitan
-    sha256 "613392aa88dbf86d8de3d6355dfeb72753a4040fd8c805907f434a7d1e5e78c4" => :yosemite
+    sha256 "cc232677371ee83d7af62598553c028e11071e309d8620818965b94d2a43b9a4" => :catalina
+    sha256 "c5d28fad3558616e2347c16a3aa8a353c7c5b0317c175a1b99e5d6e0f6bae736" => :mojave
+    sha256 "b1fa7c42647c420dd48849ad9fb0f05da911ef3bec9459f9ba3892de2d05a58b" => :high_sierra
   end
 
-  keg_only :provided_by_osx
+  keg_only :provided_by_macos
 
   def install
     system "make", "install", "BINDIR=#{bin}", "MANDIR=#{man1}"

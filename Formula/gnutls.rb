@@ -1,62 +1,47 @@
 class Gnutls < Formula
   desc "GNU Transport Layer Security (TLS) Library"
   homepage "https://gnutls.org/"
-  url "https://gnupg.org/ftp/gcrypt/gnutls/v3.5/gnutls-3.5.16.tar.xz"
-  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.5/gnutls-3.5.16.tar.xz"
-  sha256 "0924dec90c37c05f49fec966eba3672dab4d336d879e5c06e06e13325cbfec25"
+  url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.14.tar.xz"
+  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.6/gnutls-3.6.14.tar.xz"
+  sha256 "5630751adec7025b8ef955af4d141d00d252a985769f51b4059e5affa3d39d63"
 
   bottle do
-    sha256 "8b8b7f4027495db16b053f7865771b17425fd04346aa0f510667850af48a6b6d" => :high_sierra
-    sha256 "8375629a2afa653a4163af27d03709171dd7d24def3d308915ae9a86887a3484" => :sierra
-    sha256 "c58c97afd02abe6216480e235ac93432065bf359c59fc5e41e82e254d8caa866" => :el_capitan
+    sha256 "ed76b5d22e195a797c2d01ab2f4a8e769a023b056b17e86f11cb6b9af200babe" => :catalina
+    sha256 "d57c7537ca0565e8c8fdf13beb4b082548f87a0df2295469596f1cfe3067faae" => :mojave
+    sha256 "2773c249c2a71f299261889185bda3950ed15150ff09529a71f88c30d68ff26f" => :high_sierra
   end
 
-  devel do
-    url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.0.tar.xz"
-    mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.6/gnutls-3.6.0.tar.xz"
-    sha256 "2ab9e3c0131fcd9142382f37ba9c6d20022b76cba83560cbcaa8e4002d71fb72"
-  end
-
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
   depends_on "pkg-config" => :build
-  depends_on "libtasn1"
   depends_on "gmp"
-  depends_on "nettle"
+  depends_on "libidn2"
+  depends_on "libtasn1"
   depends_on "libunistring"
-  depends_on "p11-kit" => :recommended
-  depends_on "guile" => :optional
-  depends_on "unbound" => :optional
+  depends_on "nettle"
+  depends_on "p11-kit"
+  depends_on "unbound"
 
   def install
-    # Fix "dyld: lazy symbol binding failed: Symbol not found: _getentropy"
-    # Reported 18 Oct 2016 https://gitlab.com/gnutls/gnutls/issues/142
-    if MacOS.version == "10.11" && MacOS::Xcode.installed? && MacOS::Xcode.version >= "8.0"
-      inreplace "configure", "getentropy(0, 0);", "undefinedgibberish(0, 0);"
-    end
-
     args = %W[
       --disable-dependency-tracking
       --disable-silent-rules
       --disable-static
       --prefix=#{prefix}
       --sysconfdir=#{etc}
-      --with-default-trust-store-file=#{etc}/openssl/cert.pem
+      --with-default-trust-store-file=#{pkgetc}/cert.pem
+      --disable-guile
       --disable-heartbeat-support
+      --with-p11-kit
     ]
 
-    if build.with? "p11-kit"
-      args << "--with-p11-kit"
-    else
-      args << "--without-p11-kit"
-    end
-
-    if build.with? "guile"
-      args << "--enable-guile" << "--with-guile-site-dir"
-    else
-      args << "--disable-guile"
-    end
+    # Work around a gnulib issue with macOS Catalina
+    args << "gl_cv_func_ftello_works=yes"
 
     system "./configure", *args
-    system "make", "install"
+    # Adding LDFLAGS= to allow the build on Catalina 10.15.4
+    # See https://gitlab.com/gnutls/gnutls/-/issues/966
+    system "make", "LDFLAGS=", "install"
 
     # certtool shadows the macOS certtool utility
     mv bin/"certtool", bin/"gnutls-certtool"
@@ -80,9 +65,8 @@ class Gnutls < Formula
       $CHILD_STATUS.success?
     end
 
-    openssldir = etc/"openssl"
-    openssldir.mkpath
-    (openssldir/"cert.pem").atomic_write(valid_certs.join("\n"))
+    pkgetc.mkpath
+    (pkgetc/"cert.pem").atomic_write(valid_certs.join("\n"))
   end
 
   test do

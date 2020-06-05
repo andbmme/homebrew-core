@@ -1,71 +1,87 @@
 class Etcd < Formula
   desc "Key value store for shared configuration and service discovery"
-  homepage "https://github.com/coreos/etcd"
-  url "https://github.com/coreos/etcd/archive/v3.2.10.tar.gz"
-  sha256 "86b7afd78b3a409b23ddf9d889b74c4edecf0fec1148f83bf025911705895f08"
-  head "https://github.com/coreos/etcd.git"
+  homepage "https://github.com/etcd-io/etcd"
+  url "https://github.com/etcd-io/etcd.git",
+    :tag      => "v3.4.9",
+    :revision => "54ba9589114fc3fa5cc36c313550b3c0c0938c91"
+  head "https://github.com/etcd-io/etcd.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d8655b67d0b5d8b4efd5f7f71ffdc63e31d6639e5ca0cf32376177ef239debac" => :high_sierra
-    sha256 "2678b0f79e7d0ff0dfdbc3a7f222427374a633082a9c3efa893cf1c271d3b6b7" => :sierra
-    sha256 "fcd1225ae8b07e3fc3db3adc6c1c8ae534852c13ecb30bf71e40dd47e1c7697b" => :el_capitan
+    sha256 "603a74caf79959bbd42d482f81822a83eee9a7fa4a1614c989515649972d7743" => :catalina
+    sha256 "d6d3304e5f3259a8299cbf79c369b86afe8a369ec293221611811dc716c4bca0" => :mojave
+    sha256 "cf18cb41e9ee41ec20d5598a14756d231a2013c447b5406d1995e31d18137742" => :high_sierra
   end
 
   depends_on "go" => :build
 
+  # remove in the next release
+  patch do
+    url "https://github.com/etcd-io/etcd/pull/11937.patch?full_index=1"
+    sha256 "90f44278806323ddb8cc8160cb0bd00dd892698d90f27db505dca57e3c773df2"
+  end
+
   def install
-    ENV["GOPATH"] = buildpath
-    mkdir_p "src/github.com/coreos"
-    ln_s buildpath, "src/github.com/coreos/etcd"
-    system "./build"
-    bin.install "bin/etcd"
-    bin.install "bin/etcdctl"
+    # Fix vendored deps issue (remove this in the next release)
+    system "go", "mod", "vendor"
+
+    system "go", "build", "-mod=vendor", "-ldflags", "-s -w -X main.version=#{version}", "-trimpath", "-o",
+      bin/"etcd"
+    system "go", "build", "-mod=vendor", "-ldflags", "-s -w -X main.version=#{version}", "-trimpath", "-o",
+      bin/"etcdctl", "etcdctl/main.go"
+    prefix.install_metafiles
   end
 
   plist_options :manual => "etcd"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/etcd</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
         </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/etcd</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 
   test do
-    begin
-      test_string = "Hello from brew test!"
-      etcd_pid = fork do
-        exec bin/"etcd", "--force-new-cluster", "--data-dir=#{testpath}"
-      end
-      # sleep to let etcd get its wits about it
-      sleep 10
-      etcd_uri = "http://127.0.0.1:2379/v2/keys/brew_test"
-      system "curl", "--silent", "-L", etcd_uri, "-XPUT", "-d", "value=#{test_string}"
-      curl_output = shell_output("curl --silent -L #{etcd_uri}")
-      response_hash = JSON.parse(curl_output)
-      assert_match(test_string, response_hash.fetch("node").fetch("value"))
-    ensure
-      # clean up the etcd process before we leave
-      Process.kill("HUP", etcd_pid)
+    test_string = "Hello from brew test!"
+    etcd_pid = fork do
+      exec bin/"etcd",
+        "--enable-v2", # enable etcd v2 client support
+        "--force-new-cluster",
+        "--logger=zap", # default logger (`capnslog`) to be deprecated in v3.5
+        "--data-dir=#{testpath}"
     end
+    # sleep to let etcd get its wits about it
+    sleep 10
+
+    etcd_uri = "http://127.0.0.1:2379/v2/keys/brew_test"
+    system "curl", "--silent", "-L", etcd_uri, "-XPUT", "-d", "value=#{test_string}"
+    curl_output = shell_output("curl --silent -L #{etcd_uri}")
+    response_hash = JSON.parse(curl_output)
+    assert_match(test_string, response_hash.fetch("node").fetch("value"))
+
+    assert_equal "OK\n", shell_output("#{bin}/etcdctl put foo bar")
+    assert_equal "foo\nbar\n", shell_output("#{bin}/etcdctl get foo 2>&1")
+  ensure
+    # clean up the etcd process before we leave
+    Process.kill("HUP", etcd_pid)
   end
 end

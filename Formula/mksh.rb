@@ -1,30 +1,20 @@
 class Mksh < Formula
   desc "MirBSD Korn Shell"
   homepage "https://www.mirbsd.org/mksh.htm"
-  url "https://www.mirbsd.org/MirOS/dist/mir/mksh/mksh-R56b.tgz"
-  mirror "https://dl.bintray.com/homebrew/mirror/mksh-56b.tgz"
-  version "56b"
-  sha256 "40ec744eec256583e4e18907cde22af57c980286f535df47326fed07e48c9a7f"
+  url "https://www.mirbsd.org/MirOS/dist/mir/mksh/mksh-R59.tgz"
+  sha256 "592a28ba67bea8a285f003d7a5d21b65e718546c8fcb375d7d696f3d5dd390ba"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "6098461be38111921ac20b4079fbf526e902335551db5390a36444cb35c1433c" => :high_sierra
-    sha256 "92b1f35f5311b97ed642b740a3f27b06b87b602004d75c401d342ad4f1622b8f" => :sierra
-    sha256 "869c03bacc72c9d7d56f9a1371bef7072df1d39213cf6cc23b924cb7056d7853" => :el_capitan
-    sha256 "f60810eeec945b44fccf6b64943666d0c4aab9fe0d0cd94c37cda411073ccc29" => :yosemite
+    sha256 "2f558d90c4feae917f31026ba75dd757d5dca170c819320a2a3595bec487a17a" => :catalina
+    sha256 "e957fc3249181ba27dc58a60835a7e08ac8de137c9e7addc7e5ffd845214083c" => :mojave
+    sha256 "09b3570614ce07378456c65ce5a9698cd92fbd794cfceab8b056f3d22bc9d577" => :high_sierra
   end
 
   def install
-    system "sh", "./Build.sh", "-r", "-c", (ENV.compiler == :clang) ? "lto" : "combine"
+    system "sh", "./Build.sh", "-r"
     bin.install "mksh"
     man1.install "mksh.1"
-  end
-
-  def caveats; <<~EOS
-    To allow using mksh as a login shell, run this as root:
-        echo #{HOMEBREW_PREFIX}/bin/mksh >> /etc/shells
-    Then, any user may run `chsh` to change their shell.
-    EOS
   end
 
   test do

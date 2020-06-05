@@ -1,15 +1,14 @@
 class Liblo < Formula
   desc "Lightweight Open Sound Control implementation"
   homepage "https://liblo.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/liblo/liblo/0.29/liblo-0.29.tar.gz"
-  sha256 "ace1b4e234091425c150261d1ca7070cece48ee3c228a5612d048116d864c06a"
+  url "https://downloads.sourceforge.net/project/liblo/liblo/0.31/liblo-0.31.tar.gz"
+  sha256 "2b4f446e1220dcd624ecd8405248b08b7601e9a0d87a0b94730c2907dbccc750"
 
   bottle do
     cellar :any
-    sha256 "961d1559e59bdcf92134a61c799456db776434d4309c2b1dc0ba17581fca7084" => :high_sierra
-    sha256 "a618d8405b4e13bc1871a5a24da2489a2b64f3d08bff3b7920bf8a6b2b3d6302" => :sierra
-    sha256 "4d5fb18d769550dd5415441b78e167533813c36391819f3c67ea7ea1e69ce7a2" => :el_capitan
-    sha256 "2e2a5f7bc6e95657cec57fc1b969c32dac1405a9731dffec1983c69cb941dde2" => :yosemite
+    sha256 "aac4280d5e147a6baab53c252bbf7cda296fe5bdeceb26d7aa60acb10ecc5444" => :catalina
+    sha256 "3310110ec91fb412b8d5c727bda03454aebec087d78ebada20bb53ad9582088e" => :mojave
+    sha256 "034eaec236ee4df490d16db9998ec7a4d88223d929b333c8b08ade641bc74bcb" => :high_sierra
   end
 
   head do
@@ -20,18 +19,12 @@ class Liblo < Formula
     depends_on "libtool" => :build
   end
 
-  option "with-ipv6", "Compile with support for ipv6"
-
-  deprecated_option "enable-ipv6" => "with-ipv6"
-
   def install
     args = %W[
       --disable-debug
       --disable-dependency-tracking
       --prefix=#{prefix}
     ]
-
-    args << "--enable-ipv6" if build.with? "ipv6"
 
     if build.head?
       system "./autogen.sh", *args
@@ -40,5 +33,21 @@ class Liblo < Formula
     end
 
     system "make", "install"
+  end
+
+  test do
+    (testpath/"lo_version.c").write <<~EOS
+      #include <stdio.h>
+      #include "lo/lo.h"
+      int main() {
+        char version[6];
+        lo_version(version, 6, 0, 0, 0, 0, 0, 0, 0);
+        printf("%s", version);
+        return 0;
+      }
+    EOS
+    system ENV.cc, "lo_version.c", "-I#{include}", "-L#{lib}", "-llo", "-o", "lo_version"
+    lo_version = `./lo_version`
+    assert_equal version.to_str, lo_version
   end
 end

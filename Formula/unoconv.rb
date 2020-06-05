@@ -1,28 +1,31 @@
 class Unoconv < Formula
   desc "Convert between any document format supported by OpenOffice"
   homepage "http://dag.wiee.rs/home-made/unoconv/"
-  url "http://dag.wieers.com/home-made/unoconv/unoconv-0.7.tar.gz"
-  sha256 "56abbec55632b19dcaff7d506ad6e2fd86f53afff412e622cc1e162afb1263fa"
+  url "https://files.pythonhosted.org/packages/ab/40/b4cab1140087f3f07b2f6d7cb9ca1c14b9bdbb525d2d83a3b29c924fe9ae/unoconv-0.9.0.tar.gz"
+  sha256 "308ebfd98e67d898834876348b27caf41470cd853fbe2681cc7dacd8fd5e6031"
+  revision 1
   head "https://github.com/dagwieers/unoconv.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "cead2876612e72e232f8abdb037329dc5f2f98b3665f723ff556369a6e3888c1" => :high_sierra
-    sha256 "67de3e479604cf777e763c116a47793fda5791feaa322af1f2226dc7f0491ddf" => :sierra
-    sha256 "432c15c1bab856edb94784c5849a120f6397d0198ec7e3acedff679f65f6841c" => :el_capitan
-    sha256 "82e4120b114a941e5a099ca5ca3df12270f66795d8292a95d4164bcd3199edac" => :yosemite
-    sha256 "db9fc7afd8681160e90f2e3de016e92bffe9d4d541cd70b50abe85b3c987f7d1" => :mavericks
-    sha256 "ae47973f02b31408afac680814bfb26002714faded753a9c753c3ab28977572b" => :mountain_lion
+    sha256 "b8926bf449026133df038d3f6fa221803173193765a1de2de70da7b1e9ea4c7a" => :catalina
+    sha256 "b8926bf449026133df038d3f6fa221803173193765a1de2de70da7b1e9ea4c7a" => :mojave
+    sha256 "b8926bf449026133df038d3f6fa221803173193765a1de2de70da7b1e9ea4c7a" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python@3.8"
 
   def install
     system "make", "install", "prefix=#{prefix}"
   end
 
-  def caveats; <<~EOS
-    In order to use unoconv, a copy of LibreOffice between versions 3.6.0.1 - 4.3.x must be installed.
+  def caveats
+    <<~EOS
+      In order to use unoconv, a copy of LibreOffice between versions 3.6.0.1 - 4.3.x must be installed.
     EOS
+  end
+
+  test do
+    assert_match /office installation/, pipe_output("#{bin}/unoconv 2>&1")
   end
 end

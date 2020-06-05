@@ -1,26 +1,22 @@
 class Tor < Formula
   desc "Anonymizing overlay network for TCP"
   homepage "https://www.torproject.org/"
-  url "https://tor.eff.org/dist/tor-0.3.1.8.tar.gz"
-  mirror "https://www.torproject.org/dist/tor-0.3.1.8.tar.gz"
-  sha256 "7df6298860a59f410ff8829cf7905a50c8b3a9094d51a8553603b401e4b5b1a1"
+  url "https://www.torproject.org/dist/tor-0.4.3.5.tar.gz"
+  mirror "https://www.torservers.net/mirrors/torproject.org/dist/tor-0.4.3.5.tar.gz"
+  sha256 "616a0e4ae688d0e151d46e3e4258565da4d443d1ddbd316db0b90910e2d5d868"
 
   bottle do
-    sha256 "0f5c458a2ae21a325d04ac74505301fcd3179fe44d593ba56a7d49f899d7521a" => :high_sierra
-    sha256 "65de0810f6725a84d46a891710076d24e1cea3e3c411b81405e7957cfdce9bf7" => :sierra
-    sha256 "f6827d77160c2e3f6794eea3a6dfb35ba342b0f6e62cd695d4b4a212ec81a265" => :el_capitan
-  end
-
-  devel do
-    url "https://tor.eff.org/dist/tor-0.3.2.4-alpha.tar.gz"
-    mirror "https://www.torproject.org/dist/tor-0.3.2.4-alpha.tar.gz"
-    sha256 "c3ea7826b783d4357a624248d8448480f27838ceb3c1bba02a4a0e5d36564fba"
+    sha256 "1a358ca1ea1c73cbc52b0a011314954da92fed0fa8e5bffd01b3ed1f97a6fc62" => :catalina
+    sha256 "0f21e143f0d968ab33014e2c5ac101addb3de0cb4299722e0674eb4d29972064" => :mojave
+    sha256 "96465afffe32f2dbb9284406e145297f583cb8c5fdfceec3c133371975f824b0" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
   depends_on "libevent"
-  depends_on "openssl"
-  depends_on "libscrypt" => :optional
+  depends_on "libscrypt"
+  depends_on "openssl@1.1"
+
+  uses_from_macos "zlib"
 
   def install
     args = %W[
@@ -29,10 +25,8 @@ class Tor < Formula
       --prefix=#{prefix}
       --sysconfdir=#{etc}
       --localstatedir=#{var}
-      --with-openssl-dir=#{Formula["openssl"].opt_prefix}
+      --with-openssl-dir=#{Formula["openssl@1.1"].opt_prefix}
     ]
-
-    args << "--disable-libscrypt" if build.without? "libscrypt"
 
     system "./configure", *args
     system "make", "install"
@@ -40,29 +34,30 @@ class Tor < Formula
 
   plist_options :manual => "tor"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <true/>
-        <key>ProgramArguments</key>
-        <array>
-            <string>#{opt_bin}/tor</string>
-        </array>
-        <key>WorkingDirectory</key>
-        <string>#{HOMEBREW_PREFIX}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/tor.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/tor.log</string>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>KeepAlive</key>
+          <true/>
+          <key>ProgramArguments</key>
+          <array>
+              <string>#{opt_bin}/tor</string>
+          </array>
+          <key>WorkingDirectory</key>
+          <string>#{HOMEBREW_PREFIX}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/tor.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/tor.log</string>
+        </dict>
+      </plist>
     EOS
   end
 

@@ -1,15 +1,14 @@
 class Msgpack < Formula
   desc "Library for a binary-based efficient data interchange format"
   homepage "https://msgpack.org/"
-  url "https://github.com/msgpack/msgpack-c/releases/download/cpp-2.1.5/msgpack-2.1.5.tar.gz"
-  sha256 "6126375af9b204611b9d9f154929f4f747e4599e6ae8443b337915dcf2899d2b"
+  url "https://github.com/msgpack/msgpack-c/releases/download/cpp-3.2.1/msgpack-3.2.1.tar.gz"
+  sha256 "433cbcd741e1813db9ae4b2e192b83ac7b1d2dd7968a3e11470eacc6f4ab58d2"
   head "https://github.com/msgpack/msgpack-c.git"
 
   bottle do
-    sha256 "85933b57f67eaa2f08bdd634bf4615603586775d7c4558d2309f3894bf53a51c" => :high_sierra
-    sha256 "4666095a79d52aafd4f430d107621ce7478bd6a1fc605aa565c5c0fab25f82e3" => :sierra
-    sha256 "bd0d61248dbbf8fc6859d22a3ccc3b4a62289f6f5745c4415f129431614ae173" => :el_capitan
-    sha256 "f29ea6e3fa33c5ad7b3a6172ad1e993e7ebfd30bc745769da4f093f3283031a3" => :yosemite
+    sha256 "096ec799c036e133005a99e95fc2c16d69ba5c12e6d42cb22aa4cd13d45b53c7" => :catalina
+    sha256 "3b801b0f1ff7467f3d9c5613b43f8caf326a399a18f039a85075edb599abd704" => :mojave
+    sha256 "37747bceccf59ae6041667c52765c424fba6363aef6326c032d35b3b59bf3d14" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -20,7 +19,7 @@ class Msgpack < Formula
   end
 
   test do
-    # Reference: http://wiki.msgpack.org/display/MSGPACK/QuickStart+for+C+Language
+    # Reference: https://github.com/msgpack/msgpack-c/blob/master/QUICKSTART-C.md
     (testpath/"test.c").write <<~EOS
       #include <msgpack.h>
       #include <stdio.h>

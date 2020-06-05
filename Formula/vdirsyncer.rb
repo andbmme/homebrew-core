@@ -4,21 +4,22 @@ class Vdirsyncer < Formula
   desc "Synchronize calendars and contacts"
   homepage "https://github.com/pimutils/vdirsyncer"
   url "https://github.com/pimutils/vdirsyncer.git",
-      :tag => "0.16.3",
-      :revision => "cca412e7a8ce862a196ed19ba801886cda936f99"
+      :tag      => "0.16.7",
+      :revision => "dcf5f701b7b5c21a8f4e8c80243db3e0baff1313"
+  revision 1
   head "https://github.com/pimutils/vdirsyncer.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a62abbf4541a598dfcef485ac339e68fc907e49ca49e0e3b571c5cec329d4418" => :high_sierra
-    sha256 "865ecd717342ff7a1737f5ea42851f42a9c7433d6874e9eff7582510cfd3e4be" => :sierra
-    sha256 "25804a2cc2c75257254e4f06c823ba992a0a225359cb381a8b23dd42bc59066f" => :el_capitan
+    sha256 "50642f917560a8b9abaf4b504e6d9f601077d6de9b2732cc234492b0ff5b687e" => :catalina
+    sha256 "78a345ea8e488b09d5dbb32513d08b4601f1e34cf24086685a008d34ad703a77" => :mojave
+    sha256 "d1e59b0fa8679516485250dd75df11fa40477ed2b737205b21e7558e382f6039" => :high_sierra
   end
 
-  depends_on :python3
+  depends_on "python@3.8"
 
   def install
-    venv = virtualenv_create(libexec, "python3")
+    venv = virtualenv_create(libexec, "python3.8")
     system libexec/"bin/pip", "install", "-v", "--no-binary", ":all:",
                               "--ignore-installed", "requests-oauthlib",
                               buildpath

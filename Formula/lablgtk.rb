@@ -1,21 +1,21 @@
 class Lablgtk < Formula
   desc "Objective Caml interface to gtk+"
   homepage "http://lablgtk.forge.ocamlcore.org"
-  url "https://forge.ocamlcore.org/frs/download.php/1726/lablgtk-2.18.6.tar.gz"
-  sha256 "4ddca243066418e2a88ac49ebf2d846fac4b667b1b1753efadd078ae777368f8"
+  url "https://github.com/garrigue/lablgtk/archive/2.18.10.tar.gz"
+  sha256 "6f00f6b3114b468eb9e743d27511a6063936f6798f890e44b494f71a5cf95470"
 
   bottle do
-    sha256 "3d6f4d3b389c8835200d70c55ad2265852d80c5cc48ae8d60eb52effd5f443ae" => :high_sierra
-    sha256 "c70a78bc822f72c8274abbf97587f7212b2421140c21a24f2daa0e3b27d0ae26" => :sierra
-    sha256 "ab52ff587d796b85df888fe57866ee42f442f9c03d939ec9a098f69b0e442724" => :el_capitan
+    cellar :any
+    sha256 "7b434a2c4a888b4dee7e98f6da29c5044cc464bf7be0b34877028cfd1d622c29" => :catalina
+    sha256 "3f24847817551482c9bafb940a313fbb8280c0f8ce2cf9ac5f725ca7b26c6c5c" => :mojave
+    sha256 "44f35afe66045382d61895a198f3353ae7b137430b8dd726e37e1ac6a8a20620" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "camlp4" => :build
-  depends_on "ocaml"
   depends_on "gtk+"
-  depends_on "librsvg"
   depends_on "gtksourceview"
+  depends_on "librsvg"
+  depends_on "ocaml"
 
   def install
     system "./configure", "--bindir=#{bin}",

@@ -1,13 +1,14 @@
 class Aqbanking < Formula
   desc "Generic online banking interface"
   homepage "https://www.aquamaniac.de/sites/aqbanking/"
-  url "https://www.aquamaniac.de/sites/download/download.php?package=03&release=208&file=01&dummy=aqbanking-5.6.12.tar.gz"
-  sha256 "0652706a487d594640a7d544271976261165bf269d90dc70447b38b363e54b22"
+  url "https://www.aquamaniac.de/rdm/attachments/download/107/aqbanking-5.8.2.tar.gz"
+  sha256 "93ca523fe175e72042db75f8c3fc6255ab058cf82caf52796e15f030809fb15e"
 
   bottle do
-    sha256 "55d0359a888464040bedd5a893d2894435ad388d5374bab9728abe49a4dc00e1" => :sierra
-    sha256 "ff953f175c8f6ddf772da822e133201c48085c2e7ccc08b7c53135daeafa5200" => :el_capitan
-    sha256 "3cdbfa38e1459b83e70dae91fd68640207ca838098e1de21966583dea8122a63" => :yosemite
+    sha256 "95a5722e1489e556d98a230d56ddf577f31916e9d7d92624122d3b9e47d9db17" => :catalina
+    sha256 "7c2baa7fb1391d73701d3853ff42c2e54c34d08e0924cf8cfac188c65a7098ae" => :mojave
+    sha256 "3486dd0c279143a270b1dcc7522a515a5f911a738d639f71591f800b2afdbfc2" => :high_sierra
+    sha256 "75e86959e6461de20b46cd9706570aee118cc243bbe6b5cb36ff3fb046bf8697" => :sierra
   end
 
   head do
@@ -18,14 +19,14 @@ class Aqbanking < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "gwenhywfar"
-  depends_on "libxmlsec1"
-  depends_on "libxslt"
-  depends_on "libxml2"
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gmp"
-  depends_on "pkg-config" => :build
-  depends_on "ktoblzcheck" => :recommended
+  depends_on "gwenhywfar"
+  depends_on "ktoblzcheck"
+  depends_on "libxml2"
+  depends_on "libxmlsec1"
+  depends_on "libxslt"
 
   def install
     ENV.deparallelize
@@ -87,6 +88,9 @@ class Aqbanking < Formula
         } # accountInfo
       } # accountInfoList
     EOS
-    assert_match /^Account\s+110000000\s+000123456789\s+STRIPE TEST BANK\s+03.01.2014\s+12:00\s+1324.36\s+USD\s+$/, shell_output("#{bin}/aqbanking-cli listbal -c #{context}")
+
+    match = "Account 110000000 000123456789 STRIPE TEST BANK 03.01.2014 12:00 1324.36 USD"
+    out = shell_output("#{bin}/aqbanking-cli listbal -c #{context}")
+    assert_match match, out.gsub(/\s+/, " ")
   end
 end

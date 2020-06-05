@@ -1,15 +1,16 @@
 class Vifm < Formula
   desc "Ncurses based file manager with vi like keybindings"
   homepage "https://vifm.info/"
-  url "https://github.com/vifm/vifm/releases/download/v0.9/vifm-0.9.tar.bz2"
-  sha256 "ab10c99d1e4c24ff8a03c20be1c202cc15874750cc47a1614e6fe4f8d816a7fd"
+  url "https://github.com/vifm/vifm/releases/download/v0.10.1/vifm-0.10.1.tar.bz2"
+  sha256 "99006f56db05e1bdfb7983e8d5c31c9ac93bf2ac9e0409a577c8ca660fecd03b"
 
   bottle do
-    sha256 "351bfdaa028f9ffd3265391ac9dcd27e5f9818a18fe40dcabfe5adfa84ff920d" => :high_sierra
-    sha256 "43c49f57d80cae5391aa31e7f344b2082e163bf9ff0003988c5fa4f419d46566" => :sierra
-    sha256 "427c8115c17a6a7143a2ce8b9a00d1f0639a15d2f61f7492623d6f958351cd35" => :el_capitan
-    sha256 "d9eb249223e2cc06049f21e9e14c544d640858d10faafeca395c99005c7c0125" => :yosemite
+    sha256 "0495acdf812f89f23c7fafcccef47589249477c5c38dd0e47049c3421edc712a" => :mojave
+    sha256 "8371dea589590796e0f1c6b7b5ce263e18b9a1619551d5967deefd5035e512e0" => :high_sierra
+    sha256 "ded145b46f48c79712b12e7f8d14ab8b219778fcd6d0b436d0c156dd0b15129d" => :sierra
   end
+
+  uses_from_macos "ncurses"
 
   def install
     system "./configure", "--disable-dependency-tracking",
@@ -19,6 +20,7 @@ class Vifm < Formula
                           "--without-X11"
     system "make"
     system "make", "check"
+
     ENV.deparallelize { system "make", "install" }
   end
 

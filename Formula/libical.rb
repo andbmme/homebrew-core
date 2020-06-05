@@ -1,22 +1,27 @@
 class Libical < Formula
   desc "Implementation of iCalendar protocols and data formats"
   homepage "https://libical.github.io/libical/"
-  url "https://github.com/libical/libical/releases/download/v3.0.0/libical-3.0.0.tar.gz"
-  sha256 "ac2b3d8001d03818bfddec229b45c68eef84301714c036056395b9b0365a2b0d"
+  url "https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz"
+  sha256 "09fecacaf75ba5a242159e3a9758a5446b5ce4d0ab684f98a7040864e1d1286f"
+  revision 2
 
   bottle do
-    sha256 "e00639c8e22c1e65492d11fc1486f38f8c1e898cbca7d704777040e088d3192b" => :high_sierra
-    sha256 "640045615ee37609804b4f19479e813d7cbcbdbcc5ba92821c11507ed38768b7" => :sierra
-    sha256 "8188a81db33ac7f104254a24b5c94480445d50b09a71c11f14bf5d06086b7a0e" => :el_capitan
+    cellar :any
+    sha256 "aee72172114e605f00d453d7a2f5e7be3b813fcc56d05463c97de76f579db5f4" => :catalina
+    sha256 "93bd93bbad50f91aaa215ba2f764046fef919790a4ff227328a309b2ad2490d2" => :mojave
+    sha256 "3ff8dae7c504718bffd8fb8ce066c3b5c777d12250bdc87ff3fbb7f230284d1b" => :high_sierra
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
   depends_on "glib"
+  depends_on "icu4c"
+
+  uses_from_macos "libxml2"
 
   def install
     system "cmake", ".", "-DBDB_LIBRARY=BDB_LIBRARY-NOTFOUND",
-                         "-DICU_LIBRARY=ICU_LIBRARY-NOTFOUND",
+                         "-DENABLE_GTK_DOC=OFF",
                          "-DSHARED_ONLY=ON",
                          *std_cmake_args
     system "make", "install"
@@ -24,6 +29,7 @@ class Libical < Formula
 
   test do
     (testpath/"test.c").write <<~EOS
+      #define LIBICAL_GLIB_UNSTABLE_API 1
       #include <libical-glib/libical-glib.h>
       int main(int argc, char *argv[]) {
         ICalParser *parser = i_cal_parser_new();
@@ -31,8 +37,8 @@ class Libical < Formula
       }
     EOS
     system ENV.cc, "test.c", "-o", "test", "-L#{lib}", "-lical-glib",
-           "-I#{Formula["glib"].opt_include}/glib-2.0",
-           "-I#{Formula["glib"].opt_lib}/glib-2.0/include"
+                   "-I#{Formula["glib"].opt_include}/glib-2.0",
+                   "-I#{Formula["glib"].opt_lib}/glib-2.0/include"
     system "./test"
   end
 end

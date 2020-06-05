@@ -1,14 +1,14 @@
 class Check < Formula
   desc "C unit testing framework"
   homepage "https://libcheck.github.io/check/"
-  url "https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz"
-  sha256 "464201098bee00e90f5c4bdfa94a5d3ead8d641f9025b560a27755a83b824234"
+  url "https://github.com/libcheck/check/releases/download/0.14.0/check-0.14.0.tar.gz"
+  sha256 "bd0f0ca1be65b70238b32f8e9fe5d36dc2fbf7a759b7edf28e75323a7d74f30b"
 
   bottle do
     cellar :any
-    sha256 "fd175fded31ecc36ad06beeb18e05fd4d5f5bc538e1a445e86b703bf34373fd8" => :high_sierra
-    sha256 "6ad1ff9e52d767968efb2b73b563b171561421818a86185c03639f65f0a22ab3" => :sierra
-    sha256 "5de09e615daf7e12f1b10485b7bc8cb5382e04f856dc516056bae0a30b5f6b49" => :el_capitan
+    sha256 "c6adc313137a97331bebce862758d1235f590c37bfc855920f953edf858c8d85" => :catalina
+    sha256 "244b4b72dfed2d2950e3f3183e8d3a1207fef62470643097402dbf34b5223303" => :mojave
+    sha256 "b61bb914f053c31a8dcb86394d10d3e3b77b2d71ebe2c4f21585f05f15594d8e" => :high_sierra
   end
 
   def install

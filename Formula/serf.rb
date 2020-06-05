@@ -1,33 +1,21 @@
-require "language/go"
-
 class Serf < Formula
   desc "Service orchestration and management tool"
   homepage "https://serfdom.io/"
   url "https://github.com/hashicorp/serf.git",
-      :tag => "v0.8.1",
-      :revision => "d6574a5bb1226678d7010325fb6c985db20ee458"
+      :tag      => "v0.9.2",
+      :revision => "5642cc7572cebea332176ca3024bec4b3474a11a"
   head "https://github.com/hashicorp/serf.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "5056682baba23b724e2162d57ef3ec4d44ffe6065ce0e4b5ee070c283e6bb212" => :high_sierra
-    sha256 "bd635f302248c8e6a6063fb5496890743f94629af4f039be3089e59ca2b3ceab" => :sierra
-    sha256 "b17ca576f35a45bc4b60272166a035d07b6d70c4b88a191e9d151a13f8d234f1" => :el_capitan
-    sha256 "10eaf8cf838a3b49612fd7b66e3b5b3f36a41aa383e3735e5748a44d1f037266" => :yosemite
+    sha256 "3bd356983857810d36a2ea7c3ae785a93068a502c3c371ccbf9b5db5b43c7a77" => :catalina
+    sha256 "8fc8a0b90605b7f45e55bbd3334aeedf02feec63f1b1e6d0de0ce473ad575be2" => :mojave
+    sha256 "1b0dbf9abeb34aae2e0b1634f274d46b7bd95a166dfff360fe54599de68415c6" => :high_sierra
   end
 
   depends_on "go" => :build
   depends_on "govendor" => :build
-
-  go_resource "github.com/mitchellh/gox" do
-    url "https://github.com/mitchellh/gox.git",
-        :revision => "c9740af9c6574448fd48eb30a71f964014c7a837"
-  end
-
-  go_resource "github.com/mitchellh/iochan" do
-    url "https://github.com/mitchellh/iochan.git",
-        :revision => "87b45ffd0e9581375c491fef3d32130bb15c5bd7"
-  end
+  depends_on "gox" => :build
 
   def install
     contents = Dir["*"]
@@ -35,17 +23,10 @@ class Serf < Formula
     (gopath/"src/github.com/hashicorp/serf").install contents
 
     ENV["GOPATH"] = gopath
-    arch = MacOS.prefer_64_bit? ? "amd64" : "386"
-    ENV["XC_ARCH"] = arch
+    ENV["XC_ARCH"] = "amd64"
     ENV["XC_OS"] = "darwin"
 
-    Language::Go.stage_deps resources, gopath/"src"
-
-    ENV.prepend_create_path "PATH", gopath/"bin"
-    cd gopath/"src/github.com/mitchellh/gox" do
-      system "go", "build"
-      (gopath/"bin").install "gox"
-    end
+    (gopath/"bin").mkpath
 
     cd gopath/"src/github.com/hashicorp/serf" do
       system "make", "bin"
@@ -55,16 +36,14 @@ class Serf < Formula
   end
 
   test do
-    begin
-      pid = fork do
-        exec "#{bin}/serf", "agent"
-      end
-      sleep 1
-      assert_match /:7946.*alive$/, shell_output("#{bin}/serf members")
-    ensure
-      system "#{bin}/serf", "leave"
-      Process.kill "SIGINT", pid
-      Process.wait pid
+    pid = fork do
+      exec "#{bin}/serf", "agent"
     end
+    sleep 1
+    assert_match /:7946.*alive$/, shell_output("#{bin}/serf members")
+  ensure
+    system "#{bin}/serf", "leave"
+    Process.kill "SIGINT", pid
+    Process.wait pid
   end
 end

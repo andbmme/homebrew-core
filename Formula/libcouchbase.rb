@@ -1,35 +1,29 @@
 class Libcouchbase < Formula
   desc "C library for Couchbase"
-  homepage "https://developer.couchbase.com/documentation/server/4.5/sdk/c/start-using-sdk.html"
-  url "https://s3.amazonaws.com/packages.couchbase.com/clients/c/libcouchbase-2.8.2.tar.gz"
-  sha256 "ec788d9db82287b82310aae7ac5543f4a054c6dd49e33fb88ff1ec0ba3d436ef"
+  homepage "https://docs.couchbase.com/c-sdk/2.10/start-using-sdk.html"
+  url "https://packages.couchbase.com/clients/c/libcouchbase-2.10.6.tar.gz"
+  sha256 "341d7af60d637c81a4de623168746b699f49a75358aa33d9b1b99dd0a63a7cf3"
   head "https://github.com/couchbase/libcouchbase.git"
 
   bottle do
-    sha256 "ff9dea1a6bb1b39a57e2a94316ad70f5535ae33e7906d578b27496ca6890f3e8" => :high_sierra
-    sha256 "fd257896bd317270317f5730a4664cd04a4978c52964bbfdb4b0be0a86f44d96" => :sierra
-    sha256 "c58fdb8a5266e72ac31323ad564acc378c3f12c7f11dc64c45dab640691a1d54" => :el_capitan
+    sha256 "5c6c76de5524a1c134742d55139d3b33b64e010bd075ad3ff712cde4ac1a1427" => :catalina
+    sha256 "df795c015e0df35ccb86a87140495fc22d20c3195ee5cc572e4e25190c312905" => :mojave
+    sha256 "7e8649078c32b18513cd08d47358c44e0719d0545024267c42582885f7d225b2" => :high_sierra
   end
 
-  option "with-libev", "Build libev plugin"
-
-  deprecated_option "with-libev-plugin" => "with-libev"
-
-  depends_on "libev" => :optional
-  depends_on "libuv" => :optional
-  depends_on "libevent"
-  depends_on "openssl"
   depends_on "cmake" => :build
+  depends_on "libev"
+  depends_on "libevent"
+  depends_on "libuv"
+  depends_on "openssl@1.1"
 
   def install
-    args = std_cmake_args << "-DLCB_NO_TESTS=1" << "-DLCB_BUILD_LIBEVENT=ON"
-
-    ["libev", "libuv"].each do |dep|
-      args << "-DLCB_BUILD_#{dep.upcase}=" + (build.with?(dep) ? "ON" : "OFF")
-    end
-
-    mkdir "LCB-BUILD" do
-      system "cmake", "..", *args
+    mkdir "build" do
+      system "cmake", "..", *std_cmake_args,
+                            "-DLCB_NO_TESTS=1",
+                            "-DLCB_BUILD_LIBEVENT=ON",
+                            "-DLCB_BUILD_LIBEV=ON",
+                            "-DLCB_BUILD_LIBUV=ON"
       system "make", "install"
     end
   end

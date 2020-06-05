@@ -1,31 +1,16 @@
 class Valgrind < Formula
   desc "Dynamic analysis tools (memory, debug, profiling)"
-  homepage "http://www.valgrind.org/"
+  homepage "https://www.valgrind.org/"
 
   stable do
-    url "https://sourceware.org/pub/valgrind/valgrind-3.13.0.tar.bz2"
-    mirror "https://dl.bintray.com/homebrew/mirror/valgrind-3.13.0.tar.bz2"
-    sha256 "d76680ef03f00cd5e970bbdcd4e57fb1f6df7d2e2c071635ef2be74790190c3b"
+    url "https://sourceware.org/pub/valgrind/valgrind-3.16.0.tar.bz2"
+    sha256 "582d5127ba56dfeaab4c6ced92a742b2921148e28a5d55055aedd8f75f1cf633"
 
-    # valgrind does not yet support High Sierra
-    # https://bugs.kde.org/show_bug.cgi?id=383811
-    depends_on MaximumMacOSRequirement => :sierra
-
-    # Fix build on 10.12 with Xcode 9
-    # Upstream commit from 24 Sep 2017 "Support all Apple clang/LLVM 5.1+"
-    # See https://sourceware.org/git/?p=valgrind.git;a=commit;h=27e1503bc7bd767f3a98824176558beaa5a7c1d5
-    if DevelopmentTools.clang_build_version >= 900
-      patch :p0 do
-        url "https://raw.githubusercontent.com/Homebrew/formula-patches/b3915f6/valgrind/sierra-xcode9.diff"
-        sha256 "156ea88edd2116dd006d6e5550578af3f2a2e3923818a238b9166cd02e327432"
-      end
-    end
+    depends_on :maximum_macos => :high_sierra
   end
 
   bottle do
-    sha256 "1ae24d4988d010b407bb344c953dd8a7696876a3c2793f2548648be4cfc61db2" => :sierra
-    sha256 "8dcc652676c3ec2f1fd3dfc710298b4da0985b1a056f86c429e68b5b8bcf74a6" => :el_capitan
-    sha256 "02f118896232618cb6319e22f21cea21d29f8985be4807547bb49bc397307730" => :yosemite
+    sha256 "52f01d383ca2a8515840aeef2af133a7f12ced48bc0077e01de71b5eb7c44b04" => :high_sierra
   end
 
   head do
@@ -44,19 +29,10 @@ class Valgrind < Formula
     args = %W[
       --disable-dependency-tracking
       --prefix=#{prefix}
+      --enable-only64bit
+      --build=amd64-darwin
     ]
-    if MacOS.prefer_64_bit?
-      args << "--enable-only64bit" << "--build=amd64-darwin"
-    else
-      args << "--enable-only32bit"
-    end
-
     system "./autogen.sh" if build.head?
-
-    # Look for headers in the SDK on Xcode-only systems: https://bugs.kde.org/show_bug.cgi?id=295084
-    unless MacOS::CLT.installed?
-      inreplace "coregrind/Makefile.in", %r{(\s)(?=/usr/include/mach/)}, '\1'+MacOS.sdk_path.to_s
-    end
 
     system "./configure", *args
     system "make"

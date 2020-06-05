@@ -1,28 +1,25 @@
 class Spdlog < Formula
   desc "Super fast C++ logging library"
   homepage "https://github.com/gabime/spdlog"
-  url "https://github.com/gabime/spdlog/archive/v0.14.0.tar.gz"
-  sha256 "eb5beb4e53f4bfff5b32eb4db8588484bdc15a17b90eeefef3a9fc74fec1d83d"
-  head "https://github.com/gabime/spdlog.git"
+  url "https://github.com/gabime/spdlog/archive/v1.6.1.tar.gz"
+  sha256 "378a040d91f787aec96d269b0c39189f58a6b852e4cbf9150ccfacbe85ebbbfc"
+  head "https://github.com/gabime/spdlog.git", :branch => "v1.x"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "10f214120f01c039d6f75faba940473c9d87250f06887205c2964851f3bad7ab" => :high_sierra
-    sha256 "ccaa59f590a88ae154fa776bbfa0e795b073e7846140483f53bc8cfd2c35aa27" => :sierra
-    sha256 "ccaa59f590a88ae154fa776bbfa0e795b073e7846140483f53bc8cfd2c35aa27" => :el_capitan
-    sha256 "ccaa59f590a88ae154fa776bbfa0e795b073e7846140483f53bc8cfd2c35aa27" => :yosemite
+    sha256 "63dec5d3109417affd92cad8ed695c389e20da60531bc0b22f13826833ccf9f9" => :catalina
+    sha256 "19f5bc7e791fd794467a305039157acafa4d8a209a87ea8c137ce0a2909ee20c" => :mojave
+    sha256 "d47ec48d568261f83d2c7b67439b463346fd0ed3038c19392974b6efd9cbfa99" => :high_sierra
   end
 
   depends_on "cmake" => :build
-
-  needs :cxx11
 
   def install
     ENV.cxx11
 
     mkdir "spdlog-build" do
       args = std_cmake_args
-      args << "-Dpkg_config_libdir=#{lib}" << ".."
+      args << "-Dpkg_config_libdir=#{lib}" << "-DSPDLOG_BUILD_BENCH=OFF" << "-DSPDLOG_BUILD_TESTS=OFF" << ".."
       system "cmake", *args
       system "make", "install"
     end
@@ -30,15 +27,26 @@ class Spdlog < Formula
 
   test do
     (testpath/"test.cpp").write <<~EOS
-      #include "spdlog/spdlog.h"
+      #include "spdlog/sinks/basic_file_sink.h"
       #include <iostream>
       #include <memory>
       int main()
       {
-        auto console = spdlog::stdout_logger_mt("console");
+        try {
+          auto console = spdlog::basic_logger_mt("basic_logger", "#{testpath}/basic-log.txt");
+          console->info("Test");
+        }
+        catch (const spdlog::spdlog_ex &ex)
+        {
+          std::cout << "Log init failed: " << ex.what() << std::endl;
+          return 1;
+        }
       }
     EOS
+
     system ENV.cxx, "-std=c++11", "test.cpp", "-I#{include}", "-o", "test"
     system "./test"
+    assert_predicate testpath/"basic-log.txt", :exist?
+    assert_match "Test", (testpath/"basic-log.txt").read
   end
 end

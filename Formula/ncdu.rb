@@ -1,24 +1,24 @@
 class Ncdu < Formula
   desc "NCurses Disk Usage"
   homepage "https://dev.yorhel.nl/ncdu"
-  url "https://dev.yorhel.nl/download/ncdu-1.12.tar.gz"
-  sha256 "820e4e4747a2a2ec7a2e9f06d2f5a353516362c22496a10a9834f871b877499a"
+  url "https://dev.yorhel.nl/download/ncdu-1.15.tar.gz"
+  sha256 "4a593dc5cceb2492a9669f5f5d69d0e517de457a11036788ea4591f33c5297fb"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "501ad7709e92a3afc4061c54eb9113df38e2c5c34b7f40375ca5615679b3c903" => :high_sierra
-    sha256 "5784189130cbced918c7792b3c70f0cc5c8796c0beb19dd5e9ae20b9a27f2201" => :sierra
-    sha256 "b58d0b3a611a9e6538ef45f53220a29c0d6db0c3713982d7fdfdfdb9a11b3cc6" => :el_capitan
-    sha256 "33b01aed14d4258567f14b68b7aa902827c9e8ef80255a740d77f2418935a220" => :yosemite
-    sha256 "b4e39a75592588e134de07e8037bf01e0d6fc93dbe79af1f6f9e197ca8b288cb" => :mavericks
+    sha256 "df4662de39f18d84000aaea85626da50d6076281e8823b093cff48111aadf2ec" => :catalina
+    sha256 "f84f3f172a6949aff0a2a70f06a5b6e8fd05bd0a2ae18e1d6da7baf22378f0c6" => :mojave
+    sha256 "f5aced7c926a8523011d5e4f503721fcf2b67287fa4df0af4357b72211581f43" => :high_sierra
   end
 
   head do
     url "https://g.blicky.net/ncdu.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
+
+  uses_from_macos "ncurses"
 
   def install
     system "autoreconf", "-i" if build.head?

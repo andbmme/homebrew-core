@@ -1,35 +1,50 @@
 class FluidSynth < Formula
   desc "Real-time software synthesizer based on the SoundFont 2 specs"
   homepage "http://www.fluidsynth.org"
-  url "https://github.com/FluidSynth/fluidsynth/archive/v1.1.8.tar.gz"
-  sha256 "318df5aebde8e7353c8878f5c9cb3ba8ed578c2607978b6fbfc5f1cb2ad9d799"
+  url "https://github.com/FluidSynth/fluidsynth/archive/v2.1.3.tar.gz"
+  sha256 "645fbfd7c04543c6d3bf415eab8250527813b8dc8e6d6972dbcc8cb525e1d409"
+  head "https://github.com/FluidSynth/fluidsynth.git"
 
   bottle do
     cellar :any
-    sha256 "b723c0e4895e284361142a3f9ee871a1519a230ab5eac4d2e816a651ec1953b4" => :high_sierra
-    sha256 "1ae6a117a7850abd29df4d47c740eb2734a057bee5e5708da76eb21ea1770e3b" => :sierra
-    sha256 "442615894ba807164a8f80387d2d0e193ec2466b82f5f4b55afd567448edb32a" => :el_capitan
+    sha256 "20b95c9a3233fb35ea30f4942e7bd9d9c5eb560ff471bece810aa9b0b753615a" => :catalina
+    sha256 "4bb28e3e5539e606f6fa41267a483b3cad254918ecf4859402a30d524a9598b7" => :mojave
+    sha256 "8f55c689efeaf1dd86b761bb8c026bb87f71262411686d8bdb00cd068405c19a" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "cmake" => :build
+  depends_on "pkg-config" => :build
   depends_on "glib"
-  depends_on "libsndfile" => :optional
-  depends_on "portaudio" => :optional
+  depends_on "libsndfile"
+  depends_on "portaudio"
+
+  resource "example_midi" do
+    url "https://upload.wikimedia.org/wikipedia/commons/6/61/Drum_sample.mid"
+    sha256 "a1259360c48adc81f2c5b822f221044595632bd1a76302db1f9d983c44f45a30"
+  end
 
   def install
-    args = std_cmake_args
-    args << "-Denable-framework=OFF" << "-DLIB_SUFFIX="
-    args << "-Denable-portaudio=ON" if build.with? "portaudio"
-    args << "-Denable-libsndfile=OFF" if build.without? "libsndfile"
+    args = std_cmake_args + %w[
+      -Denable-framework=OFF
+      -Denable-portaudio=ON
+      -DLIB_SUFFIX=
+      -Denable-dbus=OFF
+      -Denable-sdl2=OFF
+    ]
 
     mkdir "build" do
       system "cmake", "..", *args
       system "make", "install"
     end
+
+    pkgshare.install "sf2"
   end
 
   test do
-    assert_match /#{version}/, shell_output("#{bin}/fluidsynth --version")
+    # Synthesize wav file from example midi
+    resource("example_midi").stage testpath
+    wavout = testpath/"Drum_sample.wav"
+    system bin/"fluidsynth", "-F", wavout, pkgshare/"sf2/VintageDreamsWaves-v2.sf2", testpath/"Drum_sample.mid"
+    assert_predicate wavout, :exist?
   end
 end

@@ -1,19 +1,17 @@
 class Ecl < Formula
   desc "Embeddable Common Lisp"
   homepage "https://common-lisp.net/project/ecl/"
-  url "https://common-lisp.net/project/ecl/static/files/release/ecl-16.1.3.tgz"
-  sha256 "76a585c616e8fa83a6b7209325a309da5bc0ca68e0658f396f49955638111254"
-  revision 1
-
+  url "https://common-lisp.net/project/ecl/static/files/release/ecl-20.4.24.tgz"
+  sha256 "670838edf258a936b522fdb620da336de7e575aa0d27e34841727252726d0f07"
   head "https://gitlab.com/embeddable-common-lisp/ecl.git"
 
   bottle do
-    sha256 "cbc9e5cc823e969e9de13fcd93a9044d326964f64512055d1815d7adb85cec81" => :high_sierra
-    sha256 "bd2c5fc4ca15b1e71156a3183bf2cf49c326b994c8f9f81b0f94fd9eb0960005" => :sierra
-    sha256 "6f99f513efcf23a4b1e71b2c8e188e8f41fe976cccf2da855aa1285c35924131" => :el_capitan
-    sha256 "75ee54632fbb5d6b81787e483d847162194eeb8bbe60059fea87f8bdda9c8e8c" => :yosemite
+    sha256 "2a33f32a5ae0e6f53cc341e2235525a5c5bdeaf1a696e19f1fdaf2b8c36bb02c" => :catalina
+    sha256 "1cccfc0bb6405dc4c9515936ee14589837794b61738477bd72ba77d5e0fcc9e9" => :mojave
+    sha256 "8b216d4e8eb3491593160a2d291beb13b228bc8442cc0c5d391c196754f8968c" => :high_sierra
   end
 
+  depends_on "texinfo" => :build # Apple's is too old
   depends_on "bdw-gc"
   depends_on "gmp"
   depends_on "libffi"

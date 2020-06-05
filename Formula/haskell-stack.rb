@@ -5,39 +5,58 @@ class HaskellStack < Formula
 
   desc "The Haskell Tool Stack"
   homepage "https://haskellstack.org/"
-  url "https://github.com/commercialhaskell/stack/releases/download/v1.5.1/stack-1.5.1-sdist-1.tar.gz"
-  version "1.5.1"
-  sha256 "09c31818f24d3fe2c22c6b1707f5279c00b6f9432f88eaf79032ace52a73ced4"
+  url "https://github.com/commercialhaskell/stack/archive/v2.3.1.tar.gz"
+  sha256 "6701ddfc6d0be0c2bf0f75c84375e41923c5617f04222c5e582e7011c7f8fb83"
   head "https://github.com/commercialhaskell/stack.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c9a68185939e59654c368c7a9a3fbad0739fa46b3c3b0828798dcbdbe690327f" => :high_sierra
-    sha256 "06ef012cd3eb0bd07cae75431b198a3cad8e5c0ebd26d01667a2046ae95c61a0" => :sierra
-    sha256 "cc998d5058af92414d81209cd9045480d0ee28eddcebd84ae048d6ff8f61cf49" => :el_capitan
-    sha256 "3d681f2af9240ef71c0e468954c5fbf05cd1b88b8a22d575b7a3371ce7639ad3" => :yosemite
+    sha256 "de6d561271fd1a422e4b4e85e9d71fd0cd87870d524e984aec3caab4762753ed" => :catalina
+    sha256 "bffb38f057df538f22407b0c7e62cf224f60851b4845f8ef3cd7ee603f030fed" => :mojave
+    sha256 "00038523c213ac96e759c01108a9867a55afc6ba3ea32646962493f29667b702" => :high_sierra
   end
 
-  option "without-bootstrap", "Don't bootstrap a stage 2 stack"
-
-  depends_on "ghc@8.0" => :build
   depends_on "cabal-install" => :build
 
+  uses_from_macos "zlib"
+
+  # Stack requires stack to build itself. Yep.
+  resource "bootstrap-stack" do
+    url "https://github.com/commercialhaskell/stack/releases/download/v2.3.1/stack-2.3.1-osx-x86_64.tar.gz"
+    sha256 "73eee7e5f24d11fd0af00cb05f16119e86be5d578c35083250e6b85ed1ca3621"
+  end
+
+  # Stack has very specific GHC requirements.
+  # For 2.3.1, it requires 8.6.5.
+  resource "bootstrap-ghc" do
+    url "https://downloads.haskell.org/~ghc/8.6.5/ghc-8.6.5-x86_64-apple-darwin.tar.xz"
+    sha256 "dfc1bdb1d303a87a8552aa17f5b080e61351f2823c2b99071ec23d0837422169"
+  end
+
   def install
+    (buildpath/"bootstrap-stack").install resource("bootstrap-stack")
+    ENV.append_path "PATH", "#{buildpath}/bootstrap-stack"
+
+    resource("bootstrap-ghc").stage do
+      binary = buildpath/"bootstrap-ghc"
+
+      system "./configure", "--prefix=#{binary}"
+      ENV.deparallelize { system "make", "install" }
+
+      ENV.prepend_path "PATH", binary/"bin"
+    end
+
     cabal_sandbox do
-      if build.with? "bootstrap"
-        cabal_install
+      # Let `stack` handle its own parallelization
+      # Prevents "install: mkdir ... ghc-7.10.3/lib: File exists"
+      jobs = ENV.make_jobs
+      ENV.deparallelize
 
-        # Let `stack` handle its own parallelization
-        # Prevents "install: mkdir ... ghc-7.10.3/lib: File exists"
-        jobs = ENV.make_jobs
-        ENV.deparallelize
-
-        system "stack", "-j#{jobs}", "setup"
-        system "stack", "-j#{jobs}", "--local-bin-path=#{bin}", "install"
-      else
-        install_cabal_package
-      end
+      system "stack", "-j#{jobs}", "--stack-yaml=stack.yaml",
+             "--system-ghc", "--no-install-ghc", "build"
+      system "stack", "-j#{jobs}", "--stack-yaml=stack.yaml",
+             "--system-ghc", "--no-install-ghc", "--local-bin-path=#{bin}",
+             "install"
     end
   end
 

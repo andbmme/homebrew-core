@@ -1,14 +1,14 @@
 class Wget < Formula
   desc "Internet file retriever"
   homepage "https://www.gnu.org/software/wget/"
-  url "https://ftp.gnu.org/gnu/wget/wget-1.19.2.tar.gz"
-  mirror "https://ftpmirror.gnu.org/wget/wget-1.19.2.tar.gz"
-  sha256 "4f4a673b6d466efa50fbfba796bd84a46ae24e370fa562ede5b21ab53c11a920"
+  url "https://ftp.gnu.org/gnu/wget/wget-1.20.3.tar.gz"
+  sha256 "31cccfc6630528db1c8e3a06f6decf2a370060b982841cfab2b8677400a5092e"
+  revision 2
 
   bottle do
-    sha256 "4f6896bbed75ea89f04d849357390b32e7462b86c8a3063dca85c9f5f7db1aaa" => :high_sierra
-    sha256 "d8b3ae9836eed0145615ca95132e76784a93c0f4a1f43a5b4f4af49b712d3020" => :sierra
-    sha256 "ab41d6f569535c4a19a64ea3f03f477818d66e56a86f8b9e1631311f5a4cca44" => :el_capitan
+    sha256 "ef65c759c5097a36323fa9c77756468649e8d1980a3a4e05695c05e39568967c" => :catalina
+    sha256 "28f4090610946a4eb207df102d841de23ced0d06ba31cb79e040d883906dcd4f" => :mojave
+    sha256 "91dd0caca9bd3f38c439d5a7b6f68440c4274945615fae035ff0a369264b8a2f" => :high_sierra
   end
 
   head do
@@ -20,32 +20,22 @@ class Wget < Formula
     depends_on "gettext"
   end
 
-  deprecated_option "enable-debug" => "with-debug"
-
-  option "with-debug", "Build with debug support"
-
   depends_on "pkg-config" => :build
-  depends_on "pod2man" => :build if MacOS.version <= :snow_leopard
+  depends_on "libidn2"
   depends_on "openssl@1.1"
-  depends_on "pcre" => :optional
-  depends_on "libmetalink" => :optional
-  depends_on "gpgme" => :optional
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --sysconfdir=#{etc}
-      --with-ssl=openssl
-      --with-libssl-prefix=#{Formula["openssl@1.1"].opt_prefix}
-    ]
-
-    args << "--disable-debug" if build.without? "debug"
-    args << "--disable-pcre" if build.without? "pcre"
-    args << "--with-metalink" if build.with? "libmetalink"
-    args << "--with-gpgme-prefix=#{Formula["gpgme"].opt_prefix}" if build.with? "gpgme"
-
-    system "./bootstrap" if build.head?
-    system "./configure", *args
+    system "./bootstrap", "--skip-po" if build.head?
+    system "./configure", "--prefix=#{prefix}",
+                          "--sysconfdir=#{etc}",
+                          "--with-ssl=openssl",
+                          "--with-libssl-prefix=#{Formula["openssl@1.1"].opt_prefix}",
+                          # Work around a gnulib issue with macOS Catalina
+                          "gl_cv_func_ftello_works=yes",
+                          "--disable-debug",
+                          "--disable-pcre",
+                          "--disable-pcre2",
+                          "--without-libpsl"
     system "make", "install"
   end
 

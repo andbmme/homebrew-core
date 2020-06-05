@@ -1,16 +1,17 @@
 class Lv2 < Formula
   desc "Portable plugin standard for audio systems"
-  homepage "http://lv2plug.in"
-  url "http://lv2plug.in/spec/lv2-1.14.0.tar.bz2"
-  sha256 "b8052683894c04efd748c81b95dd065d274d4e856c8b9e58b7c3da3db4e71d32"
+  homepage "https://lv2plug.in/"
+  url "https://lv2plug.in/spec/lv2-1.18.0.tar.bz2"
+  sha256 "90a3e5cf8bdca81b49def917e89fd6bba1d5845261642cd54e7888df0320473f"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "76cdfc151001c6faeb0ca4a8cc9aab877943a96af3a92c0ddf514fafb1e47996" => :high_sierra
-    sha256 "9612d259fdbfa42956e58e8b71188b7fe259258453a34a623f3c99af69d87418" => :sierra
-    sha256 "2986387faf275715556b26ca612b8099031a98933d8f760b17e2c0ea4b770fc6" => :el_capitan
-    sha256 "2986387faf275715556b26ca612b8099031a98933d8f760b17e2c0ea4b770fc6" => :yosemite
+    sha256 "6cafb26479b24f5b6746557359b665d03bc42dd47ee7acea5a9c0b742c23936e" => :catalina
+    sha256 "6cafb26479b24f5b6746557359b665d03bc42dd47ee7acea5a9c0b742c23936e" => :mojave
+    sha256 "6cafb26479b24f5b6746557359b665d03bc42dd47ee7acea5a9c0b742c23936e" => :high_sierra
   end
+
+  depends_on :macos # Due to Python 2
 
   def install
     system "./waf", "configure", "--prefix=#{prefix}", "--no-plugins", "--lv2dir=#{lib}"

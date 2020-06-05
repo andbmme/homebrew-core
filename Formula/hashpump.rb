@@ -3,23 +3,17 @@ class Hashpump < Formula
   homepage "https://github.com/bwall/HashPump"
   url "https://github.com/bwall/HashPump/archive/v1.2.0.tar.gz"
   sha256 "d002e24541c6604e5243e5325ef152e65f9fcd00168a9fa7a06ad130e28b811b"
+  revision 4
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "8633fe113f7ec0351ee216e41bd56cc5e6c5b777212620c135e9e3f8f3cd3bbd" => :high_sierra
-    sha256 "3603a67cae4501fcd0e610a9d40cf532fdc3a36b91de1da2a3931628c6f285eb" => :sierra
-    sha256 "bc00f1a7c60564fed1ebf0ece40306aa169e4a7ddf7f9c8d56c7088130f5e530" => :el_capitan
-    sha256 "8b33f44272b46174184639f3a6044f47151756039068343262d3e2cbe4a26a7c" => :yosemite
-    sha256 "667650946f6e697657832f9f906f3a548bc55991e2422f8cbbbe7c793434111f" => :mavericks
-    sha256 "a776ebf2d22d7b5fa492308fff20409696064ea70149c5cac695b75bcf004d7c" => :mountain_lion
+    sha256 "117ca0966fcc664caacd251d564dbebde369b0a5b6c9a35242c898f5b12f232e" => :catalina
+    sha256 "71b04dff8cc052944d44566bd79385236db3af53fea647381e587d13503bb148" => :mojave
+    sha256 "e7dc1492f0177f7e186deebccb47428861cd2525bbb352959a2b69608f86de3f" => :high_sierra
   end
 
-  option "without-python", "Build without python 2 support"
-
-  depends_on "openssl"
-  depends_on :python => :recommended if MacOS.version <= :snow_leopard
-  depends_on :python3 => :optional
+  depends_on "openssl@1.1"
+  depends_on "python@3.8"
 
   # Remove on next release
   patch do
@@ -33,9 +27,7 @@ class Hashpump < Formula
                    "CXX=#{ENV.cxx}",
                    "install"
 
-    Language::Python.each_python(build) do |python, _version|
-      system python, *Language::Python.setup_install_args(prefix)
-    end
+    system "python3", *Language::Python.setup_install_args(prefix)
   end
 
   test do

@@ -1,13 +1,13 @@
 class Ngspice < Formula
   desc "Spice circuit simulator"
   homepage "https://ngspice.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/ngspice/ng-spice-rework/27/ngspice-27.tar.gz"
-  sha256 "0c08c7d57a2e21cf164496f3237f66f139e0c78e38345fbe295217afaf150695"
+  url "https://downloads.sourceforge.net/project/ngspice/ng-spice-rework/32/ngspice-32.tar.gz"
+  sha256 "3cd90c4e94516d87c5b4d02a3a6405b1136b25d05c871d4fee1fd7c4c0d03ef2"
 
   bottle do
-    sha256 "82a3aadf40794f4bf0dd89dbb85af272080768009b5a43e9c2e10e214060a000" => :high_sierra
-    sha256 "245e35d1ad12c0b06da9089eb9fe05a51da73aefa8e4840c2dc4f6514c6af902" => :sierra
-    sha256 "d220c96f72941f8a05dab330ffdb813f294f37daaffede4292821d1b1ed7d7a0" => :el_capitan
+    sha256 "924b787c656fc7062bd5e3c96b0a2b33f458013d27c1aa55cd85f56218ac7a8e" => :catalina
+    sha256 "7a93fe4be3e1508b76d1549ee9d749fbcadb801dc0d2333d0d3042880044ad96" => :mojave
+    sha256 "c8c737e0652d05084ed7496af7bc0e1cb55e9f6b2a1ccaaaeff5a436a0d96f92" => :high_sierra
   end
 
   head do
@@ -19,11 +19,8 @@ class Ngspice < Formula
     depends_on "libtool" => :build
   end
 
-  option "without-xspice", "Build without x-spice extensions"
-
-  deprecated_option "with-x" => "with-x11"
-
-  depends_on :x11 => :optional
+  depends_on "fftw"
+  depends_on "readline"
 
   def install
     system "./autogen.sh" if build.head?
@@ -31,14 +28,10 @@ class Ngspice < Formula
     args = %W[
       --disable-dependency-tracking
       --prefix=#{prefix}
-      --with-editline=yes
+      --with-readline=yes
+      --enable-xspice
+      --without-x
     ]
-    if build.with? "x11"
-      args << "--with-x"
-    else
-      args << "--without-x"
-    end
-    args << "--enable-xspice" if build.with? "xspice"
 
     system "./configure", *args
     system "make", "install"

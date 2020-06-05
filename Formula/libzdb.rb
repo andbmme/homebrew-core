@@ -1,34 +1,33 @@
 class Libzdb < Formula
   desc "Database connection pool library"
-  homepage "http://tildeslash.com/libzdb/"
-  url "http://tildeslash.com/libzdb/dist/libzdb-3.1.tar.gz"
-  sha256 "0f01abb1b01d1a1f4ab9b55ad3ba445d203fc3b4757abdf53e1d85e2b7b42695"
-  revision 3
+  homepage "https://tildeslash.com/libzdb/"
+  url "https://tildeslash.com/libzdb/dist/libzdb-3.2.2.tar.gz"
+  sha256 "d51e4e21ee1ee84ac8763de91bf485360cd76860b951ca998e891824c4f195ae"
 
   bottle do
     cellar :any
-    sha256 "4cbb32921ac9edc6308ac6ac0d26553661d6ea3f154c62af9c3aaf63d2afdf58" => :high_sierra
-    sha256 "9cec69cc93f6b975d95c506f3c7b04a4d2934ac30adc13afedd1d32fe2e31d8c" => :sierra
-    sha256 "0a7bc557e3e91db185787147df1a87ae9c7aef33a1b57875bc74daa52a1338c8" => :el_capitan
-    sha256 "3a5394289ceffbd2bc7bde8dd4dfad4f9b27a4d0180fab199a839c44739f0344" => :yosemite
+    sha256 "114982357474fdd8af3df7d11a3575e81686ff55d6c2018b5385c7f5acfee7ed" => :catalina
+    sha256 "bc52a04fe2ae5500200c1521f4e32497c9eee2d2c4087e60c9ed11a09b2cac67" => :mojave
+    sha256 "123039235efee305797c3252e0e4b07c93989785165c044eefa9f86eae73f9b0" => :high_sierra
   end
 
-  depends_on "openssl"
-  depends_on :postgresql => :recommended
-  depends_on :mysql => :recommended
-  depends_on "sqlite" => :recommended
+  depends_on :macos => :high_sierra # C++ 17 is required
+  depends_on "mysql-client"
+  depends_on "openssl@1.1"
+  depends_on "postgresql"
+  depends_on "sqlite"
 
   def install
-    args = %W[
-      --disable-dependency-tracking
-      --prefix=#{prefix}
-    ]
-
-    args << "--without-postgresql" if build.without? "postgresql"
-    args << "--without-mysql" if build.without? "mysql"
-    args << "--without-sqlite" if build.without? "sqlite"
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--disable-dependency-tracking"
     system "make", "install"
+    pkgshare.install "test"
+  end
+
+  test do
+    cp_r pkgshare/"test", testpath
+    cd "test" do
+      system ENV.cc, "select.c", "-L#{lib}", "-lzdb", "-I#{include}/zdb", "-o", "select"
+      system "./select"
+    end
   end
 end

@@ -1,23 +1,22 @@
 class Less < Formula
   desc "Pager program similar to more"
   homepage "http://www.greenwoodsoftware.com/less/index.html"
-  url "https://ftp.gnu.org/gnu/less/less-487.tar.gz"
-  mirror "http://www.greenwoodsoftware.com/less/less-487.tar.gz"
-  sha256 "f3dc8455cb0b2b66e0c6b816c00197a71bf6d1787078adeee0bcf2aea4b12706"
+  url "http://www.greenwoodsoftware.com/less/less-551.tar.gz"
+  sha256 "ff165275859381a63f19135a8f1f6c5a194d53ec3187f94121ecd8ef0795fe3d"
 
   bottle do
-    sha256 "482f63381cba240e0e90bf9f2d970c39e30a3580e31ff49c8210d6e5a0e7d3ad" => :high_sierra
-    sha256 "9ca07bd92196f4fbf122054b3ee394f43f14173b816a5217f05661453c13dd23" => :sierra
-    sha256 "877f32f255528633a67c4ae76dfda423315473a0780f8f066b7d78af4d58bbc8" => :el_capitan
-    sha256 "5be9c4ad7e6eda596a6828d1f49c70612ac02e2df6a65254e99dc1a34ecf1095" => :yosemite
+    cellar :any
+    sha256 "a76b3f1fb43e1e0ab566a70eca5430afa744d6d87430b55e9a5b98160834c8b9" => :catalina
+    sha256 "2ee3f16d15855ab88ad87067085c0f2dd58c90c5b91ae51499ae0548a24693b2" => :mojave
+    sha256 "46cd5ba33b6a1d00cfa3993712ea617bce5b6c9908b016a72413f370eda714be" => :high_sierra
   end
 
-  depends_on "pcre" => :optional
+  depends_on "pcre"
+
+  uses_from_macos "ncurses"
 
   def install
-    args = ["--prefix=#{prefix}"]
-    args << "--with-regex=pcre" if build.with? "pcre"
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--with-regex=pcre"
     system "make", "install"
   end
 

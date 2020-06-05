@@ -1,27 +1,23 @@
 class Mosquitto < Formula
   desc "Message broker implementing the MQTT protocol"
   homepage "https://mosquitto.org/"
-  url "https://mosquitto.org/files/source/mosquitto-1.4.14.tar.gz"
-  sha256 "156b1fa731d12baad4b8b22f7b6a8af50ba881fc711b81e9919ec103cf2942d1"
-  revision 2
+  url "https://mosquitto.org/files/source/mosquitto-1.6.10.tar.gz"
+  sha256 "92d1807717f0f6d57d1ac1207ffdb952e8377e916c7b0bb4718f745239774232"
 
   bottle do
-    sha256 "db6cc90bff7409aa2d287a9e090458fc5ffd2ef882c6d38efee28bfe9bc43bae" => :high_sierra
-    sha256 "88a6fd908f71fdf46ed19f0baa7154759751227c92234afe30ba27bf218db653" => :sierra
-    sha256 "d3195ebbcd82c77b56a0e65c1752ae803d5593d2a39b665e0524c853a0520878" => :el_capitan
+    cellar :any
+    sha256 "5ddfb287cb31bebc6ed03919d4dad9929a41a32d208b18e84fa7d93004a4bf4c" => :catalina
+    sha256 "26b87ebf33eb37ee27f1ea0eb05841c4e6d68c0ec3436ba1df15c542734fc27e" => :mojave
+    sha256 "c93f76bc649b7999229e88478fdae1501a18292fe122353bbcd1eb3323f5747e" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "cmake" => :build
-  depends_on "c-ares"
-  depends_on "openssl"
-  depends_on "libwebsockets" => :recommended
+  depends_on "pkg-config" => :build
+  depends_on "libwebsockets"
+  depends_on "openssl@1.1"
 
   def install
-    args = std_cmake_args
-    args << "-DWITH_WEBSOCKETS=ON" if build.with? "libwebsockets"
-
-    system "cmake", ".", *args
+    system "cmake", ".", *std_cmake_args, "-DWITH_WEBSOCKETS=ON"
     system "make", "install"
   end
 
@@ -29,36 +25,38 @@ class Mosquitto < Formula
     (var/"mosquitto").mkpath
   end
 
-  def caveats; <<~EOS
-    mosquitto has been installed with a default configuration file.
-    You can make changes to the configuration by editing:
-        #{etc}/mosquitto/mosquitto.conf
+  def caveats
+    <<~EOS
+      mosquitto has been installed with a default configuration file.
+      You can make changes to the configuration by editing:
+          #{etc}/mosquitto/mosquitto.conf
     EOS
   end
 
   plist_options :manual => "mosquitto -c #{HOMEBREW_PREFIX}/etc/mosquitto/mosquitto.conf"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>#{opt_sbin}/mosquitto</string>
-        <string>-c</string>
-        <string>#{etc}/mosquitto/mosquitto.conf</string>
-      </array>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>KeepAlive</key>
-      <false/>
-      <key>WorkingDirectory</key>
-      <string>#{var}/mosquitto</string>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_sbin}/mosquitto</string>
+          <string>-c</string>
+          <string>#{etc}/mosquitto/mosquitto.conf</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <false/>
+        <key>WorkingDirectory</key>
+        <string>#{var}/mosquitto</string>
+      </dict>
+      </plist>
     EOS
   end
 

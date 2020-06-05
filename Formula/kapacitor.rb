@@ -2,16 +2,15 @@ class Kapacitor < Formula
   desc "Open source time series data processor"
   homepage "https://github.com/influxdata/kapacitor"
   url "https://github.com/influxdata/kapacitor.git",
-      :tag => "v1.3.3",
-      :revision => "ce586f35e89e75a1779e2b493caba15d66295a15"
+      :tag      => "v1.5.5",
+      :revision => "71a67c40348a8dfdad3f76d4c699ff8ef938da2b"
   head "https://github.com/influxdata/kapacitor.git"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "ef5b9fca23bec2457e0ca83c50ff6ee6e3d123cba42a3c159f53448db5ba6e7d" => :high_sierra
-    sha256 "a2714ef4df092c66ebc7aec7fbead28ad86dbccdb8c4af1fb7027d0c26d8a348" => :sierra
-    sha256 "8666187b386a0fbc88724ca02a7bde971e5a4659c041d7d25426a7bd7b0fbe97" => :el_capitan
+    sha256 "7ee7eca6cd66838aa2fe214cbffa75375103e5d6d4d6d1aad5d4ce0a4064ad08" => :catalina
+    sha256 "85371bcc18833788733d65a821447cea4e0c644d4457ae0da70ccf96dbc1e635" => :mojave
+    sha256 "883cee096d636e749afba8e4938a7f24fe18cc063976dbf1f0aef3cca0f3818d" => :high_sierra
   end
 
   depends_on "go" => :build
@@ -20,8 +19,8 @@ class Kapacitor < Formula
     ENV["GOPATH"] = buildpath
     kapacitor_path = buildpath/"src/github.com/influxdata/kapacitor"
     kapacitor_path.install Dir["*"]
-    revision = `git rev-parse HEAD`.strip
-    version = `git describe --tags`.strip
+    revision = Utils.popen_read("git rev-parse HEAD").strip
+    version = Utils.popen_read("git describe --tags").strip
 
     cd kapacitor_path do
       system "go", "install",
@@ -44,34 +43,35 @@ class Kapacitor < Formula
 
   plist_options :manual => "kapacitord -config #{HOMEBREW_PREFIX}/etc/kapacitor.conf"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/kapacitord</string>
+            <string>-config</string>
+            <string>#{HOMEBREW_PREFIX}/etc/kapacitor.conf</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/kapacitor.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/kapacitor.log</string>
         </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/kapacitord</string>
-          <string>-config</string>
-          <string>#{HOMEBREW_PREFIX}/etc/kapacitor.conf</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/kapacitor.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/kapacitor.log</string>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 

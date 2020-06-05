@@ -3,14 +3,13 @@ class Gqview < Formula
   homepage "https://gqview.sourceforge.io"
   url "https://downloads.sourceforge.net/project/gqview/gqview/2.0.4/gqview-2.0.4.tar.gz"
   sha256 "97e3b7ce5f17a315c56d6eefd7b3a60b40cc3d18858ca194c7e7262acce383cb"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 "1023c1aa7974af83c78cd30e86d05a78973de3986cd83a56bd7ce7d185f2e89c" => :high_sierra
-    sha256 "ef7dbffe9de32bc2aab41756951fc374058f2317a9fea19e8cacb6a0fc3c2bac" => :sierra
-    sha256 "79fd96b1ea513216f2db420d2d0275d9a14ed99bda9a4a83d0f5587eb8f1d298" => :el_capitan
-    sha256 "e6662b9adbe591c01f599293ac65d40755cf097df40a914c568a4ef961edb586" => :yosemite
-    sha256 "05ae1074ccd46e283e40a9455d43fae4b124726272ca9bdbfc941b05517da500" => :mavericks
+    sha256 "e8e56389d265444d10d7859b63736370c2b88b98d4f8b4254bdecf2f3b7c8ab4" => :catalina
+    sha256 "dc9cc0efc66c0e2156efeba84201c54711288e96868367bde264dbfaff14236f" => :mojave
+    sha256 "faeb25a25899fc5d18b2097574c3975648aaab4b8a55545e5ba6579335c2f587" => :high_sierra
+    sha256 "b0e983e36c58634a2ae893003567dac0737c012811c1dcb64f0def22fc11f604" => :sierra
   end
 
   depends_on "pkg-config" => :build

@@ -1,13 +1,14 @@
 class Gspell < Formula
   desc "Flexible API to implement spellchecking in GTK+ applications"
   homepage "https://wiki.gnome.org/Projects/gspell"
-  url "https://download.gnome.org/sources/gspell/1.6/gspell-1.6.1.tar.xz"
-  sha256 "f4d329348775374eec18158f8dcbbacf76f85be5ce002a92d93054ece70ec4de"
+  url "https://download.gnome.org/sources/gspell/1.8/gspell-1.8.3.tar.xz"
+  sha256 "5ae514dd0216be069176accf6d0049d6a01cfa6a50df4bc06be85f7080b62de8"
+  revision 1
 
   bottle do
-    sha256 "4bd62678f3608537ed8ee048b5f9fa85fdd538261dcdaefa9063929bc1c3675f" => :high_sierra
-    sha256 "00991cf339c0912b2b90a5fe9aface5bf0431204c4de259b662d7f314810b0db" => :sierra
-    sha256 "010ac6b54ebf832dc015e4d7562a2bef21f477c83b9147b5539ddbf7aedd2cad" => :el_capitan
+    sha256 "dc92fb32bf34607082f1f60aa137e56e75d3b4d500678dc53d25b80e0a0cf808" => :catalina
+    sha256 "057689ef3fca7d67e67a58b2d0f86879800dd71ca9c605da7c032aa2710ba2e2" => :mojave
+    sha256 "ba04c61bbfef8426e1a0af6195f134850c9a0a7cf55a0fc4d907fcf5872b9599" => :high_sierra
   end
 
   depends_on "autoconf" => :build
@@ -19,12 +20,12 @@ class Gspell < Formula
   depends_on "gtk+3"
   depends_on "gtk-mac-integration"
   depends_on "iso-codes"
-  depends_on "vala" => :recommended
+  depends_on "vala"
 
   patch :DATA
 
   def install
-    system "autoreconf", "-i"
+    system "autoreconf", "-if"
     system "./configure", "--disable-dependency-tracking",
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"
@@ -58,7 +59,7 @@ class Gspell < Formula
     flags = %W[
       -I#{atk.opt_include}/atk-1.0
       -I#{cairo.opt_include}/cairo
-      -I#{enchant.opt_include}/enchant
+      -I#{enchant.opt_include}/enchant-2
       -I#{fontconfig.opt_include}
       -I#{freetype.opt_include}/freetype2
       -I#{gdk_pixbuf.opt_include}/gdk-pixbuf-2.0
@@ -99,6 +100,10 @@ class Gspell < Formula
       -lpangocairo-1.0
     ]
     system ENV.cc, "test.c", "-o", "test", *flags
+    ENV["G_DEBUG"] = "fatal-warnings"
+
+    # This test will fail intentionally when iso-codes gets updated.
+    # Resolve by increasing the `revision` on this formula.
     system "./test"
   end
 end
@@ -129,4 +134,3 @@ index 076a9fd..6c67184 100644
  endif # OS_OSX
 
  if HAVE_INTROSPECTION
-

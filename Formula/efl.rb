@@ -1,56 +1,70 @@
 class Efl < Formula
   desc "Enlightenment Foundation Libraries"
   homepage "https://www.enlightenment.org"
-  url "https://download.enlightenment.org/rel/libs/efl/efl-1.20.5.tar.xz"
-  sha256 "da5e69b81c94b79f4e31cfc312413c36acb7429e1cb6fd4397a1251a0e23c21c"
+  url "https://download.enlightenment.org/rel/libs/efl/efl-1.24.2.tar.xz"
+  sha256 "e1f91dfe8b8171f182f474eb9cfb13d9176c21f1879983fb896e92f7e2ce7a70"
 
   bottle do
-    sha256 "46590b21ee1fceb740f9bba4d9e3e5e990efa5d79c238674e1220764add3675e" => :high_sierra
-    sha256 "d557dca9f97fd470144b141600603cdb1f24fe7f7693ce06480beeb61d0b25f3" => :sierra
-    sha256 "125b9bbfe2c6b30a16c1b995fc9d1f1e40d79c2f9ff1de56172f3ec3aac8bb9f" => :el_capitan
+    sha256 "68f439ffc5760bfc9ae064636f4b97a535d00f1efd03d89e81f8c458345c4da8" => :catalina
+    sha256 "4e22052fec4cfb43ed3c5bdc55b05dd4cf5bb1d6c43e3c9a43c44e60247233de" => :mojave
+    sha256 "0fc278e2b80b1b8e9cc76669197b66af273edb874dc8693a305f516557a74b26" => :high_sierra
   end
 
-  option "with-docs", "Install development libraries/headers and HTML docs"
-
-  depends_on "doxygen" => :build if build.with? "docs"
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
-  depends_on "gettext" => :build
-  depends_on "openssl"
-  depends_on "freetype"
+  depends_on "bullet"
+  depends_on "dbus"
   depends_on "fontconfig"
+  depends_on "freetype"
+  depends_on "fribidi"
+  depends_on "gettext"
+  depends_on "giflib"
+  depends_on "glib"
+  depends_on "gst-plugins-good"
+  depends_on "gstreamer"
   depends_on "jpeg"
   depends_on "libpng"
-  depends_on "luajit"
-  depends_on "fribidi"
-  depends_on "giflib"
-  depends_on "libtiff"
-  depends_on "gstreamer"
-  depends_on "gst-plugins-good"
-  depends_on "dbus"
-  depends_on "pulseaudio"
-  depends_on "bullet"
-  depends_on "libsndfile"
-  depends_on "libspectre"
   depends_on "libraw"
   depends_on "librsvg"
+  depends_on "libsndfile"
+  depends_on "libspectre"
+  depends_on "libtiff"
+  depends_on "luajit"
+  depends_on "lz4"
+  depends_on "openssl@1.1"
   depends_on "poppler"
+  depends_on "pulseaudio"
   depends_on "shared-mime-info"
-  depends_on "webp" => :optional
-  depends_on "glib" => :optional
 
-  needs :cxx11
+  uses_from_macos "zlib"
 
   def install
-    ENV.cxx11
-
-    args = %W[
-      --disable-dependency-tracking
-      --prefix=#{prefix}
+    args = std_meson_args + %w[
+      -Davahi=false
+      -Dbuild-examples=false
+      -Dbuild-tests=false
+      -Dcocoa=true
+      -Dembedded-lz4=false
+      -Deeze=false
+      -Dglib=true
+      -Dlibmount=false
+      -Dopengl=full
+      -Dphysics=true
+      -Dsystemd=false
+      -Dv4l2=false
+      -Dx11=false
     ]
 
-    system "./configure", *args
-    system "make", "install"
-    system "make", "install-doc" if build.with? "docs"
+    # Install in our Cellar - not dbus's
+    inreplace "dbus-services/meson.build", "dep.get_pkgconfig_variable('session_bus_services_dir')",
+                                           "'#{share}/dbus-1/services'"
+
+    mkdir "build" do
+      system "meson", *args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   def post_install

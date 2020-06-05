@@ -1,17 +1,16 @@
 class Hivemind < Formula
   desc "The mind to rule processes of your development environment"
   homepage "https://github.com/DarthSim/hivemind"
-  url "https://github.com/DarthSim/hivemind/archive/v1.0.3.tar.gz"
-  sha256 "005e816289c467de2f9a2b0f37f4f685b5aea7c25167c3fdafda3da68fc76e80"
-
+  url "https://github.com/DarthSim/hivemind/archive/v1.0.6.tar.gz"
+  sha256 "8ca7884db49268b7938d0503e7e95443cb3a56696478d5dcc2b9813705525a39"
   head "https://github.com/DarthSim/hivemind.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "56c20cb1f12f1507f5bd9812e1cbd5aa0ba9d6175ca630d77b9ee695544de256" => :high_sierra
-    sha256 "9394d7e524f24e97b7c1785603007d61a9f881693120431048cb0738735f499e" => :sierra
-    sha256 "b4935d6a93aadeb47588fd644af677cea9dce0f2aaaf6aa7a7b69a1d025012cf" => :el_capitan
-    sha256 "f5ae77335095a56d15ebae85def6d35a3b15634db18dfddf4ae5de5e22505068" => :yosemite
+    sha256 "ed80238e557ca71f115b2b3cd5031bfac16a3d02d8b37b386b629d89dd26af48" => :catalina
+    sha256 "8e6f70ca5e0c8eb1e42d47bee207ec5333b453660d808103a36d53c51a7fb59a" => :mojave
+    sha256 "7a89018774693681975cea22dcdebe35df043507476d1318f195e6d194978693" => :high_sierra
+    sha256 "4aa25b52b5c7fd3dc7ae29ab31cf19eeddde4e7685fd7e9838be0ea8cf09f3c1" => :sierra
   end
 
   depends_on "go" => :build

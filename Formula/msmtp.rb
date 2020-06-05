@@ -1,31 +1,26 @@
 class Msmtp < Formula
   desc "SMTP client that can be used as an SMTP plugin for Mutt"
-  homepage "https://msmtp.sourceforge.io"
-  url "https://downloads.sourceforge.net/project/msmtp/msmtp/1.6.6/msmtp-1.6.6.tar.xz"
-  sha256 "da15db1f62bd0201fce5310adb89c86188be91cd745b7cb3b62b81a501e7fb5e"
+  homepage "https://marlam.de/msmtp/"
+  url "https://marlam.de/msmtp/releases/msmtp-1.8.11.tar.xz"
+  sha256 "f25f0fa177ce9e0ad65c127e790a37f35fb64fee9e33d90345844c5c86780e60"
 
   bottle do
-    sha256 "e9161f534cfa50edb5beae511d7689fe02a53b68f90623ebc751a41ba34b4037" => :high_sierra
-    sha256 "d0b8a2a76d7ee8ed6beda0c383acd28d7a85d9d677c8d89a8a2e6b717055fe70" => :sierra
-    sha256 "115ce90fcc11a1fbda6bf4496200b50e89d4cccdb32f999cf6b3b749635f8e3e" => :el_capitan
-    sha256 "6f5227576bf8ac42fed7190c22f2e62b0fb2a3af59fa085e783426661c606758" => :yosemite
+    sha256 "465356913ededba9a76ab0f76f597913a3e7eb5901f47780494e140917a94447" => :catalina
+    sha256 "8ce3ca882b2e0fbc6bad2fdf544f20f53413616bda869544f90c51e9bd87a521" => :mojave
+    sha256 "61d5d5c532afb5f5297ccd3e5d2e7ba09b3810f8b128701160c981e6c16fc73e" => :high_sierra
   end
 
-  option "with-gsasl", "Use GNU SASL authentication library"
-
   depends_on "pkg-config" => :build
-  depends_on "openssl"
-  depends_on "gsasl" => :optional
+  depends_on "gnutls"
 
   def install
     args = %W[
+      --disable-debug
       --disable-dependency-tracking
+      --disable-silent-rules
       --with-macosx-keyring
       --prefix=#{prefix}
-      --with-tls=openssl
     ]
-
-    args << "--with-libsasl" if build.with? "gsasl"
 
     system "./configure", *args
     system "make", "install"

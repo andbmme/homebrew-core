@@ -3,28 +3,25 @@ class Fonttools < Formula
 
   desc "Library for manipulating fonts"
   homepage "https://github.com/fonttools/fonttools"
-  url "https://github.com/fonttools/fonttools/releases/download/3.19.0/fonttools-3.19.0.zip"
-  sha256 "8d1dcb1ff3665b69e52d020590e20c460445b7d80b5cb573832cf97ec97c74af"
+  url "https://github.com/fonttools/fonttools/releases/download/4.11.0/fonttools-4.11.0.zip"
+  sha256 "7fe5937206099ef284055b8c94798782e0993a740eed87f0dd262ed9870788aa"
   head "https://github.com/fonttools/fonttools.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "83d6c9b755887ee7a65483c31431e859e74ff1ce1fcb0f5e36be420371f784aa" => :high_sierra
-    sha256 "f808975b1920bb1da2e9fe1166fc5502d42ca094b77deedfef22e5b68c1194ba" => :sierra
-    sha256 "51c4922da3dfdb44083ef8942aef8266e1b5f9290b94ba413896d50c01ce6159" => :el_capitan
+    sha256 "b34726bb5a17cdf31c345105ea80a0ac8525312c2f31bc3622fca42b1b8d66c1" => :catalina
+    sha256 "d8dbeba805163017c07211896a0312bde0e77211203be33e4ce941b70c0d1ce8" => :mojave
+    sha256 "ddb0f0c422048b527666eedba16284dc46d9c83857ff7c2a4b876c8bd47d5fc0" => :high_sierra
   end
 
-  option "with-pygtk", "Build with pygtk support for pyftinspect"
-
-  depends_on :python if MacOS.version <= :snow_leopard
-  depends_on "pygtk" => :optional
+  depends_on "python@3.8"
 
   def install
     virtualenv_install_with_resources
   end
 
   test do
-    cp "/Library/Fonts/Arial.ttf", testpath
-    system bin/"ttx", "Arial.ttf"
+    cp "/System/Library/Fonts/ZapfDingbats.ttf", testpath
+    system bin/"ttx", "ZapfDingbats.ttf"
   end
 end

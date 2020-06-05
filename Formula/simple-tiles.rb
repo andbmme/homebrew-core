@@ -3,14 +3,14 @@ class SimpleTiles < Formula
   homepage "https://propublica.github.io/simple-tiles/"
   url "https://github.com/propublica/simple-tiles/archive/v0.6.1.tar.gz"
   sha256 "2391b2f727855de28adfea9fc95d8c7cbaca63c5b86c7286990d8cbbcd640d6f"
+  revision 6
   head "https://github.com/propublica/simple-tiles.git"
 
   bottle do
     cellar :any
-    sha256 "cbc2dea9c008f499c335bebb7bbb8c00fd19c797ae2442138175f794140e9396" => :high_sierra
-    sha256 "2d3092fc48d4bc3fd7eb3679f09506bae62c6509756a55fbf6f9a3f18dd5e738" => :sierra
-    sha256 "acbf4fd455b3351d3e5188361694cba78a98dec6f91ce70862e9a7a57b3d387b" => :el_capitan
-    sha256 "42c5936f5beb15090b5199c1e97295ecf442c11ce52fe38876f2a992ffbcb160" => :yosemite
+    sha256 "01524befcfe63132db75c049716bd9263168314fbbf1a6a16c5b5a17630607b1" => :catalina
+    sha256 "a11f30c0385bd2b4f9f4f385c7b83f8ab8bb0655b4df93039dc5aac032b42efc" => :mojave
+    sha256 "98bfedb532839b94020ccfef187e00d7598bf9b97d204e169d5718e246d09fbe" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
@@ -38,6 +38,7 @@ class SimpleTiles < Formula
            "-I#{Formula["gdal"].opt_include}",
            "-I#{Formula["glib"].opt_include}/glib-2.0",
            "-I#{Formula["glib"].opt_lib}/glib-2.0/include",
+           "-I#{Formula["harfbuzz"].opt_include}/harfbuzz",
            "-I#{Formula["pango"].opt_include}/pango-1.0",
            "test.c", "-o", "test"
     system testpath/"test"

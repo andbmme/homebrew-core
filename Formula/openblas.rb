@@ -1,32 +1,29 @@
 class Openblas < Formula
   desc "Optimized BLAS library"
-  homepage "http://www.openblas.net/"
-  url "https://github.com/xianyi/OpenBLAS/archive/v0.2.20.tar.gz"
-  sha256 "5ef38b15d9c652985774869efd548b8e3e972e1e99475c673b25537ed7bcf394"
+  homepage "https://www.openblas.net/"
+  url "https://github.com/xianyi/OpenBLAS/archive/v0.3.9.tar.gz"
+  sha256 "17d4677264dfbc4433e97076220adc79b050e4f8a083ea3f853a53af253bc380"
   head "https://github.com/xianyi/OpenBLAS.git", :branch => "develop"
 
   bottle do
     cellar :any
-    sha256 "ce8b1b057a2cc93d9bcbaae0c9483200dd2e2f04ab533456dfe13eb38c6ab96b" => :high_sierra
-    sha256 "1bb0db6885551ec021c2267c8e7ea662ef4877ac8c2a9b590d920866f018aea3" => :sierra
-    sha256 "15b53cdfdc5028719e559612ea41f432cfbd2d4448cc29202273636ff3980bf5" => :el_capitan
-    sha256 "95bb17c1ffeb1f652d24d0d064241a822804818ab8a317a39918a4cfe740b905" => :yosemite
+    sha256 "7f61aa85ee83058e3ac4898f74b6721009f83d09caca7f6c772a3aa4874a1248" => :catalina
+    sha256 "15116c0a8d1f359f83761de72835021cbad6a814cf7fd53cc93428b522f06dda" => :mojave
+    sha256 "b92397b5ddaefbba91b6a40bce8a5afd55529e25f711abc5ed6c3fb501484b50" => :high_sierra
   end
 
-  keg_only :provided_by_osx,
-           "macOS provides BLAS and LAPACK in the Accelerate framework"
+  keg_only :shadowed_by_macos, "macOS provides BLAS in Accelerate.framework"
 
-  option "with-openmp", "Enable parallel computations with OpenMP"
-  needs :openmp if build.with? "openmp"
-
-  depends_on :fortran
+  depends_on "gcc" # for gfortran
+  fails_with :clang
 
   def install
-    ENV["DYNAMIC_ARCH"] = "1" if build.bottle?
-    ENV["USE_OPENMP"] = "1" if build.with? "openmp"
+    ENV["DYNAMIC_ARCH"] = "1"
+    ENV["USE_OPENMP"] = "1"
+    ENV["NO_AVX512"] = "1"
 
     # Must call in two steps
-    system "make", "CC=#{ENV.cc}", "FC=#{ENV.fc}", "libs", "netlib", "shared"
+    system "make", "CC=#{ENV.cc}", "FC=gfortran", "libs", "netlib", "shared"
     system "make", "PREFIX=#{prefix}", "install"
 
     lib.install_symlink "libopenblas.dylib" => "libblas.dylib"

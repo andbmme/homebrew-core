@@ -1,15 +1,17 @@
 class Fio < Formula
   desc "I/O benchmark and stress test"
-  homepage "http://git.kernel.dk/cgit/fio/"
-  url "https://github.com/axboe/fio/archive/fio-3.2.tar.gz"
-  sha256 "5f54652d00858fe933902b0dfd0cdbc7bd4278e5de5e84bb8df43f15b33a146a"
+  homepage "https://github.com/axboe/fio"
+  url "https://github.com/axboe/fio/archive/fio-3.19.tar.gz"
+  sha256 "809963b1d023dbc9ac7065557af8129aee17b6895e0e8c5ca671b0b14285f404"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "eb9cbd7d0e3e643c4b738de0d5e92c87c527634fffd4997b274df1d5b7e45092" => :high_sierra
-    sha256 "71738bee1b494455191c385f966d3e0c1ac4c23f04a568485453522383cf1f60" => :sierra
-    sha256 "a38e68a9fbd176a015f24923e7a61d6558d92992843ffba9c63c1c2e48062cc6" => :el_capitan
+    sha256 "252dd7cba1c767568b9ecb13fbbd891e1ffe47f590ed126cfea8214ff20333f5" => :catalina
+    sha256 "2b4b3372f9ad040eb974ba38ecdde11c08b0328fae71d785e5d0b88c77ecffc3" => :mojave
+    sha256 "89e47c70a1cca2e1acf29b97720da6b968348ea93a5e417fdca7ad86d670114d" => :high_sierra
   end
+
+  uses_from_macos "zlib"
 
   def install
     system "./configure"

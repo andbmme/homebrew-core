@@ -1,32 +1,33 @@
 class GsettingsDesktopSchemas < Formula
   desc "GSettings schemas for desktop components"
   homepage "https://download.gnome.org/sources/gsettings-desktop-schemas/"
-  url "https://download.gnome.org/sources/gsettings-desktop-schemas/3.24/gsettings-desktop-schemas-3.24.1.tar.xz"
-  sha256 "76a3fa309f9de6074d66848987214f0b128124ba7184c958c15ac78a8ac7eea7"
+  url "https://download.gnome.org/sources/gsettings-desktop-schemas/3.36/gsettings-desktop-schemas-3.36.1.tar.xz"
+  sha256 "004bdbe43cf8290f2de7d8537e14d8957610ca479a4fa368e34dbd03f03ec9d9"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "6852bd372272eb28017382189011107af8563211a86ef4e8f9b686cef440fc66" => :high_sierra
-    sha256 "e4f5ab8d16e84e09cf10439b7f827d80b403efe598e3b05d593b745d1d5675fa" => :sierra
-    sha256 "e4f5ab8d16e84e09cf10439b7f827d80b403efe598e3b05d593b745d1d5675fa" => :el_capitan
-    sha256 "e4f5ab8d16e84e09cf10439b7f827d80b403efe598e3b05d593b745d1d5675fa" => :yosemite
+    sha256 "ca79e0409fb9d658c9ab2f9e3ecde89e10ef305121b9fa71c909cf3cb098a82a" => :catalina
+    sha256 "ca79e0409fb9d658c9ab2f9e3ecde89e10ef305121b9fa71c909cf3cb098a82a" => :mojave
+    sha256 "ca79e0409fb9d658c9ab2f9e3ecde89e10ef305121b9fa71c909cf3cb098a82a" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
   depends_on "glib"
-  depends_on "gettext"
-  depends_on "libffi"
-  depends_on "python" if MacOS.version <= :mavericks
+
+  uses_from_macos "expat"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--disable-schemas-compile",
-                          "--enable-introspection=yes"
-    system "make", "install"
+    ENV["DESTDIR"] = "/"
+
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   def post_install

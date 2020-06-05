@@ -1,21 +1,24 @@
 class Htslib < Formula
   desc "C library for high-throughput sequencing data formats"
-  homepage "http://www.htslib.org/"
-  url "https://github.com/samtools/htslib/releases/download/1.6/htslib-1.6.tar.bz2"
-  sha256 "9588be8be0c2390a87b7952d644e7a88bead2991b3468371347965f2e0504ccb"
-  revision 1
+  homepage "https://www.htslib.org/"
+  url "https://github.com/samtools/htslib/releases/download/1.10.2/htslib-1.10.2.tar.bz2"
+  sha256 "e3b543de2f71723830a1e0472cf5489ec27d0fbeb46b1103e14a11b7177d1939"
 
   bottle do
     cellar :any
-    sha256 "15c9481d899d77e7d7eeb5c2d2cac09930fef9b28409ec9ea3ab57ec9cc70e87" => :high_sierra
-    sha256 "35a9e6c69ed762ee9d5ba2966a484f3a13557dbf23ef897fee6ba7d6f9db5659" => :sierra
-    sha256 "5fe4d1a962dd98c9c0497fa88da33f493fdec868a25e531def7c5506424571d0" => :el_capitan
+    sha256 "4db003ad760c84dbe70dfcd866a32066a4d93980eab12526f69f53e0052d84a6" => :catalina
+    sha256 "b4282ee3f330a894e68a0141b13b7fc1327d92a5319a95f5a8107a401e57ece5" => :mojave
+    sha256 "507db470fc6cb7d97b06f0efff270fe2063d25143bdc09623135c4876474b3c3" => :high_sierra
   end
 
   depends_on "xz"
 
+  uses_from_macos "bzip2"
+  uses_from_macos "curl"
+  uses_from_macos "zlib"
+
   def install
-    system "./configure", "--prefix=#{prefix}"
+    system "./configure", "--prefix=#{prefix}", "--enable-libcurl"
     system "make", "install"
     pkgshare.install "test"
   end

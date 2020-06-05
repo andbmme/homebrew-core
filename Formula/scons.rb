@@ -1,19 +1,24 @@
 class Scons < Formula
   desc "Substitute for classic 'make' tool with autoconf/automake functionality"
-  homepage "http://www.scons.org"
-  url "https://downloads.sourceforge.net/project/scons/scons/3.0.1/scons-3.0.1.tar.gz"
-  sha256 "24475e38d39c19683bc88054524df018fe6949d70fbd4c69e298d39a0269f173"
+  homepage "https://www.scons.org/"
+  url "https://downloads.sourceforge.net/project/scons/scons/3.1.2/scons-3.1.2.tar.gz"
+  sha256 "7801f3f62f654528e272df780be10c0e9337e897650b62ddcee9f39fde13f8fb"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c791b4905477a5fbc33345cef5e412807ffc90ba6ea35bfc9a263f542702aa1c" => :high_sierra
-    sha256 "c791b4905477a5fbc33345cef5e412807ffc90ba6ea35bfc9a263f542702aa1c" => :sierra
-    sha256 "c791b4905477a5fbc33345cef5e412807ffc90ba6ea35bfc9a263f542702aa1c" => :el_capitan
+    sha256 "d754617c360bfc6701d9b3e345ff08d28530adafb302227ec6fe8eea6760ca28" => :catalina
+    sha256 "d754617c360bfc6701d9b3e345ff08d28530adafb302227ec6fe8eea6760ca28" => :mojave
+    sha256 "d754617c360bfc6701d9b3e345ff08d28530adafb302227ec6fe8eea6760ca28" => :high_sierra
   end
 
+  depends_on "python@3.8"
+
   def install
+    Language::Python.rewrite_python_shebang(Formula["python@3.8"].opt_bin/"python3")
+
     man1.install gzip("scons-time.1", "scons.1", "sconsign.1")
-    system "/usr/bin/python", "setup.py", "install",
+    system Formula["python@3.8"].opt_bin/"python3", "setup.py", "install",
              "--prefix=#{prefix}",
              "--standalone-lib",
              # SCons gets handsy with sys.path---`scons-local` is one place it

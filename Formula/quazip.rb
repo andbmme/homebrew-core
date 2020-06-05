@@ -1,18 +1,17 @@
 class Quazip < Formula
   desc "C++ wrapper over Gilles Vollant's ZIP/UNZIP package"
-  homepage "https://quazip.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/quazip/quazip/0.7.3/quazip-0.7.3.tar.gz"
-  sha256 "2ad4f354746e8260d46036cde1496c223ec79765041ea28eb920ced015e269b5"
-  revision 1
+  homepage "https://github.com/stachenov/quazip/"
+  url "https://github.com/stachenov/quazip/archive/v0.9.1.tar.gz"
+  sha256 "5d36b745cb94da440432690050e6db45b99b477cfe9bc3b82fd1a9d36fff95f5"
 
   bottle do
     cellar :any
-    sha256 "907e72c7b9ee1af624c684c960925b3227409d3c95324bfc00aef2ad6384d22c" => :high_sierra
-    sha256 "9ec688664e0354803611744d1aaeec073cf0912762652be352404ac1c1fadfb4" => :sierra
-    sha256 "ce3454f5f7c5c8083df617ec63ccaf7291091da544287719573fc2c3dbb744c6" => :el_capitan
-    sha256 "dc296670c3c7bd52c825bb545132df0731c274af47f44d8ecefc53eda3c2065c" => :yosemite
+    sha256 "fcc3c28686a10a6e8d0e95ac978c0499400e5af3364c015f6ee128d9c0fd878e" => :catalina
+    sha256 "b74d9a5c9d2dbc349de524bce7ae4ef45882b37e2187b065c11141d7a2056953" => :mojave
+    sha256 "632c10f191326e2afc006c9a065f40af0f5ab8d6b562b4013ecdf77e79ed1eaf" => :high_sierra
   end
 
+  depends_on :xcode => :build
   depends_on "qt"
 
   def install

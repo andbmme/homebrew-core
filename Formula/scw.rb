@@ -1,16 +1,16 @@
 class Scw < Formula
   desc "Manage BareMetal Servers from command-line (as easily as with Docker)"
   homepage "https://github.com/scaleway/scaleway-cli"
-  url "https://github.com/scaleway/scaleway-cli/archive/v1.14.tar.gz"
-  sha256 "8d1c0cd9db51ceb18c819ce52d277897622a227b02abd8a566dacc3523dcda2c"
+  url "https://github.com/scaleway/scaleway-cli/archive/v1.20.tar.gz"
+  sha256 "4c50725be7bebdab17b8ef77acd230525e773631fef4051979f8ff91c86bebf8"
   head "https://github.com/scaleway/scaleway-cli.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "7bab9dbbedcaf00fad74ee52d3ac7dcdd825d28018a9356a6dfe94392cd06ecf" => :high_sierra
-    sha256 "c2bc2d7b6576719ebed7cd961795e65bea23fc5375b8232643556e9d12b67377" => :sierra
-    sha256 "f72df0768951c24d5f8b53d7e92715205ac3aa207c9ef7731bd3979ac2525be1" => :el_capitan
-    sha256 "460c30f2ea93e5ffe5759ed1e20711f1914e31d3d0e25e741434bdf8de1df904" => :yosemite
+    sha256 "1534981c7a030117408095b219d79614333acbb4ead6ecf4b11625acf7b186c7" => :catalina
+    sha256 "1c7a69355bafd8c035bb2878f6c9c7a9a013dacc8cdbdc1997b66bc49f7fd7f0" => :mojave
+    sha256 "87a2f754ab3e1c5434a2b24b855de6e5da39990bf9cf558416fc2e259d66d0ab" => :high_sierra
+    sha256 "b5727720c3f4173012c81b8dfee1a942262d430ae6951c0f39a9c28aefc21b83" => :sierra
   end
 
   depends_on "go" => :build
@@ -20,9 +20,11 @@ class Scw < Formula
     ENV["GOBIN"] = buildpath
     (buildpath/"src/github.com/scaleway/scaleway-cli").install Dir["*"]
 
-    system "go", "build", "-o", "#{bin}/scw", "-v", "-ldflags", "-X  github.com/scaleway/scaleway-cli/pkg/scwversion.GITCOMMIT=homebrew", "github.com/scaleway/scaleway-cli/cmd/scw/"
+    system "go", "build", "-o", "#{bin}/scw", "-v", "-ldflags",
+           "-X github.com/scaleway/scaleway-cli/pkg/scwversion.GITCOMMIT=homebrew",
+           "github.com/scaleway/scaleway-cli/cmd/scw/"
 
-    bash_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/bash/scw"
+    bash_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/bash/scw.bash"
     zsh_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/zsh/_scw"
   end
 

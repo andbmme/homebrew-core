@@ -1,17 +1,15 @@
 class Ejdb < Formula
-  desc "C library based on modified version of Tokyo Cabinet"
-  homepage "http://ejdb.org"
-  url "https://github.com/Softmotions/ejdb/archive/v1.2.12.tar.gz"
-  sha256 "858b58409a2875eb2b0c812ce501661f1c8c0378f7756d2467a72a1738c8a0bf"
-
+  desc "Embeddable JSON Database engine C11 library"
+  homepage "https://ejdb.org"
+  url "https://github.com/Softmotions/ejdb/archive/v2.0.49.tar.gz"
+  sha256 "850ade8319a72caf5e361118e45de8de5fefcea8f7c27badb177e0eee648dcb6"
   head "https://github.com/Softmotions/ejdb.git"
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "75817c5481e57bdbf55d29289f2d22dabf162810cf94308826a2c40d40904f52" => :high_sierra
-    sha256 "1ef9acee32b25883f868a7148e72f5b22303b504c347711f0509d2324425fdae" => :sierra
-    sha256 "6d470ca361e813d40dbff0e27ef7589d5062bba9a7b005f5b360bd595c343ded" => :el_capitan
+    sha256 "0a799daea926e40f36ae01a1543c5f217c51805e6a9b9663b7298485e74bedb0" => :catalina
+    sha256 "4ca418200de1dedf6fd414a12ca61e60f4addd3ae1590e544728981c5b4e1132" => :mojave
+    sha256 "b1e465d9b7c02c8f21e86b96cac5b6ba21c249f5fabce0fe1e35d1346014bb00" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -25,56 +23,79 @@ class Ejdb < Formula
 
   test do
     (testpath/"test.c").write <<~EOS
-      #include <ejdb/ejdb.h>
+      #include <ejdb2/ejdb2.h>
 
-      static EJDB *jb;
+      #define RCHECK(rc_)          \\
+        if (rc_) {                 \\
+          iwlog_ecode_error3(rc_); \\
+          return 1;                \\
+        }
+
+      static iwrc documents_visitor(EJDB_EXEC *ctx, const EJDB_DOC doc, int64_t *step) {
+        // Print document to stderr
+        return jbl_as_json(doc->raw, jbl_fstream_json_printer, stderr, JBL_PRINT_PRETTY);
+      }
+
       int main() {
-          jb = ejdbnew();
-          if (!ejdbopen(jb, "addressbook", JBOWRITER | JBOCREAT | JBOTRUNC)) {
-              return 1;
+
+        EJDB_OPTS opts = {
+          .kv = {
+            .path = "testdb.db",
+            .oflags = IWKV_TRUNC
           }
-          EJCOLL *coll = ejdbcreatecoll(jb, "contacts", NULL);
+        };
+        EJDB db;     // EJDB2 storage handle
+        int64_t id;  // Document id placeholder
+        JQL q = 0;   // Query instance
+        JBL jbl = 0; // Json document
 
-          bson bsrec;
-          bson_oid_t oid;
+        iwrc rc = ejdb_init();
+        RCHECK(rc);
 
-          bson_init(&bsrec);
-          bson_append_string(&bsrec, "name", "Bruce");
-          bson_append_string(&bsrec, "phone", "333-222-333");
-          bson_append_int(&bsrec, "age", 58);
-          bson_finish(&bsrec);
+        rc = ejdb_open(&opts, &db);
+        RCHECK(rc);
 
-          ejdbsavebson(coll, &bsrec, &oid);
-          bson_destroy(&bsrec);
+        // First record
+        rc = jbl_from_json(&jbl, "{\\"name\\":\\"Bianca\\", \\"age\\":4}");
+        RCGO(rc, finish);
+        rc = ejdb_put_new(db, "parrots", jbl, &id);
+        RCGO(rc, finish);
+        jbl_destroy(&jbl);
 
-          bson bq1;
-          bson_init_as_query(&bq1);
-          bson_append_start_object(&bq1, "name");
-          bson_append_string(&bq1, "$begin", "Bru");
-          bson_append_finish_object(&bq1);
-          bson_finish(&bq1);
+        // Second record
+        rc = jbl_from_json(&jbl, "{\\"name\\":\\"Darko\\", \\"age\\":8}");
+        RCGO(rc, finish);
+        rc = ejdb_put_new(db, "parrots", jbl, &id);
+        RCGO(rc, finish);
+        jbl_destroy(&jbl);
 
-          EJQ *q1 = ejdbcreatequery(jb, &bq1, NULL, 0, NULL);
+        // Now execute a query
+        rc =  jql_create(&q, "parrots", "/[age > :age]");
+        RCGO(rc, finish);
 
-          uint32_t count;
-          TCLIST *res = ejdbqryexecute(coll, q1, &count, 0, NULL);
+        EJDB_EXEC ux = {
+          .db = db,
+          .q = q,
+          .visitor = documents_visitor
+        };
 
-          int i;
-          for (i = 0; i < TCLISTNUM(res); ++i) {
-              void *bsdata = TCLISTVALPTR(res, i);
-              bson_print_raw(bsdata, 0);
-          }
-          tclistdel(res);
+        // Set query placeholder value.
+        // Actual query will be /[age > 3]
+        rc = jql_set_i64(q, "age", 0, 3);
+        RCGO(rc, finish);
 
-          ejdbquerydel(q1);
-          bson_destroy(&bq1);
+        // Now execute the query
+        rc = ejdb_exec(&ux);
 
-          ejdbclose(jb);
-          ejdbdel(jb);
-          return 0;
+      finish:
+        if (q) jql_destroy(&q);
+        if (jbl) jbl_destroy(&jbl);
+        ejdb_close(&db);
+        RCHECK(rc);
+        return 0;
       }
     EOS
-    system ENV.cc, "-I#{include}", "test.c", "-L#{lib}", "-lejdb", "-o", testpath/"test"
+    system ENV.cc, "-I#{include}", "test.c", "-L#{lib}", "-lejdb2", "-o", testpath/"test"
     system "./test"
   end
 end

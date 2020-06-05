@@ -1,24 +1,23 @@
 class PamU2f < Formula
   desc "Provides an easy way to use U2F-compliant authenticators with PAM"
   homepage "https://developers.yubico.com/pam-u2f/"
-  url "https://developers.yubico.com/pam-u2f/Releases/pam_u2f-1.0.4.tar.gz"
-  sha256 "71542e4568e6d2acaa50810a93c67297ba402f960da1ebb621413bd31f0732a1"
+  url "https://developers.yubico.com/pam-u2f/Releases/pam_u2f-1.0.8.tar.gz"
+  sha256 "52a203a6fab6160e06c1369ff104afed62007ca3ffbb40c297352232fa975c99"
   head "https://github.com/Yubico/pam-u2f.git"
 
   bottle do
     cellar :any
-    sha256 "b881b4ec2faf6a51fd472fc451d923906936b4c90e09ce11f9d22c79f0d7583f" => :high_sierra
-    sha256 "9fb8b93015d92146debeda74c68aaca28ff1d279399d1709e5212909e0c46d4d" => :sierra
-    sha256 "9718cd1b3cb8bd22b7f492191ed4a338119dd157cea531924fec10a53e1f017b" => :el_capitan
-    sha256 "8df3bff3b7804b58b200d96c1e2b013cb68aa6f52de033c6f0bd01321523c9bc" => :yosemite
-    sha256 "d1c6cdbb0ffba2af29c97623c83b2f5dc77f8da6d9d1cdd6ba9965f570a3810e" => :mavericks
+    sha256 "bf854539fa332aaa19f524dec3603f1cdbdfccb714081147b0c6845a6a9cfe24" => :catalina
+    sha256 "5284e43e79ed3e1031484265ef76eb5f02dfd4782de5752f336927feae235750" => :mojave
+    sha256 "07e3f722d932e932de1af8e871940b90fe1340c1332274d1cbc6cceb2e981bda" => :high_sierra
+    sha256 "aba234dff72d3e2c9f51484e294776ca51bc7e03fe390f80539aa5b3e759d1a1" => :sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "libtool" => :build
+  depends_on "asciidoc" => :build
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "asciidoc" => :build
+  depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
   depends_on "libu2f-host"
   depends_on "libu2f-server"
 
@@ -30,13 +29,14 @@ class PamU2f < Formula
     system "make", "install"
   end
 
-  def caveats; <<~EOS
-    To use a U2F key for PAM authentication, specify the full path to the
-    module (#{opt_lib}/pam/pam_u2f.so) in a PAM
-    configuration. You can find all PAM configurations in /etc/pam.d.
+  def caveats
+    <<~EOS
+      To use a U2F key for PAM authentication, specify the full path to the
+      module (#{opt_lib}/pam/pam_u2f.so) in a PAM
+      configuration. You can find all PAM configurations in /etc/pam.d.
 
-    For further installation instructions, please visit
-    https://developers.yubico.com/pam-u2f/#installation.
+      For further installation instructions, please visit
+      https://developers.yubico.com/pam-u2f/#installation.
     EOS
   end
 

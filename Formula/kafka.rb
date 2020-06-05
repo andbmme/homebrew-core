@@ -1,20 +1,16 @@
 class Kafka < Formula
   desc "Publish-subscribe messaging rethought as a distributed commit log"
-  homepage "https://kafka.apache.org"
-  url "https://www.apache.org/dyn/closer.cgi?path=/kafka/0.11.0.1/kafka_2.12-0.11.0.1.tgz"
-  mirror "http://mirror.nbtelecom.com.br/apache/kafka/0.11.0.1/kafka_2.12-0.11.0.1.tgz"
-  sha256 "c776f2dbb7f4e1af6b61e32d482b513a1788bf5f39602746b005ab92601a46f2"
+  homepage "https://kafka.apache.org/"
+  url "https://www.apache.org/dyn/closer.lua?path=kafka/2.5.0/kafka_2.12-2.5.0.tgz"
+  mirror "https://archive.apache.org/dist/kafka/2.5.0/kafka_2.12-2.5.0.tgz"
+  sha256 "4a857fe348e39d1cefa71bc4f61da9ffa59efbb1ff79d41709dc3dbca5f04baf"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "0ede0df6100d654842a0c90734c5a5c403a0e45da23118bdd468b312bfd1dcfa" => :high_sierra
-    sha256 "0ede0df6100d654842a0c90734c5a5c403a0e45da23118bdd468b312bfd1dcfa" => :sierra
-    sha256 "0ede0df6100d654842a0c90734c5a5c403a0e45da23118bdd468b312bfd1dcfa" => :el_capitan
+    sha256 "73988ab14de02fa338846206583dacadeea66585d23efbebbaf9180b8542cc29" => :catalina
+    sha256 "73988ab14de02fa338846206583dacadeea66585d23efbebbaf9180b8542cc29" => :mojave
+    sha256 "73988ab14de02fa338846206583dacadeea66585d23efbebbaf9180b8542cc29" => :high_sierra
   end
-
-  depends_on "zookeeper"
-  depends_on :java => "1.8"
 
   # Related to https://issues.apache.org/jira/browse/KAFKA-2034
   # Since Kafka does not currently set the source or target compability version inside build.gradle
@@ -23,6 +19,11 @@ class Kafka < Formula
     reason "The bottle requires Java 1.8."
     satisfy { quiet_system("/usr/libexec/java_home --version 1.8 --failfast") }
   end
+
+  depends_on :java => "1.8"
+  depends_on "zookeeper"
+
+  conflicts_with "confluent-platform", :because => "both install identically named Kafka related executables"
 
   def install
     data = var/"lib"
@@ -51,30 +52,31 @@ class Kafka < Formula
 
   plist_options :manual => "zookeeper-server-start #{HOMEBREW_PREFIX}/etc/kafka/zookeeper.properties & kafka-server-start #{HOMEBREW_PREFIX}/etc/kafka/server.properties"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>WorkingDirectory</key>
-        <string>#{HOMEBREW_PREFIX}</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>#{opt_bin}/kafka-server-start</string>
-            <string>#{etc}/kafka/server.properties</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <true/>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/kafka/kafka_output.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/kafka/kafka_output.log</string>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>WorkingDirectory</key>
+          <string>#{HOMEBREW_PREFIX}</string>
+          <key>ProgramArguments</key>
+          <array>
+              <string>#{opt_bin}/kafka-server-start</string>
+              <string>#{etc}/kafka/server.properties</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>KeepAlive</key>
+          <true/>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/kafka/kafka_output.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/kafka/kafka_output.log</string>
+      </dict>
+      </plist>
     EOS
   end
 
@@ -89,27 +91,33 @@ class Kafka < Formula
 
     begin
       fork do
-        exec "#{bin}/zookeeper-server-start #{testpath}/kafka/zookeeper.properties > #{testpath}/test.zookeeper-server-start.log 2>&1"
+        exec "#{bin}/zookeeper-server-start #{testpath}/kafka/zookeeper.properties " \
+             "> #{testpath}/test.zookeeper-server-start.log 2>&1"
       end
 
       sleep 15
 
       fork do
-        exec "#{bin}/kafka-server-start #{testpath}/kafka/server.properties > #{testpath}/test.kafka-server-start.log 2>&1"
+        exec "#{bin}/kafka-server-start #{testpath}/kafka/server.properties " \
+             "> #{testpath}/test.kafka-server-start.log 2>&1"
       end
 
       sleep 30
 
-      system "#{bin}/kafka-topics --zookeeper localhost:2181 --create --if-not-exists --replication-factor 1 --partitions 1 --topic test > #{testpath}/kafka/demo.out 2>/dev/null"
-      pipe_output("#{bin}/kafka-console-producer --broker-list localhost:9092 --topic test 2>/dev/null", "test message")
-      system "#{bin}/kafka-console-consumer --zookeeper localhost:2181 --topic test --from-beginning --max-messages 1 >> #{testpath}/kafka/demo.out 2>/dev/null"
-      system "#{bin}/kafka-topics --zookeeper localhost:2181 --delete --topic test >> #{testpath}/kafka/demo.out 2>/dev/null"
+      system "#{bin}/kafka-topics --zookeeper localhost:2181 --create --if-not-exists --replication-factor 1 " \
+             "--partitions 1 --topic test > #{testpath}/kafka/demo.out 2>/dev/null"
+      pipe_output "#{bin}/kafka-console-producer --broker-list localhost:9092 --topic test 2>/dev/null",
+                  "test message"
+      system "#{bin}/kafka-console-consumer --bootstrap-server localhost:9092 --topic test --from-beginning " \
+             "--max-messages 1 >> #{testpath}/kafka/demo.out 2>/dev/null"
+      system "#{bin}/kafka-topics --zookeeper localhost:2181 --delete --topic test >> #{testpath}/kafka/demo.out " \
+             "2>/dev/null"
     ensure
       system "#{bin}/kafka-server-stop"
       system "#{bin}/zookeeper-server-stop"
       sleep 10
     end
 
-    assert_match /test message/, IO.read("#{testpath}/kafka/demo.out")
+    assert_match(/test message/, IO.read("#{testpath}/kafka/demo.out"))
   end
 end

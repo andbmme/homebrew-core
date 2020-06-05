@@ -1,18 +1,20 @@
 class MediaInfo < Formula
   desc "Unified display of technical and tag data for audio/video"
   homepage "https://mediaarea.net/"
-  url "https://mediaarea.net/download/binary/mediainfo/17.10/MediaInfo_CLI_17.10_GNU_FromSource.tar.bz2"
-  version "17.10"
-  sha256 "2833fa4e72937d9c9f52a8ccf6a9e344ab3dfdf058c36fa6796cdce43f3029a2"
+  url "https://mediaarea.net/download/binary/mediainfo/20.03/MediaInfo_CLI_20.03_GNU_FromSource.tar.bz2"
+  sha256 "3ea86061ba398c2f57292dc1c844a8962481fb2c8984be424ba6ffa746b83d3e"
 
   bottle do
     cellar :any
-    sha256 "96d5d7c27619acb21217a6b982d16e4318d60d5f68e5e40240e9549dd0c105b8" => :high_sierra
-    sha256 "66f93ac922c8a75067f0c069e3a70feb1f6eaac69ca9ab34923cd4c1ff7c7bdb" => :sierra
-    sha256 "b992a076c1de1fb5da7b7ceed5abb52814f07a2c21af2d4a88996b0f5bddc33e" => :el_capitan
+    sha256 "d2d02196a863e262a5437917d4171ecc0cd6ee04af9aa68afdd91a11c0edfc84" => :catalina
+    sha256 "f0c39a5f20693be853f15a2424541eb009b539508e5719ceea99f15177613d86" => :mojave
+    sha256 "43a6de49a3e7ebe1fa462da717c18cc8fae8668d713677cc417d995c37ed37ae" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
+
+  uses_from_macos "curl"
+  uses_from_macos "zlib"
 
   def install
     cd "ZenLib/Project/GNU/Library" do

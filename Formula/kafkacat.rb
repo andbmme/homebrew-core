@@ -2,25 +2,26 @@ class Kafkacat < Formula
   desc "Generic command-line non-JVM Apache Kafka producer and consumer"
   homepage "https://github.com/edenhill/kafkacat"
   url "https://github.com/edenhill/kafkacat.git",
-      :tag => "1.3.1",
-      :revision => "0ab52045cde0c16f9f99dad41cee019ff88e974e"
-  revision 1
+      :tag      => "1.5.0",
+      :revision => "3b4bcf00d322533c374e226f2a4eb16501e8a441"
 
   bottle do
     cellar :any
-    sha256 "d38492eb3083e50f91bb50d0a77c59bf559821a6dbc958b3b8d3bac4b192dead" => :high_sierra
-    sha256 "14038aa18ab2f7f982000b3a5ad347f9519809b3bab0cfe47424bb73f333de6e" => :sierra
-    sha256 "ef21329872a809c9a01e6361fcc2d0830f5b9c33455286260b45713acf19285f" => :el_capitan
-    sha256 "cc9011d799bd2dfcb514c9ac499bda051e14a30f73ea8884048fa3d1337ceb47" => :yosemite
+    rebuild 2
+    sha256 "af4674858fa32d4c39346018f441609647f35071ef9d7615f214ad47594e1b6f" => :catalina
+    sha256 "169186d382345c58af1a3a616493ce305f7abb808420ac95a8230e9bcbcec2d9" => :mojave
+    sha256 "60bca6aa0aae36980bcd917cb0ff1b042d7cb3317c5e6e6446488c25ac1edf29" => :high_sierra
   end
 
+  depends_on "avro-c"
   depends_on "librdkafka"
+  depends_on "libserdes"
   depends_on "yajl"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--enable-json"
+    system "./configure", "--prefix=#{prefix}",
+                          "--enable-json",
+                          "--enable-avro"
     system "make"
     system "make", "install"
   end

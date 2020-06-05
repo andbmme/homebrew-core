@@ -1,31 +1,22 @@
 class Dovecot < Formula
   desc "IMAP/POP3 server"
   homepage "https://dovecot.org/"
-  url "https://dovecot.org/releases/2.2/dovecot-2.2.33.2.tar.gz"
-  sha256 "fe1e3b78609a56ee22fc209077e4b75348fa1bbd54c46f52bde2472a4c4cee84"
+  url "https://dovecot.org/releases/2.3/dovecot-2.3.10.1.tar.gz"
+  sha256 "6642e62f23b1b23cfac235007ca6e21cb67460cca834689fad450724456eb10c"
 
   bottle do
-    sha256 "7cb3706428dcf34d179f55e90741dcfc9efc0b9589d6e2c436d15a1aef0f38b8" => :high_sierra
-    sha256 "ad0cadba19b93fd85281d7ec8e86b1e210d19f43b1f7f5b5df8ce7ad90f3b014" => :sierra
-    sha256 "eb070bd1e5f6bd10c0a7268dff45cb421f1d0895ca1d8d25faa50088b9f2be09" => :el_capitan
+    sha256 "e8d7b6bf587b5673826b467c3a30b148a191ed94246797609fcdad42e3ad40e4" => :catalina
+    sha256 "3b05663fc50f7669b2f16f6b55821f6fb2abf54fea8a858301ed7d5dbf7de7b5" => :mojave
+    sha256 "3f35d37650ccc397e11584b5a31ef13157e63b7db3b4886a5f3b7c4fb73a3e7b" => :high_sierra
   end
 
-  option "with-pam", "Build with PAM support"
-  option "with-pigeonhole", "Add Sieve addon for Dovecot mailserver"
-  option "with-pigeonhole-unfinished-features", "Build unfinished new Sieve addon features/extensions"
-  option "with-stemmer", "Build with libstemmer support"
-
-  depends_on "openssl"
-  depends_on "clucene" => :optional
+  depends_on "openssl@1.1"
+  uses_from_macos "bzip2"
+  uses_from_macos "sqlite"
 
   resource "pigeonhole" do
-    url "https://pigeonhole.dovecot.org/releases/2.2/dovecot-2.2-pigeonhole-0.4.21.tar.gz"
-    sha256 "4ae09cb788c5334d167f5a89ee70b0616c3231e5904ad258ce408e4953cfdd6a"
-  end
-
-  resource "stemmer" do
-    url "https://github.com/snowballstem/snowball.git",
-        :revision => "5137019d68befd633ce8b1cd48065f41e77ed43e"
+    url "https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-0.5.9.tar.gz"
+    sha256 "36da68aae5157b83e21383f711b8977e5b6f5477f369f71e7e22e76a738bbd05"
   end
 
   def install
@@ -35,84 +26,71 @@ class Dovecot < Formula
       --libexecdir=#{libexec}
       --sysconfdir=#{etc}
       --localstatedir=#{var}
-      --with-ssl=openssl
-      --with-sqlite
-      --with-zlib
       --with-bzlib
+      --with-pam
+      --with-sqlite
+      --with-ssl=openssl
+      --with-zlib
     ]
-
-    args << "--with-lucene" if build.with? "clucene"
-    args << "--with-pam" if build.with? "pam"
-
-    if build.with? "stemmer"
-      args << "--with-libstemmer"
-
-      resource("stemmer").stage do
-        system "make", "dist_libstemmer_c"
-        system "tar", "xzf", "dist/libstemmer_c.tgz", "-C", buildpath
-      end
-    end
 
     system "./configure", *args
     system "make", "install"
 
-    if build.with? "pigeonhole"
-      resource("pigeonhole").stage do
-        args = %W[
-          --disable-dependency-tracking
-          --with-dovecot=#{lib}/dovecot
-          --prefix=#{prefix}
-        ]
+    resource("pigeonhole").stage do
+      args = %W[
+        --disable-dependency-tracking
+        --with-dovecot=#{lib}/dovecot
+        --prefix=#{prefix}
+      ]
 
-        args << "--with-unfinished-features" if build.with? "pigeonhole-unfinished-features"
-
-        system "./configure", *args
-        system "make"
-        system "make", "install"
-      end
+      system "./configure", *args
+      system "make"
+      system "make", "install"
     end
   end
 
-  def caveats; <<~EOS
-    For Dovecot to work, you may need to create a dovecot user
-    and group depending on your configuration file options.
+  def caveats
+    <<~EOS
+      For Dovecot to work, you may need to create a dovecot user
+      and group depending on your configuration file options.
     EOS
   end
 
   plist_options :startup => true
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>KeepAlive</key>
-        <false/>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_sbin}/dovecot</string>
-          <string>-F</string>
-        </array>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/dovecot/dovecot.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/dovecot/dovecot.log</string>
-        <key>SoftResourceLimits</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-        <key>NumberOfFiles</key>
-        <integer>1000</integer>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>KeepAlive</key>
+          <false/>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_sbin}/dovecot</string>
+            <string>-F</string>
+          </array>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/dovecot/dovecot.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/dovecot/dovecot.log</string>
+          <key>SoftResourceLimits</key>
+          <dict>
+          <key>NumberOfFiles</key>
+          <integer>1000</integer>
+          </dict>
+          <key>HardResourceLimits</key>
+          <dict>
+          <key>NumberOfFiles</key>
+          <integer>1024</integer>
+          </dict>
         </dict>
-        <key>HardResourceLimits</key>
-        <dict>
-        <key>NumberOfFiles</key>
-        <integer>1024</integer>
-        </dict>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 

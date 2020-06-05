@@ -1,16 +1,16 @@
 class Lz4 < Formula
   desc "Extremely Fast Compression algorithm"
-  homepage "http://www.lz4.org/"
-  url "https://github.com/lz4/lz4/archive/v1.8.0.tar.gz"
-  sha256 "2ca482ea7a9bb103603108b5a7510b7592b90158c151ff50a28f1ca8389fccf6"
+  homepage "https://lz4.org/"
+  url "https://github.com/lz4/lz4/archive/v1.9.2.tar.gz"
+  sha256 "658ba6191fa44c92280d4aa2c271b0f4fbc0e34d249578dd05e50e76d0e5efcc"
   head "https://github.com/lz4/lz4.git"
 
   bottle do
     cellar :any
-    sha256 "f2fb292bafe98e31654fc85c7a032529c12a4d2139cf96d1211411106618a025" => :high_sierra
-    sha256 "1168e44a252b92853ce8fe24976c0198bc2a252678d36c4d5fd999e6e95bc417" => :sierra
-    sha256 "42f1aa22230648e0fe1dc738d6cf6649b35a9f5b5255322418de601347c7848c" => :el_capitan
-    sha256 "5abd84100b170b6b8650f46639edb181fefda11ffd582c46dcdc72580ac1913b" => :yosemite
+    sha256 "7de6165d86c7a7ae01d254a5d0ea0a6d5876f90cffb63a2570942d46cca6373a" => :catalina
+    sha256 "67ca428e60e2c2f6e524dd3de42629c1a616d28b2c743b66bf4cbdcc3b28ea46" => :mojave
+    sha256 "7f60879b81a3a9ee52b3e9b87ed265c4934058b841e8f5320044f826b4660a92" => :high_sierra
+    sha256 "00d3610cf09b0fcde34928890f5dac870ebcaffacd6eb51eaea05b754753e462" => :sierra
   end
 
   def install

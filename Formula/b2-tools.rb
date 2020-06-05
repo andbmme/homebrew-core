@@ -3,22 +3,23 @@ class B2Tools < Formula
 
   desc "B2 Cloud Storage Command-Line Tools"
   homepage "https://github.com/Backblaze/B2_Command_Line_Tool"
-  url "https://github.com/Backblaze/B2_Command_Line_Tool/archive/v1.0.0.tar.gz"
-  sha256 "7d9643474a1554aa858d0e6aa75433bac8b6797fd58d04b959f372b89ee38c6f"
+  url "https://github.com/Backblaze/B2_Command_Line_Tool/archive/v1.4.2.tar.gz"
+  sha256 "2d6382b94af59dcaa44dd546252807e0364d1b61f169584829ebbf82458e7078"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "fc2a8a03eec57a7936d159620592d39080cbdc644bad8abef8abeff0bf2d3c6a" => :high_sierra
-    sha256 "fb4b0631e13cafe26975d6c36fbb9a1602c4c4b40a0ffad0377edb95dbe155c8" => :sierra
-    sha256 "14ef28f1f55498c97ffc288bc7d16ec3154d3e1a73bd8e8d423ae75d931cb62b" => :el_capitan
+    sha256 "359dc46390fbfc8b78ee10a1ca122b3bae6164030be4db88bfa5458c9bd25306" => :catalina
+    sha256 "53b316d86ae2a7611cf1640d7216f2b4b19656e7d400ec09d991fece6ff5ac4f" => :mojave
+    sha256 "46ffa1e56c42f5593dc594b85cd0bd9aa2e7e6b418887469236cab8d6faadebb" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python@3.8"
 
   conflicts_with "boost-build", :because => "both install `b2` binaries"
 
   def install
-    venv = virtualenv_create(libexec)
+    venv = virtualenv_create(libexec, Formula["python@3.8"].opt_bin/"python3")
     system libexec/"bin/pip", "install", "-v", "--no-binary", ":all:",
                               "--ignore-installed", buildpath
     system libexec/"bin/pip", "uninstall", "-y", "b2"
@@ -29,7 +30,8 @@ class B2Tools < Formula
   end
 
   test do
+    ENV["LC_ALL"] = "en_US.UTF-8"
     cmd = "#{bin}/b2 authorize_account BOGUSACCTID BOGUSAPPKEY 2>&1"
-    assert_match "bad_auth_token", shell_output(cmd, 1)
+    assert_match "unable to authorize account", shell_output(cmd, 1)
   end
 end

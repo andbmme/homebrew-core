@@ -1,23 +1,18 @@
 class Ffe < Formula
   desc "Parse flat file structures and print them in different formats"
   homepage "https://ff-extractor.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/ff-extractor/ff-extractor/0.3.7-1/ffe-0.3.7-1.tar.gz"
-  sha256 "0266e65778b4e69ae65c5dad43577767612f0afe13dc8c3e2cd3c49f7c869689"
+  url "https://downloads.sourceforge.net/project/ff-extractor/ff-extractor/0.3.9/ffe-0.3.9.tar.gz"
+  sha256 "78bab8fa1068a62600c3de153122b8fc9252080ddbc521f71b938b5dbd9afb0d"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ccecbf9c6595344a6988ed708a38bb18d8d754d5e948e9e9a0d8fd2b933e1eec" => :high_sierra
-    sha256 "9471c2e19149beb552d0f7b724b6f6f140b2f2dd26d180f8293d6e95a704907f" => :sierra
-    sha256 "a85474d61e83b870dd30b1df63b16eb28cc87f18c74d4484e49f5719b2ebad43" => :el_capitan
-    sha256 "df84e69d719b76fd4c9dd6d7462c2dabcad331454dd20f64ba55ab0a0a7ba03d" => :yosemite
+    sha256 "59d1950fc3b1ed9baccaa08b100a4768e1a5dd21895623d1bbb99077218426fb" => :catalina
+    sha256 "845ba501eb75d9f3d0466e95700c5b04511a3908dd2fa8b0a3dd06e611a937c4" => :mojave
+    sha256 "3415f4fa4e7407929bfc62ac70c663a48669d39a38375524319851cf396abacb" => :high_sierra
+    sha256 "e454fbfb4ac9947f7e7222e7af911cc89a502bee98ab41301f2fe5ecf1f4b8a9" => :sierra
   end
 
   def install
-    # Work around build failure "ffe.c:326:23: error: non-void function
-    # 'update_anon_info' should return a value [-Wreturn-type]"
-    # Reported 7 Feb 2017 to tjsa@iki.fi
-    ENV.append_to_cflags "-Wno-return-type"
-
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--disable-silent-rules",

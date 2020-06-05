@@ -1,24 +1,20 @@
 class Libmicrohttpd < Formula
   desc "Light HTTP/1.1 server library"
   homepage "https://www.gnu.org/software/libmicrohttpd/"
-  url "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.55.tar.gz"
-  mirror "https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-0.9.55.tar.gz"
-  sha256 "0c1cab8dc9f2588bd3076a28f77a7f8de9560cbf2d80e53f9a8696ada80ed0f8"
+  url "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.63.tar.gz"
+  mirror "https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-0.9.63.tar.gz"
+  sha256 "37c36f1be177f0e37ef181a645cd3baac1000bd322a01c2eff70f3cc8c91749c"
 
   bottle do
     cellar :any
-    sha256 "bd5e172b2cd386f61292bed10d4023b0c58b9b389a4abe0317bb8278e373d75b" => :high_sierra
-    sha256 "fa246ec8a891bb8e2d30d370481bdafa50a655e40a7464abc108bd439c4b628b" => :sierra
-    sha256 "fba444e775c81f2a790f1644f3243aa79d0bf9a6944fb56907968233d2106c2b" => :el_capitan
-    sha256 "67bd7b02c040618e6d041d4e6969b7abbb7f193b2cee2514701f86239ce1e8f2" => :yosemite
+    sha256 "0d9d914ee9491289a10f751dce3e57efc02544cd520ec647d939a1b58baa60ef" => :catalina
+    sha256 "065c03c15e7cddac444a335ae9a4a581b9cb10f9ea4edbafab86cb9ec083ce49" => :mojave
+    sha256 "2b022a903526ca0d939b8660fd1d9ca82877c29734b177bb865631a6fbf0e375" => :high_sierra
+    sha256 "60a0909d2d0f9784060686b71c58afae980601141d19d20d62c78c451467245c" => :sierra
   end
 
-  option "with-ssl", "Enable SSL support"
-
-  if build.with? "ssl"
-    depends_on "libgcrypt"
-    depends_on "gnutls"
-  end
+  depends_on "gnutls"
+  depends_on "libgcrypt"
 
   def install
     system "./configure", "--disable-dependency-tracking",

@@ -4,26 +4,26 @@ class Hadolint < Formula
   include Language::Haskell::Cabal
 
   desc "Smarter Dockerfile linter to validate best practices"
-  homepage "http://hadolint.lukasmartinelli.ch/"
-  url "https://github.com/lukasmartinelli/hadolint/archive/v1.2.2.tar.gz"
-  sha256 "600731b0ebf8b86d561ea7ff37424d3249ccd36b91c440551200829c2f80f646"
+  homepage "https://github.com/hadolint/hadolint"
+  url "https://github.com/hadolint/hadolint/archive/v1.17.7.tar.gz"
+  sha256 "67ffa0385a83c611e0e7bf7f8d3105f626b24d94c7f753645d55b0d0fd8f53e9"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d4c3729595b2346d96a1a02c19a90a47eb86f9dc4a0dceb7f7dce9abf1f266cb" => :high_sierra
-    sha256 "e50b8e3ecbaa931e47a6eef649c041af70569f3812433707e22502cfe281c186" => :sierra
-    sha256 "8e2cf9aa35ef51c0ffe475af366a97149b15a64558c97445e34574f6a66ce43d" => :el_capitan
-    sha256 "c079436775b7811e6e3b566fa040d9c39580c31e9362fad7386f2527212fde10" => :yosemite
+    sha256 "7bd313740e10757294d520da94d948640ceed039bbe2d18078433ff9a1d49114" => :catalina
+    sha256 "a1eac5f81e5e981ac77cb4bdf35f593f14c874f560b4305dfd2a2aefc26cfdd9" => :mojave
+    sha256 "79fed0ab543f61b75aa424680dd685545e62f041a01f11bbf9afe1b5216de6df" => :high_sierra
   end
 
-  depends_on "ghc" => :build
-  depends_on "cabal-install" => :build
+  depends_on "haskell-stack" => :build
 
   def install
-    # Fix "src/Hadolint/Bash.hs:9:20: error: The constructor 'PositionedComment'
-    # should have 3 arguments, but has been given 2"
-    # Reported 9 Dec 2016 https://github.com/lukasmartinelli/hadolint/issues/72
-    install_cabal_package "--constraint=ShellCheck<0.4.5"
+    # Let `stack` handle its own parallelization
+    jobs = ENV.make_jobs
+    ENV.deparallelize
+
+    system "stack", "-j#{jobs}", "build"
+    system "stack", "-j#{jobs}", "--local-bin-path=#{bin}", "install"
   end
 
   test do

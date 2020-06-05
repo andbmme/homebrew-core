@@ -1,24 +1,20 @@
 class Nss < Formula
   desc "Libraries for security-enabled client and server applications"
   homepage "https://developer.mozilla.org/docs/NSS"
-  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_34_RTM/src/nss-3.34.tar.gz"
-  sha256 "0d45954181373023c7cfc33e77c8c636d394ec7e55b93e059149ed7888652af5"
+  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_53_RTM/src/nss-3.53.tar.gz"
+  sha256 "08d36dc1a56325f02e626626d4eeab9c4d126dbd99dfaf419b91d0a696f58917"
 
   bottle do
     cellar :any
-    sha256 "9525cb470a55f3170e17a1dbf9bd957ba202e2f835ba655999e6c954111cd436" => :high_sierra
-    sha256 "7a589946f94f56e17f821b8315cc43bf4407d6a36f4c093fa38d33f8e76b70b1" => :sierra
-    sha256 "131247ea7f020d621628336f13633661b1734e8435c4bdbdc7b4a37d61a95e21" => :el_capitan
+    sha256 "3911cfd46503f27779ef28f4c88ff8798123fd787143533b0508ce2a19b2d667" => :catalina
+    sha256 "596b59e7c317a4d05f46ad5d65c7c65b2c1e29663a73c3e66617b89269691c30" => :mojave
+    sha256 "495bf1b2f2bf5a7d33f558db974ae356e578769608ba2c040dff011cd84c7e95" => :high_sierra
   end
 
-  keg_only <<~EOS
-    Firefox can pick this up instead of the built-in library, resulting in
-    random crashes without meaningful explanation.
-
-    Please see https://bugzilla.mozilla.org/show_bug.cgi?id=1142646 for details
-  EOS
-
   depends_on "nspr"
+
+  uses_from_macos "sqlite"
+  uses_from_macos "zlib"
 
   def install
     ENV.deparallelize
@@ -26,11 +22,12 @@ class Nss < Formula
 
     args = %W[
       BUILD_OPT=1
+      NSS_ALLOW_SSLKEYLOGFILE=1
       NSS_USE_SYSTEM_SQLITE=1
       NSPR_INCLUDE_DIR=#{Formula["nspr"].opt_include}/nspr
       NSPR_LIB_DIR=#{Formula["nspr"].opt_lib}
+      USE_64=1
     ]
-    args << "USE_64=1" if MacOS.prefer_64_bit?
 
     # Remove the broken (for anyone but Firefox) install_name
     inreplace "coreconf/Darwin.mk", "-install_name @executable_path", "-install_name #{lib}"
@@ -76,30 +73,32 @@ class Nss < Formula
 
   # A very minimal nss-config for configuring firefox etc. with this nss,
   # see https://bugzil.la/530672 for the progress of upstream inclusion.
-  def config_file; <<~EOS
-    #!/bin/sh
-    for opt; do :; done
-    case "$opt" in
-      --version) opt="--modversion";;
-      --cflags|--libs) ;;
-      *) exit 1;;
-    esac
-    pkg-config "$opt" nss
+  def config_file
+    <<~EOS
+      #!/bin/sh
+      for opt; do :; done
+      case "$opt" in
+        --version) opt="--modversion";;
+        --cflags|--libs) ;;
+        *) exit 1;;
+      esac
+      pkg-config "$opt" nss
     EOS
   end
 
-  def pc_file; <<~EOS
-    prefix=#{prefix}
-    exec_prefix=${prefix}
-    libdir=${exec_prefix}/lib
-    includedir=${prefix}/include/nss
+  def pc_file
+    <<~EOS
+      prefix=#{prefix}
+      exec_prefix=${prefix}
+      libdir=${exec_prefix}/lib
+      includedir=${prefix}/include/nss
 
-    Name: NSS
-    Description: Mozilla Network Security Services
-    Version: #{version}
-    Requires: nspr >= 4.12
-    Libs: -L${libdir} -lnss3 -lnssutil3 -lsmime3 -lssl3
-    Cflags: -I${includedir}
+      Name: NSS
+      Description: Mozilla Network Security Services
+      Version: #{version}
+      Requires: nspr >= 4.12
+      Libs: -L${libdir} -lnss3 -lnssutil3 -lsmime3 -lssl3
+      Cflags: -I${includedir}
     EOS
   end
 end

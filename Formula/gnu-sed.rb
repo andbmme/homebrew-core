@@ -1,60 +1,54 @@
 class GnuSed < Formula
   desc "GNU implementation of the famous stream editor"
   homepage "https://www.gnu.org/software/sed/"
-  url "https://ftp.gnu.org/gnu/sed/sed-4.4.tar.xz"
-  mirror "https://ftpmirror.gnu.org/sed/sed-4.4.tar.xz"
-  sha256 "cbd6ebc5aaf080ed60d0162d7f6aeae58211a1ee9ba9bb25623daa6cd942683b"
+  url "https://ftp.gnu.org/gnu/sed/sed-4.8.tar.xz"
+  mirror "https://ftpmirror.gnu.org/sed/sed-4.8.tar.xz"
+  sha256 "f79b0cfea71b37a8eeec8490db6c5f7ae7719c35587f21edb0617f370eeff633"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "64ac013220afae09b98b7af21de4d577e348a5bbcac5e1d195ae068a3c584c5a" => :high_sierra
-    sha256 "dbb273a424c68a41670b1bdc7630960ed3d81b08d16b4e2de89da3b08d8042f8" => :sierra
-    sha256 "9b221159fc84c8774053bf6611f9da3652636f1531a68819f8ca59fc3c7321c1" => :el_capitan
-    sha256 "8abddf2922e6151ee21c84f2b997f9cfe55eeadbbe13ca28ea4097afa0c91f9d" => :yosemite
+    sha256 "726be75d6d7155820b408a10e5c1a5ba1406374a7fc167af62524a4f4bbbc099" => :catalina
+    sha256 "093f16752e7dfb115c055f20aed090108b94edd47c40f5e50878d961359251b2" => :mojave
+    sha256 "865abe618c67037a4a419a05e0df2c6814fb3abdd6f631ea546aeba0aaf8eb78" => :high_sierra
   end
-
-  option "with-default-names", "Do not prepend 'g' to the binary"
 
   conflicts_with "ssed", :because => "both install share/info/sed.info"
 
-  deprecated_option "default-names" => "with-default-names"
-
   def install
-    args = ["--prefix=#{prefix}", "--disable-dependency-tracking"]
-    args << "--program-prefix=g" if build.without? "default-names"
+    args = %W[
+      --prefix=#{prefix}
+      --disable-dependency-tracking
+      --program-prefix=g
+    ]
+
+    # Work around a gnulib issue with macOS Catalina
+    args << "gl_cv_func_ftello_works=yes"
 
     system "./configure", *args
     system "make", "install"
 
-    if build.without? "default-names"
-      (libexec/"gnubin").install_symlink bin/"gsed" =>"sed"
-      (libexec/"gnuman/man1").install_symlink man1/"gsed.1" => "sed.1"
-    end
+    (libexec/"gnubin").install_symlink bin/"gsed" =>"sed"
+    (libexec/"gnuman/man1").install_symlink man1/"gsed.1" => "sed.1"
+
+    libexec.install_symlink "gnuman" => "man"
   end
 
   def caveats
-    if build.without? "default-names" then <<~EOS
-      The command has been installed with the prefix "g".
-      If you do not want the prefix, install using the "with-default-names" option.
+    <<~EOS
+      GNU "sed" has been installed as "gsed".
+      If you need to use it as "sed", you can add a "gnubin" directory
+      to your PATH from your bashrc like:
 
-      If you need to use these commands with their normal names, you
-      can add a "gnubin" directory to your PATH from your bashrc like:
-        PATH="#{opt_libexec}/gnubin:$PATH"
-
-      Additionally, you can access their man pages with normal names if you add
-      the "gnuman" directory to your MANPATH from your bashrc as well:
-        MANPATH="#{opt_libexec}/gnuman:$MANPATH"
-      EOS
-    end
+          PATH="#{opt_libexec}/gnubin:$PATH"
+    EOS
   end
 
   test do
     (testpath/"test.txt").write "Hello world!"
-    if build.with? "default-names"
-      system "#{bin}/sed", "-i", "s/world/World/g", "test.txt"
-    else
-      system "#{bin}/gsed", "-i", "s/world/World/g", "test.txt"
-    end
+    system "#{bin}/gsed", "-i", "s/world/World/g", "test.txt"
+    assert_match /Hello World!/, File.read("test.txt")
+
+    system "#{opt_libexec}/gnubin/sed", "-i", "s/world/World/g", "test.txt"
     assert_match /Hello World!/, File.read("test.txt")
   end
 end

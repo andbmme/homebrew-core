@@ -1,19 +1,22 @@
 class Libofx < Formula
   desc "Library to support OFX command responses"
   homepage "https://libofx.sourceforge.io"
-  url "https://downloads.sourceforge.net/project/libofx/libofx/libofx-0.9.12.tar.gz"
-  sha256 "c15fa062fa11e759eb6d8c7842191db2185ee1b221a3f75e9650e2849d7b7373"
+  url "https://downloads.sourceforge.net/project/libofx/libofx/libofx-0.9.15.tar.gz"
+  sha256 "e95c14e09fc37b331af3ef4ef7bea29eb8564a06982959fbd4bca7e331816144"
 
   bottle do
-    sha256 "b682be169269451309ccc7827782a66489e8cf3c9b1793a6b03aa51fd1a943e6" => :high_sierra
-    sha256 "74ccac1d72a7c16eb296c19ea7396f504ab7428aa0b302a84629cd00ef64d6ac" => :sierra
-    sha256 "1e5b91a3e74e5bf3f8ae5ac577a0ad1c81c679a328abee6770b9671fd678456d" => :el_capitan
+    sha256 "aa4c73d9fe09d54bc4fb0a1dde14bd927949f4d0ce100dae987f03df79236958" => :catalina
+    sha256 "9b731e873dee237f2723fd05aa7f88b0e64f29197297c33e9def68112d7c2fc8" => :mojave
+    sha256 "7c561c3c928ad133d1763afe6a9d25b784d236411f00085151740f3505b164b3" => :high_sierra
   end
 
   depends_on "open-sp"
 
   def install
+    opensp = Formula["open-sp"]
     system "./configure", "--disable-dependency-tracking",
+                          "--with-opensp-includes=#{opensp.opt_include}/OpenSP",
+                          "--with-opensp-libs=#{opensp.opt_lib}",
                           "--prefix=#{prefix}"
     system "make", "install"
   end

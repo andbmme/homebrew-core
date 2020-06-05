@@ -1,30 +1,24 @@
 class MariadbAT101 < Formula
   desc "Drop-in replacement for MySQL"
   homepage "https://mariadb.org/"
-  url "https://downloads.mariadb.org/f/mariadb-10.1.29/source/mariadb-10.1.29.tar.gz"
-  sha256 "73bbd5602f52ab5aa4d83f465134871b6c87bda25371d098f6da5a3d98517ed4"
+  url "https://downloads.mariadb.org/f/mariadb-10.1.45/source/mariadb-10.1.45.tar.gz"
+  sha256 "9d8f0f71f9613b2028ffc5c5be8b98948ec955eb0d89600d18ed7cc04807dad5"
 
   bottle do
-    sha256 "527c6af783fff58e1239f738a6f88af41494dc1576e37b65991d4e28e6362ef1" => :high_sierra
-    sha256 "e82f7c5d5364bd678e291117ee63eef1f375dff2949b89b09cf092527185809f" => :sierra
-    sha256 "7057a3050cbbc3e833c90ed9c727550ee5c6a1853dc1e02141e6df204e810995" => :el_capitan
+    sha256 "bc23160ad65b005fa2548a15279eba9514a93526c79fdfb311370b5215a1ba9d" => :catalina
+    sha256 "2ae7f80a01184bd035a51f77be142a3d85d4cc54e9d34a8d02c597d19134da7d" => :mojave
+    sha256 "0da7b90040d6f28180bd892d7d84fbf37969038d084d106bc2ab03d074ef9ff5" => :high_sierra
   end
 
   keg_only :versioned_formula
 
-  option "with-test", "Keep test when installing"
-  option "with-bench", "Keep benchmark app when installing"
-  option "with-embedded", "Build the embedded server"
-  option "with-libedit", "Compile with editline wrapper instead of readline"
-  option "with-archive-storage-engine", "Compile with the ARCHIVE storage engine enabled"
-  option "with-blackhole-storage-engine", "Compile with the BLACKHOLE storage engine enabled"
-  option "with-local-infile", "Build with local infile loading support"
-
-  deprecated_option "enable-local-infile" => "with-local-infile"
-  deprecated_option "with-tests" => "with-test"
-
   depends_on "cmake" => :build
-  depends_on "openssl"
+  depends_on "pkg-config" => :build
+  depends_on "groonga"
+  depends_on "openssl@1.1"
+
+  uses_from_macos "bzip2"
+  uses_from_macos "ncurses"
 
   def install
     # Set basedir and ldata so that mysql_install_db can find the server
@@ -35,6 +29,9 @@ class MariadbAT101 < Formula
       s.change_make_var! "ldata", "\"#{var}/mysql\""
     end
 
+    # Use brew groonga
+    rm_r "storage/mroonga/vendor/groonga"
+
     # -DINSTALL_* are relative to prefix
     args = %W[
       -DMYSQL_DATADIR=#{var}/mysql
@@ -44,9 +41,11 @@ class MariadbAT101 < Formula
       -DINSTALL_INFODIR=share/info
       -DINSTALL_MYSQLSHAREDIR=share/mysql
       -DWITH_PCRE=bundled
+      -DWITH_READLINE=yes
       -DWITH_SSL=yes
-      -DDEFAULT_CHARSET=utf8
-      -DDEFAULT_COLLATION=utf8_general_ci
+      -DWITH_UNIT_TESTS=OFF
+      -DDEFAULT_CHARSET=utf8mb4
+      -DDEFAULT_COLLATION=utf8mb4_general_ci
       -DINSTALL_SYSCONFDIR=#{etc}
       -DCOMPILATION_COMMENT=Homebrew
     ]
@@ -54,26 +53,12 @@ class MariadbAT101 < Formula
     # disable TokuDB, which is currently not supported on macOS
     args << "-DPLUGIN_TOKUDB=NO"
 
-    args << "-DWITH_UNIT_TESTS=OFF" if build.without? "test"
-
-    # Build the embedded server
-    args << "-DWITH_EMBEDDED_SERVER=ON" if build.with? "embedded"
-
-    # Compile with readline unless libedit is explicitly chosen
-    args << "-DWITH_READLINE=yes" if build.without? "libedit"
-
-    # Compile with ARCHIVE engine enabled if chosen
-    args << "-DPLUGIN_ARCHIVE=YES" if build.with? "archive-storage-engine"
-
-    # Compile with BLACKHOLE engine enabled if chosen
-    args << "-DPLUGIN_BLACKHOLE=YES" if build.with? "blackhole-storage-engine"
-
-    # Build with local infile loading support
-    args << "-DENABLED_LOCAL_INFILE=1" if build.with? "local-infile"
-
     system "cmake", ".", *std_cmake_args, *args
     system "make"
     system "make", "install"
+
+    # Avoid references to the Homebrew shims directory
+    inreplace bin/"mysqlbug", HOMEBREW_SHIMS_PATH/"mac/super/", ""
 
     # Fix my.cnf to point to #{etc} instead of /etc
     (etc/"my.cnf.d").mkpath
@@ -85,8 +70,9 @@ class MariadbAT101 < Formula
     # See: https://github.com/Homebrew/homebrew/issues/4975
     rm_rf prefix/"data"
 
-    (prefix/"mysql-test").rmtree if build.without? "test" # save 121MB!
-    (prefix/"sql-bench").rmtree if build.without? "bench"
+    # Save space
+    (prefix/"mysql-test").rmtree
+    (prefix/"sql-bench").rmtree
 
     # Link the setup script into bin
     bin.install_symlink prefix/"scripts/mysql_install_db"
@@ -129,49 +115,45 @@ class MariadbAT101 < Formula
     end
   end
 
-  def caveats; <<~EOS
-    A "/etc/my.cnf" from another install may interfere with a Homebrew-built
-    server starting up correctly.
+  def caveats
+    <<~EOS
+      A "/etc/my.cnf" from another install may interfere with a Homebrew-built
+      server starting up correctly.
 
-    MySQL is configured to only allow connections from localhost by default
+      MySQL is configured to only allow connections from localhost by default
 
-    To connect:
-        mysql -uroot
+      To connect:
+          mysql -uroot
     EOS
   end
 
   plist_options :manual => "#{HOMEBREW_PREFIX}/opt/mariadb@10.1/bin/mysql.server start"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>KeepAlive</key>
-      <true/>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>#{opt_bin}/mysqld_safe</string>
-        <string>--datadir=#{var}/mysql</string>
-      </array>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>WorkingDirectory</key>
-      <string>#{var}</string>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>KeepAlive</key>
+        <true/>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/mysqld_safe</string>
+          <string>--datadir=#{var}/mysql</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>WorkingDirectory</key>
+        <string>#{var}</string>
+      </dict>
+      </plist>
     EOS
   end
 
   test do
-    if build.with? "test"
-      (prefix/"mysql-test").cd do
-        system "./mysql-test-run.pl", "status"
-      end
-    else
-      system bin/"mysqld", "--version"
-    end
+    system bin/"mysqld", "--version"
   end
 end

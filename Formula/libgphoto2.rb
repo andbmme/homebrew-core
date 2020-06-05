@@ -1,28 +1,27 @@
 class Libgphoto2 < Formula
   desc "Gphoto2 digital camera library"
   homepage "http://www.gphoto.org/proj/libgphoto2/"
-  url "https://downloads.sourceforge.net/project/gphoto/libgphoto/2.5.16/libgphoto2-2.5.16.tar.bz2"
-  sha256 "e757416d1623e01a9d0d294b2e790162e434c0964f50d3b7ff1a3424b62a2906"
+  url "https://downloads.sourceforge.net/project/gphoto/libgphoto/2.5.25/libgphoto2-2.5.25.tar.bz2"
+  sha256 "7c0e98f438c2b128186afe16ce7833a12fa36f87d01467e837b9d27e7a167f3a"
 
   bottle do
-    sha256 "42d67ebe5a33c3a41237fcaae5f5f89827a93e4b01da6f37becd8f59bda3d3b2" => :high_sierra
-    sha256 "f775f6c15a087e09939cf4f4514db5a3019e57cff0c16f19de8cab04a56a06d4" => :sierra
-    sha256 "4990ce77089bdb05581b0cd72fde5851a4e19df9916a46c298c50e49c6d83543" => :el_capitan
+    sha256 "0609b72a67e2d6c45ede30bb4cfca8b4fc6b312d5873c4e647e292fdc1f227ff" => :catalina
+    sha256 "5a1f7ec7d0146bb772a4c6fa2ef5ed53e6a6ac183fe1f916ca8b53b2a4c68ad9" => :mojave
+    sha256 "110b4ca7ee321419851bcf5b8401d2fe082bf29261787700890f93db77af0112" => :high_sierra
   end
 
   head do
     url "https://github.com/gphoto/libgphoto2.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "gettext" => :build
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libtool" => :run
-  depends_on "libusb-compat"
   depends_on "gd"
-  depends_on "libexif" => :optional
+  depends_on "libtool"
+  depends_on "libusb-compat"
 
   def install
     system "autoreconf", "-fvi" if build.head?

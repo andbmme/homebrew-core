@@ -1,27 +1,21 @@
 class GoJira < Formula
   desc "Simple jira command-line client in Go"
-  homepage "https://github.com/Netflix-Skunkworks/go-jira"
-  url "https://github.com/Netflix-Skunkworks/go-jira/archive/v1.0.14.tar.gz"
-  sha256 "34cb45af19985474b8d9079c1f551f4892bfbe64073a5a8f89333ca3603e4639"
+  homepage "https://github.com/go-jira/jira"
+  url "https://github.com/go-jira/jira/archive/v1.0.23.tar.gz"
+  sha256 "01c86d3119d050774caa41b89fb4f038026542eb1e362e89f3f89bf330b68354"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "146cdcca1cfcf0c950fea209100769aa9832bee22c924cb21f8da1e13433b1f1" => :high_sierra
-    sha256 "f5710f28a79317fcbe98eb3bb6674e78d957811e4517266b09dd3375915dc03f" => :sierra
-    sha256 "3c97af966b4ef4dd2ef1df1f7982120785ecc2ab5b3b58148b2913a0de7e5ad1" => :el_capitan
+    sha256 "77a16e13c81b90fb7a7cb90ce607531b1bb932a31e2db1aedfdb6d85d7986f1d" => :catalina
+    sha256 "f165d25aa98ec17d4da66fa9c3b727c1b99723043ad4b259f01b6aa3e8c80bfd" => :mojave
+    sha256 "a4d50f8c0376b0bef991ee3d7e9c50621dfae151e9bdb0e5ed143649de49a283" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    dir = buildpath/"src/gopkg.in/Netflix-Skunkworks/go-jira.v1"
-    dir.install buildpath.children
-
-    cd dir do
-      system "go", "build", "-o", bin/"jira", "-ldflags", "-w -s", "cmd/jira/main.go"
-      prefix.install_metafiles
-    end
+    system "go", "build", "-ldflags", "-s -w", "-trimpath", "-o", bin/"jira", "cmd/jira/main.go"
+    prefix.install_metafiles
   end
 
   test do
@@ -29,11 +23,10 @@ class GoJira < Formula
     template_dir = testpath/".jira.d/templates/"
 
     files = Dir.entries(template_dir)
-    # not an exhaustive list, see https://github.com/Netflix-Skunkworks/go-jira/blob/4d74554300fa7e5e660cc935a92e89f8b71012ea/jiracli/templates.go#L239
+    # not an exhaustive list, see https://github.com/go-jira/jira/blob/4d74554300fa7e5e660cc935a92e89f8b71012ea/jiracli/templates.go#L239
     expected_templates = %w[comment components create edit issuetypes list view worklog debug]
 
     assert_equal([], expected_templates - files)
-    debug = open(template_dir + "debug")
-    assert_equal("{{ . | toJson}}\n", debug.read)
+    assert_equal("{{ . | toJson}}\n", IO.read("#{template_dir}/debug"))
   end
 end

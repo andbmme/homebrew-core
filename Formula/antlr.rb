@@ -1,24 +1,25 @@
 class Antlr < Formula
   desc "ANother Tool for Language Recognition"
-  homepage "http://www.antlr.org/"
-  url "http://www.antlr.org/download/antlr-4.7-complete.jar"
-  sha256 "cd8bc38c2b72426f8d5922843c1b8ffcd0238fa34722597a944a153d8c570864"
+  homepage "https://www.antlr.org/"
+  url "https://www.antlr.org/download/antlr-4.8-complete.jar"
+  sha256 "73a49d6810d903aa4827ee32126937b85d3bebec0a8e679b0dd963cbcc49ba5a"
+  revision 1
 
   bottle :unneeded
 
-  depends_on :java
+  depends_on "openjdk"
 
   def install
     prefix.install "antlr-#{version}-complete.jar"
 
-    (bin/"antlr4").write <<~EOS
+    (bin/"antlr").write <<~EOS
       #!/bin/bash
-      CLASSPATH="#{prefix}/antlr-#{version}-complete.jar:." exec java -jar #{prefix}/antlr-#{version}-complete.jar "$@"
+      CLASSPATH="#{prefix}/antlr-#{version}-complete.jar:." exec "#{Formula["openjdk"].opt_bin}/java" -jar #{prefix}/antlr-#{version}-complete.jar "$@"
     EOS
 
     (bin/"grun").write <<~EOS
       #!/bin/bash
-      java -classpath #{prefix}/antlr-#{version}-complete.jar:. org.antlr.v4.gui.TestRig "$@"
+      exec "#{Formula["openjdk"].opt_bin}/java" -classpath #{prefix}/antlr-#{version}-complete.jar:. org.antlr.v4.gui.TestRig "$@"
     EOS
   end
 
@@ -37,8 +38,8 @@ class Antlr < Formula
     EOS
     ENV.prepend "CLASSPATH", "#{prefix}/antlr-#{version}-complete.jar", ":"
     ENV.prepend "CLASSPATH", ".", ":"
-    system "#{bin}/antlr4", "Expr.g4"
-    system "javac", *Dir["Expr*.java"]
+    system "#{bin}/antlr", "Expr.g4"
+    system "#{Formula["openjdk"].bin}/javac", *Dir["Expr*.java"]
     assert_match(/^$/, pipe_output("#{bin}/grun Expr prog", "22+20\n"))
   end
 end

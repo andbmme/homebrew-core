@@ -1,15 +1,14 @@
 class Debianutils < Formula
   desc "Miscellaneous utilities specific to Debian"
   homepage "https://packages.debian.org/sid/debianutils"
-  url "https://mirrors.ocf.berkeley.edu/debian/pool/main/d/debianutils/debianutils_4.8.3.tar.xz"
-  mirror "https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/d/debianutils/debianutils_4.8.3.tar.xz"
-  sha256 "7102246d1c35260ed7f0458a9886acf655c379d14908415574494cdea45e28fb"
+  url "https://deb.debian.org/debian/pool/main/d/debianutils/debianutils_4.11.tar.xz"
+  sha256 "bb5ce6290696b0d623377521ed217f484aa98f7346c5f7c48f9ae3e1acfb7151"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e69ed2b8db267b01c61f0e792c2276f2f3cb92c31e5fdb4d6fedcd189756b999" => :high_sierra
-    sha256 "3e1bef16feab858fc42c7f2062551e3124c5bb437e0c4da7d2d5427a03fd6177" => :sierra
-    sha256 "a04d91df71d97539e30d53850f38f18fa6e72795ab88ca0d0d27568739b77228" => :el_capitan
+    sha256 "91343603e1d52380fd28a65781e2cc8e7f9708cd94fd710a60261cc626509286" => :catalina
+    sha256 "0968d5be34075a8d95c5884baee76f3147216d403446cf2d121931a20664925b" => :mojave
+    sha256 "632fac3d90523c039bc7ab6829de0a27cd3f1fc39ce41337ba90ea6d14f2be89" => :high_sierra
   end
 
   def install

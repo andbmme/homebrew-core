@@ -1,23 +1,22 @@
 class Lasi < Formula
   desc "C++ stream output interface for creating Postscript documents"
   homepage "https://www.unifont.org/lasi/"
-  url "https://downloads.sourceforge.net/project/lasi/lasi/1.1.2%20Source/libLASi-1.1.2.tar.gz"
-  sha256 "448c6e52263a1e88ac2a157f775c393aa8b6cd3f17d81fc51e718f18fdff5121"
-
+  url "https://downloads.sourceforge.net/project/lasi/lasi/1.1.3%20Source/libLASi-1.1.3.tar.gz"
+  sha256 "5e5d2306f7d5a275949fb8f15e6d79087371e2a1caa0d8f00585029d1b47ba3b"
+  revision 1
   head "https://svn.code.sf.net/p/lasi/code/trunk"
 
   bottle do
     cellar :any
-    sha256 "83a968297bd38cd5ab4f5198f1b8723286c0503486f682844f5576db75a176e6" => :high_sierra
-    sha256 "777226a80b3fad497241ea6810d16d39846a4ff2d51acea4d4924cb44751419b" => :sierra
-    sha256 "35a95d3bf2ad71999df616c06417883d25d22f343a40ce3a27b6a3fb11c1e689" => :el_capitan
-    sha256 "4e1c3dc744e265709bc196acc936d8bf4307196972a772130a812c8c7bb1a80b" => :yosemite
-    sha256 "31c9f3a86877476a4c1c6fbdd8c6064512cf3aebc50b25bf0be53a1b5ed2ba1e" => :mavericks
+    rebuild 1
+    sha256 "65a46c00e8cef9b98bf1b36229a3da7cf69038b5e1d8cccbb620cb1431d27319" => :catalina
+    sha256 "5ef18cc43b46bf548f42925b3b2beb4993461ba78d5078f1cacaf8ac7b7af169" => :mojave
+    sha256 "447ee1c538c34cb9f06c5dc743ad86807ddb4e05ea6e345b6db085705324da6d" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
   depends_on "doxygen" => :build
+  depends_on "pkg-config" => :build
   depends_on "pango"
 
   def install

@@ -1,30 +1,38 @@
 class Pari < Formula
   desc "Computer algebra system designed for fast computations in number theory"
   homepage "https://pari.math.u-bordeaux.fr/"
-  url "https://pari.math.u-bordeaux.fr/pub/pari/unix/pari-2.9.3.tar.gz"
-  mirror "https://mirrors.kernel.org/debian/pool/main/p/pari/pari_2.9.3.orig.tar.gz"
-  sha256 "e76a27779d2b1210ce1aba48363b98dd201a1bf876eb14f46ea6bd7769a00a63"
+  url "https://pari.math.u-bordeaux.fr/pub/pari/unix/pari-2.11.4.tar.gz"
+  sha256 "bfc88fc4f7352f4840e6e352c72f0369cbea8a45403b1834a6269f3709970b1c"
 
   bottle do
-    sha256 "8d35c379a0b659ad24443156bf15f8ac7568a8bfa138a43a0a57f87d3bda4b87" => :high_sierra
-    sha256 "277dfbdc1111f80998e37b26372cdc5f8492a76547651a8a1296b931ac23d915" => :sierra
-    sha256 "b4b85de28303d7c0dd6bfb4199d5dc11648a5f119d142b71437939cf3c95db89" => :el_capitan
-    sha256 "5eee87a9a209235e74a8c608e84228de425dc16c0a44bae6e22ab54e736bb752" => :yosemite
+    sha256 "34bff086dc53fc97511828c3329f71ab67c394011f88d551dc5d820fad455a93" => :catalina
+    sha256 "bb2a09ef34d5e55b7f357169c34cd8e5942bb074770b789757e21388d440d80d" => :mojave
+    sha256 "13613061281235cc2ffb502fd6541775a305ab61aa6ff85ed8ca15b23ec44ae4" => :high_sierra
   end
 
   depends_on "gmp"
   depends_on "readline"
-  depends_on :x11
 
   def install
     readline = Formula["readline"].opt_prefix
     gmp = Formula["gmp"].opt_prefix
     system "./Configure", "--prefix=#{prefix}",
                           "--with-gmp=#{gmp}",
-                          "--with-readline=#{readline}"
+                          "--with-readline=#{readline}",
+                          "--graphic=ps"
     # make needs to be done in two steps
     system "make", "all"
     system "make", "install"
+
+    # Avoid references to Homebrew shims
+    inreplace lib/"pari/pari.cfg", HOMEBREW_LIBRARY/"Homebrew/shims/mac/super/", "/usr/bin/"
+  end
+
+  def caveats
+    <<~EOS
+      If you need the graphical plotting functions you need to install X11 with:
+        brew cask install xquartz
+    EOS
   end
 
   test do

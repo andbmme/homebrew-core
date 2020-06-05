@@ -1,33 +1,36 @@
 class YelpTools < Formula
   desc "Tools that help create and edit Mallard or DocBook documentation"
   homepage "https://github.com/GNOME/yelp-tools"
-  url "https://download.gnome.org/sources/yelp-tools/3.18/yelp-tools-3.18.0.tar.xz"
-  sha256 "c6c1d65f802397267cdc47aafd5398c4b60766e0a7ad2190426af6c0d0716932"
+  url "https://download.gnome.org/sources/yelp-tools/3.32/yelp-tools-3.32.2.tar.xz"
+  sha256 "183856b5ed0b0bb2c05dd1204af023946ed436943e35e789afb0295e5e71e8f9"
+  revision 2
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 2
-    sha256 "362bd3f0673ad7e44f9d37b37f46989512823d218d06aa27e452c47faf589b41" => :high_sierra
-    sha256 "b0ea184a43def810986761f163243688d08e1f891ddfdb104793b5dcb7c9155c" => :sierra
-    sha256 "b0ea184a43def810986761f163243688d08e1f891ddfdb104793b5dcb7c9155c" => :el_capitan
-    sha256 "b0ea184a43def810986761f163243688d08e1f891ddfdb104793b5dcb7c9155c" => :yosemite
+    sha256 "fd04fbc43832ca6a6e75ffcd928794c866153c7cf04d4f366e79d15a14a317b6" => :catalina
+    sha256 "fd04fbc43832ca6a6e75ffcd928794c866153c7cf04d4f366e79d15a14a317b6" => :mojave
+    sha256 "fd04fbc43832ca6a6e75ffcd928794c866153c7cf04d4f366e79d15a14a317b6" => :high_sierra
   end
 
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
   depends_on "gettext" => :build
-  depends_on "gtk+3"
   depends_on "intltool" => :build
   depends_on "itstool" => :build
+  depends_on "libtool" => :build
   depends_on "libxml2" => :build
   depends_on "libxslt" => :build
   depends_on "pkg-config" => :build
+  depends_on "gtk+3"
 
   resource "yelp-xsl" do
-    url "https://download.gnome.org/sources/yelp-xsl/3.20/yelp-xsl-3.20.1.tar.xz"
-    sha256 "dc61849e5dca473573d32e28c6c4e3cf9c1b6afe241f8c26e29539c415f97ba0"
+    url "https://download.gnome.org/sources/yelp-xsl/3.34/yelp-xsl-3.34.2.tar.xz"
+    sha256 "0c3fe6146113df26fb1295901b1c7baed9f0fe67a87f4345e11543aefe7cb7ad"
   end
 
   def install
     resource("yelp-xsl").stage do
+      system "autoreconf", "-fi"
       system "./configure", "--disable-debug",
                             "--disable-dependency-tracking",
                             "--disable-silent-rules",
@@ -36,6 +39,7 @@ class YelpTools < Formula
       ENV.append_path "PKG_CONFIG_PATH", "#{share}/pkgconfig"
     end
 
+    system "autoreconf", "-fi"
     system "./configure", "--prefix=#{prefix}"
     system "make", "install"
   end
@@ -49,13 +53,5 @@ class YelpTools < Formula
     system "#{bin}/yelp-new", "task", "ducksinarow"
     system "#{bin}/yelp-build", "html", "ducksinarow.page"
     system "#{bin}/yelp-check", "validate", "ducksinarow.page"
-    [
-      prefix/"share/yelp-xsl/icons/hicolor/24x24/status/yelp-note-warning.png",
-      prefix/"share/yelp-xsl/js/jquery.syntax.brush.smalltalk.js",
-      prefix/"share/yelp-xsl/xslt/mallard/html/mal2html-links.xsl",
-      share/"pkgconfig/yelp-xsl.pc",
-    ].each do |filename|
-      assert filename.exist?, "#{filename} doesn't exist"
-    end
   end
 end

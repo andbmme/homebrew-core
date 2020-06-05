@@ -1,14 +1,12 @@
 class CargoCompletion < Formula
   desc "Bash and Zsh completion for Cargo"
   homepage "https://github.com/rust-lang/cargo"
-  url "https://github.com/rust-lang/cargo/archive/0.22.0.tar.gz"
-  sha256 "6740e2f8d035a5a5246a12e84a141d37ad4c2b826355aff497e6f1fcfb637aef"
+  url "https://github.com/rust-lang/cargo/archive/0.44.1.tar.gz"
+  sha256 "65b9c2f51dc2c31acf91f1e222a7dd75a8cf3d287d2142755159b681156d263c"
   version_scheme 1
   head "https://github.com/rust-lang/cargo.git"
 
   bottle :unneeded
-
-  conflicts_with "rust", :because => "both install shell completion for cargo"
 
   def install
     bash_completion.install "src/etc/cargo.bashcomp.sh" => "cargo"

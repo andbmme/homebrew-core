@@ -1,24 +1,36 @@
 class Restic < Formula
   desc "Fast, efficient and secure backup program"
   homepage "https://restic.github.io/"
-  url "https://github.com/restic/restic/archive/v0.7.3.tar.gz"
-  sha256 "6d795a5f052b3a8cb8e7571629da14f00e92035b7174eb20e32fd1440f68aaff"
+  url "https://github.com/restic/restic/archive/v0.9.6.tar.gz"
+  sha256 "1cc8655fa99f06e787871a9f8b5ceec283c856fa341a5b38824a0ca89420b0fe"
   head "https://github.com/restic/restic.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "fcaf988b191c6d859a77fd670f88e3d866cb7e5df07d098367a3d65520b27221" => :high_sierra
-    sha256 "fcaf988b191c6d859a77fd670f88e3d866cb7e5df07d098367a3d65520b27221" => :sierra
-    sha256 "fcaf988b191c6d859a77fd670f88e3d866cb7e5df07d098367a3d65520b27221" => :el_capitan
+    sha256 "cfbf35af0c86f5893fbecfb60085c49edd22ed8eb0861e6921cd85922680de44" => :catalina
+    sha256 "92b98a560b99f2a295e8e40689cd2fa9b8f04df62d6846fed8d13b63e0c2f960" => :mojave
+    sha256 "736201b7e7014d36f9ccd79a1deee1f577b231975628a2c405ca424882f00e7f" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
+    ENV["GOPATH"] = HOMEBREW_CACHE/"go_cache"
+    ENV["CGO_ENABLED"] = "1"
 
-    system "go", "run", "build.go"
+    system "go", "run", "-mod=vendor", "build.go", "--enable-cgo"
+
+    mkdir "completions"
+    system "./restic", "generate", "--bash-completion", "completions/restic"
+    system "./restic", "generate", "--zsh-completion", "completions/_restic"
+
+    mkdir "man"
+    system "./restic", "generate", "--man", "man"
+
     bin.install "restic"
+    bash_completion.install "completions/restic"
+    zsh_completion.install "completions/_restic"
+    man1.install Dir["man/*.1"]
   end
 
   test do

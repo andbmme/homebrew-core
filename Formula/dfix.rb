@@ -2,22 +2,22 @@ class Dfix < Formula
   desc "Auto-upgrade tool for D source code"
   homepage "https://github.com/dlang-community/dfix"
   url "https://github.com/dlang-community/dfix.git",
-      :tag => "v0.3.2",
-      :revision => "396fd6b26f92f4b20b22163ec12712f19a5942cd"
+      :tag      => "v0.3.5",
+      :revision => "5265a8db4b0fdc54a3d0837a7ddf520ee94579c4"
   head "https://github.com/dlang-community/dfix.git", :shallow => false
 
   bottle do
-    sha256 "2935e9ac043283df52b926482ae7c307a031a1ace87d4bfaf0761c35dd8cc0f8" => :high_sierra
-    sha256 "bc69197be2687f97b4ce65c1589f4e09c082c5bdb41ee8b51248ffd34ccd0890" => :sierra
-    sha256 "ee8da255bb3663a160cc9e2040f594b0e71490feda65c56f213a5912ff99ca36" => :el_capitan
-    sha256 "70715e792ec79f8b867bba5547b8f193d1d42fe1c36cb78a553051c7d37e407b" => :yosemite
+    cellar :any_skip_relocation
+    rebuild 1
+    sha256 "ff3b76977bcbfb5b7a04bbebb53a794cc522b64987f724fe5f8a8236812eb1f8" => :catalina
+    sha256 "24d234e206efa754f8bd900102720280d8efb1af6ec93059a467589acddca3ee" => :mojave
+    sha256 "13a2621737c198bd0540f507293a9b015a0ebe36cd3373589a69ec834a863d8d" => :high_sierra
   end
 
   depends_on "dmd" => :build
 
   def install
     system "make"
-    system "make", "test"
     bin.install "bin/dfix"
     pkgshare.install "test/testfile_expected.d", "test/testfile_master.d"
   end

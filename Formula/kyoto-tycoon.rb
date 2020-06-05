@@ -1,36 +1,26 @@
 class KyotoTycoon < Formula
   desc "Database server with interface to Kyoto Cabinet"
-  homepage "http://fallabs.com/kyototycoon/"
-  url "http://fallabs.com/kyototycoon/pkg/kyototycoon-0.9.56.tar.gz"
+  homepage "https://fallabs.com/kyototycoon/"
+  url "https://fallabs.com/kyototycoon/pkg/kyototycoon-0.9.56.tar.gz"
   sha256 "553e4ea83237d9153cc5e17881092cefe0b224687f7ebcc406b061b2f31c75c6"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 "ea2abfe479faf89d5499962751fc693d9d7afce04d289ca5384b0ebd1fe934e6" => :high_sierra
-    sha256 "0d10f657af62307608b9059e52339bf4961831ac8e713a68ea0522ad04428854" => :sierra
-    sha256 "f018a810f3925d61fcce6a3ef558ac3d72fbbaf3f4e4ef10b7b5b1b994081a38" => :el_capitan
-    sha256 "82548c79c4b3830b0991eb60656887d2b52f4b2d7be9467d2a446be34b550991" => :yosemite
-    sha256 "b3fd82a6dd9e2949037da1a8c634632bab67c9628169c2f81bdbfc81515e7f50" => :mavericks
+    sha256 "2f430dc00ac505a7098596c769cc1c03d6d7a3fdc35ba7bc55fcd707576ac9a2" => :catalina
+    sha256 "04d72b5c55be3c26c688eda6c0cc9f88c85855ba6fe81aa36e210fc29afe7572" => :mojave
+    sha256 "ce7db5082c632bef982d5463f3a8507d786fd3bcae7f7cccf8663ab36c3571bd" => :high_sierra
+    sha256 "e75c60a4417bc00d04e1f24241320329f01b0d3076de2585e92375b12c4ef31d" => :sierra
   end
 
-  depends_on "lua" => :recommended
   depends_on "kyoto-cabinet"
+  depends_on "lua"
 
-  patch :DATA if MacOS.version >= :mavericks
+  patch :DATA
 
   def install
-    # Locate kyoto-cabinet for non-/usr/local builds
-    cabinet = Formula["kyoto-cabinet"].opt_prefix
-    args = ["--prefix=#{prefix}", "--with-kc=#{cabinet}"]
-
-    if build.with? "lua"
-      lua = Formula["lua"].opt_prefix
-      args << "--with-lua=#{lua}"
-    else
-      args << "--enable-lua"
-    end
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}",
+                          "--with-kc=#{Formula["kyoto-cabinet"].opt_prefix}",
+                          "--with-lua=#{Formula["lua"].opt_prefix}"
     system "make"
     system "make", "install"
   end

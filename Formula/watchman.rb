@@ -1,42 +1,52 @@
 class Watchman < Formula
   desc "Watch files and take action when they change"
   homepage "https://github.com/facebook/watchman"
-  url "https://github.com/facebook/watchman/archive/v4.9.0.tar.gz"
-  sha256 "1f6402dc70b1d056fffc3748f2fdcecff730d8843bb6936de395b3443ce05322"
+  revision 4
   head "https://github.com/facebook/watchman.git"
 
-  bottle do
-    sha256 "41484c1bd9660d1dc3a269da0f604ae4e4358861a7d6da7e217840a8e60973f8" => :high_sierra
-    sha256 "d42c5a991e4cddef004773474b3d28f3275113a6c1858d0ddaae274a11bbeb33" => :sierra
-    sha256 "83db75e3e7b186521d4b910a49836ec53ec85b987b6b35d63bc32b7282209dc7" => :el_capitan
-    sha256 "da774a8464b5ddab2342d7d8ba0211220cd630d8099b2605bc977a4574dfee1e" => :yosemite
+  stable do
+    url "https://github.com/facebook/watchman/archive/v4.9.0.tar.gz"
+    sha256 "1f6402dc70b1d056fffc3748f2fdcecff730d8843bb6936de395b3443ce05322"
+
+    # Upstream commit from 1 Sep 2017: "Have bin scripts use iter() method for python3"
+    patch do
+      url "https://github.com/facebook/watchman/commit/17958f7d.diff?full_index=1"
+      sha256 "edad4971fceed2aecfa2b9c3e8e22c455bfa073732a3a0c77b030e506ee860af"
+    end
   end
 
-  depends_on :macos => :yosemite # older versions don't support fstatat(2)
-  depends_on :python if MacOS.version <= :snow_leopard
+  bottle do
+    sha256 "7840f564c11d33425c9eb8985f9156e782e66ef2a3578329dba83ee15a9bf0be" => :catalina
+    sha256 "ba2338b0f23c8b8817fd7bfa92466b7a97ab416e93ec6c3a400041aef013de86" => :mojave
+    sha256 "150468653b5c5a8e4eb92a3ecf420f157ed0e4772513ee93425bb3f635964dad" => :high_sierra
+  end
+
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
   depends_on "pkg-config" => :build
-  depends_on "openssl"
+  depends_on :macos => :yosemite # older versions don't support fstatat(2)
+  depends_on "openssl@1.1"
   depends_on "pcre"
+  depends_on "python@3.8"
 
   def install
     system "./autogen.sh"
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--with-pcre",
-                          # we'll do the homebrew specific python
-                          # installation below
+                          # Do homebrew specific Python installation below
                           "--without-python",
                           "--enable-statedir=#{var}/run/watchman"
     system "make"
     system "make", "install"
 
     # Homebrew specific python application installation
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"
+    python3 = Formula["python@3.8"].opt_bin/"python3"
+    xy = Language::Python.major_minor_version python3
+    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{xy}/site-packages"
     cd "python" do
-      system "python", *Language::Python.setup_install_args(libexec)
+      system python3, *Language::Python.setup_install_args(libexec)
     end
     bin.install Dir[libexec/"bin/*"]
     bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])

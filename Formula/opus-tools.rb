@@ -1,19 +1,19 @@
 class OpusTools < Formula
   desc "Utilities to encode, inspect, and decode .opus files"
   homepage "https://www.opus-codec.org"
-  url "https://archive.mozilla.org/pub/opus/opus-tools-0.1.10.tar.gz"
-  sha256 "a2357532d19471b70666e0e0ec17d514246d8b3cb2eb168f68bb0f6fd372b28c"
+  url "https://archive.mozilla.org/pub/opus/opus-tools-0.2.tar.gz"
+  sha256 "b4e56cb00d3e509acfba9a9b627ffd8273b876b4e2408642259f6da28fa0ff86"
 
   bottle do
     cellar :any
-    sha256 "e5ec4e698f8090348b42786193c94c9571522dbf8c39e8ab6ffca677f6c5386c" => :high_sierra
-    sha256 "62d9154105f9d7be511899c04959bb76c669ee573cb4597b1a34291de613ad57" => :sierra
-    sha256 "32b77b8739b8e44eac8b3b45791291c3a1efbaf2b1c99b1f74b32d2beae5c795" => :el_capitan
-    sha256 "97a0d5affca76c00fec6d56ca3b6b2984e68f518380edd9098b6c49b0f465c46" => :yosemite
+    rebuild 1
+    sha256 "964b3493cffeb5e32411c7a34e1813e8e83e940419aca39f50be7db9b0c8fab2" => :catalina
+    sha256 "c4059aca471c3b1ec384323c1c801b844a2d2b61f17434ebc43c0accffde9f9b" => :mojave
+    sha256 "0f8828cf6044f2d7b0cac9c591295b420244e8f086dc0afae9ae5420e6be7cb9" => :high_sierra
   end
 
   head do
-    url "https://git.xiph.org/opus-tools.git"
+    url "https://gitlab.xiph.org/xiph/opus-tools.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -21,9 +21,11 @@ class OpusTools < Formula
   end
 
   depends_on "pkg-config" => :build
-  depends_on "opus"
   depends_on "flac"
   depends_on "libogg"
+  depends_on "libopusenc"
+  depends_on "opus"
+  depends_on "opusfile"
 
   def install
     system "./autogen.sh" if build.head?

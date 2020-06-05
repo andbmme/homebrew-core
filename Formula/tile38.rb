@@ -1,30 +1,34 @@
 class Tile38 < Formula
   desc "In-memory geolocation data store, spatial index, and realtime geofence"
-  homepage "http://tile38.com"
-  url "https://github.com/tidwall/tile38/archive/1.9.1.tar.gz"
-  sha256 "58ea936660105e5bcceedc05e9a4382bb9696d4f7a84edfe83cad09734a2164d"
-  head "https://github.com/tidwall/tile38.git"
+  homepage "https://tile38.com/"
+  url "https://github.com/tidwall/tile38.git",
+    :tag      => "1.21.1",
+    :revision => "c1ba2d86aa5c99532f08c368376077646ec742b0"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "b2d3df688127a085ad14f81dd9cbad43218360b893b58673128c64fbb5708ae3" => :high_sierra
-    sha256 "6b50ff3c6d0d7ccc7e4d22947e77795fedeed4dee0bd81b8f8090e6b9cd91791" => :sierra
-    sha256 "858bfb5f4b5e4fd3fc8d1e6abbaf11b3d4edc4d7cda9f2c65a207379271f41ff" => :el_capitan
-    sha256 "a56ee5e85dc8d70f9cfb83abea0ef41ff0f59b3ffdeb9aaf1203f76b8bea592e" => :yosemite
+    sha256 "c7d557f4881ecc7cd8a50fa3f516155e973e8cf88ab437d0dbd0714f99f6e764" => :catalina
+    sha256 "843f06a5b431814a4a7e8c96e4bcbf4f02c33acf3c3baacfca3ef06638fdf573" => :mojave
+    sha256 "c387f4bdff3facf50abb35fc06f52ff64d8a976de7c22d3075e7581b82df766c" => :high_sierra
   end
 
   depends_on "go" => :build
-  depends_on "godep" => :build
 
   def datadir
     var/"tile38/data"
   end
 
   def install
-    ENV["GOPATH"] = buildpath
-    system "make"
+    commit = Utils.popen_read("git rev-parse --short HEAD").chomp
 
-    bin.install "tile38-cli", "tile38-server"
+    ldflags = %W[
+      -s -w
+      -X github.com/tidwall/tile38/core.Version=#{version}
+      -X github.com/tidwall/tile38/core.GitSHA=#{commit}
+    ]
+
+    system "go", "build", "-o", bin/"tile38-server", "-ldflags", ldflags.join(" "), "./cmd/tile38-server"
+    system "go", "build", "-o", bin/"tile38-cli", "-ldflags", ldflags.join(" "), "./cmd/tile38-cli"
   end
 
   def post_install
@@ -32,16 +36,56 @@ class Tile38 < Formula
     datadir.mkpath
   end
 
-  def caveats; <<~EOS
-    Data directory created at #{datadir}. To start the server:
-        tile38-server -d #{datadir}
+  def caveats
+    <<~EOS
+      To connect: tile38-cli
+    EOS
+  end
 
-    To connect:
-        tile38-cli
+  plist_options :manual => "tile38-server -d #{HOMEBREW_PREFIX}/var/tile38/data"
+
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/tile38-server</string>
+            <string>-d</string>
+            <string>#{datadir}</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/tile38.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/tile38.log</string>
+        </dict>
+      </plist>
     EOS
   end
 
   test do
-    system bin/"tile38-cli", "-h"
+    pid = fork do
+      exec "#{bin}/tile38-server", "-q"
+    end
+    sleep 2
+    # remove `$408` in the first line output
+    json_output = shell_output("#{bin}/tile38-cli server").lines[1]
+    tile38_server = JSON.parse(json_output)
+    assert_equal tile38_server["ok"], true
+  ensure
+    Process.kill("HUP", pid)
   end
 end

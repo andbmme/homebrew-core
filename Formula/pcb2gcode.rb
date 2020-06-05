@@ -1,35 +1,87 @@
 class Pcb2gcode < Formula
   desc "Command-line tool for isolation, routing and drilling of PCBs"
   homepage "https://github.com/pcb2gcode/pcb2gcode"
-  url "https://github.com/pcb2gcode/pcb2gcode/releases/download/v1.3.2/pcb2gcode-1.3.2.tar.gz"
-  sha256 "c4135cd3981c4a5d6baffa81b7f8e890ae29776107b0d1938b744a8dfebdbc63"
-  revision 2
+  url "https://github.com/pcb2gcode/pcb2gcode/archive/v2.0.0.tar.gz"
+  sha256 "3b7e8cdc58852294d95b0ed705933f528a9e56428863490f5a27f22153cd713e"
+  revision 1
+  head "https://github.com/pcb2gcode/pcb2gcode.git"
 
   bottle do
     cellar :any
-    sha256 "cb1dd175729534cc8629db3a2ca577106cba0cbec844b436d07bbba429ac47da" => :high_sierra
-    sha256 "1e5aa984afb12cebb770c670f29554e7f447804c1997babf225cbae55e86b8ab" => :sierra
-    sha256 "76e311cada9b598a7f47d88969a75995d18689f4b9f8066ea93153ba0a72cf51" => :el_capitan
-    sha256 "76b51585b0b780305de0060e7614c6c35f3e738682dafb4e10092624eb03ef89" => :yosemite
+    sha256 "cb5117bb2a37a8bec3353d77f02d9992b07ecc5a8b4d5394cf83b640a02145c1" => :catalina
+    sha256 "e22d8eba9bdecf87719ee96fe8f7c4d2f02dc9d92f73304da07fe126f3ef05dc" => :mojave
+    sha256 "aa37eb099526a7acee7efd4f6e62a7522d162c1ef1c5abc2cb7e3afe25f2cd47" => :high_sierra
+    sha256 "434bd10eebb50332d8d20181285165c0aee158738de660549c32e3a0c4820086" => :sierra
   end
 
-  head do
-    url "https://github.com/pcb2gcode/pcb2gcode.git"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "boost"
-  depends_on "gtkmm"
+  # Release 2.0.0 doesn't include an autoreconfed tarball
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gerbv"
+  depends_on "gtkmm"
+  depends_on "librsvg"
+
+  # Upstream maintainer claims that the geometry library from boost >= 1.67
+  # is severely broken. Remove the vendoring once fixed.
+  # See https://github.com/Homebrew/homebrew-core/pull/30914#issuecomment-411662760
+  # and https://svn.boost.org/trac10/ticket/13645
+  resource "boost" do
+    url "https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2"
+    sha256 "5721818253e6a0989583192f96782c4a98eb6204965316df9f5ad75819225ca9"
+
+    # Fix build on Xcode 11.4
+    patch do
+      url "https://github.com/boostorg/build/commit/b3a59d265929a213f02a451bb63cea75d668a4d9.patch?full_index=1"
+      sha256 "04a4df38ed9c5a4346fbb50ae4ccc948a1440328beac03cb3586c8e2e241be08"
+      directory "tools/build"
+    end
+  end
 
   def install
-    system "autoreconf", "-fvi" if build.head?
+    resource("boost").stage do
+      # Force boost to compile with the desired compiler
+      open("user-config.jam", "a") do |file|
+        file.write "using darwin : : #{ENV.cxx} ;\n"
+      end
+
+      bootstrap_args = %W[
+        --prefix=#{buildpath}/boost
+        --libdir=#{buildpath}/boost/lib
+        --with-libraries=program_options
+        --without-icu
+      ]
+
+      args = %W[
+        --prefix=#{buildpath}/boost
+        --libdir=#{buildpath}/boost/lib
+        -d2
+        -j#{ENV.make_jobs}
+        --ignore-site-config
+        --layout=tagged
+        --user-config=user-config.jam
+        install
+        threading=multi
+        link=static
+        optimization=space
+        variant=release
+        cxxflags=-std=c++11
+      ]
+
+      args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++" if ENV.compiler == :clang
+
+      system "./bootstrap.sh", *bootstrap_args
+      system "./b2", "headers"
+      system "./b2", *args
+    end
+
+    system "autoreconf", "-fvi"
     system "./configure", "--disable-dependency-tracking",
                           "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+                          "--prefix=#{prefix}",
+                          "--with-boost=#{buildpath}/boost",
+                          "--enable-static-boost"
     system "make", "install"
   end
 

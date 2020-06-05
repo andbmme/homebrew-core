@@ -1,16 +1,14 @@
 class Conserver < Formula
   desc "Allows multiple users to watch a serial console at the same time"
   homepage "https://www.conserver.com/"
-  url "http://www.conserver.com/conserver-8.2.1.tar.gz"
-  sha256 "251ae01997e8f3ee75106a5b84ec6f2a8eb5ff2f8092438eba34384a615153d0"
+  url "https://github.com/conserver/conserver/releases/download/v8.2.5/conserver-8.2.5.tar.gz"
+  sha256 "7db192f304126d7e5c15421c4c83cd5c08039f2f2b3c61b2998e71881ae47eea"
 
   bottle do
-    sha256 "3bcd02c87d5ad4864ec2e086c6f79f3391c189750326b41063506b47c354e8a6" => :high_sierra
-    sha256 "74f40d6d02b64102a69a8d7b197dc9ff63283969e753a5850ab5b96abaefeb71" => :sierra
-    sha256 "d1bd6a4154604db42e233e9c9ea03a9bcdfd73498e15d56840ea03903c2a3230" => :el_capitan
-    sha256 "0afc8a0539f05c8226c0d75775558e98f42e597e2e9755988164dc5f2e0f3cf7" => :yosemite
-    sha256 "40af1ae864c47df564f22760f96969c3a6e9575610d9cd1d3348b44d6eef5a9e" => :mavericks
-    sha256 "88887688a6de1d1cb9ed36899477e16ef233b80392854220291fa1a5499ea833" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "ce9d095a9e435480fe4a8eb2e73c0732fe0d7eda89aafc98e0599453eaa8f626" => :catalina
+    sha256 "70283393748aaf6397ea4b0bcdda5f7192597da2093e8fe0c21fcbc89cd5e900" => :mojave
+    sha256 "e5de5fdc13fd75c8ab4cb11f0a86408b63b2683ac9aacf573d7df0500dc38210" => :high_sierra
   end
 
   def install

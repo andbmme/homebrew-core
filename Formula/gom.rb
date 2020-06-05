@@ -1,39 +1,32 @@
 class Gom < Formula
   desc "GObject wrapper around SQLite"
   homepage "https://wiki.gnome.org/Projects/Gom"
-  url "https://download.gnome.org/sources/gom/0.3/gom-0.3.3.tar.xz"
-  sha256 "ac57e34b5fe273ed306efaeabb346712c264e341502913044a782cdf8c1036d8"
+  url "https://download.gnome.org/sources/gom/0.4/gom-0.4.tar.xz"
+  sha256 "68d08006aaa3b58169ce7cf1839498f45686fba8115f09acecb89d77e1018a9d"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "6c881c4f323fdd61bb89e09c7f9d246736d0f9d77c8b1b37583561afe11cd264" => :high_sierra
-    sha256 "0362cca9f99c933d1e2ff55e14c4a1bd6e29b603691ed31584c3c11ec047bba0" => :sierra
-    sha256 "cb6b8b45f13d113c9be5008ce9dc92dd3e10dee96f7b0f6f1b2f6425a82fce92" => :el_capitan
+    sha256 "2d41e90512e737bfd112ba64278fda9c0dbaf1ab7dbd00732ed6ebb644da31e0" => :catalina
+    sha256 "619f71c318e02d8c33e4d827aedfaad09d6f349d92408bb9a40097dba99eb65e" => :mojave
+    sha256 "7566dd0ded406861960ebd556ce0d7f7e6e48eac4e72ab88aa9934d554ad638b" => :high_sierra
   end
 
+  depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
+  depends_on "python@3.8" => :build
   depends_on "gdk-pixbuf"
   depends_on "gettext"
   depends_on "glib"
-  depends_on "gobject-introspection"
-  depends_on "py3cairo"
-  depends_on "pygobject3" => "with-python3"
-  depends_on :python3
-  depends_on "sqlite"
 
   def install
-    ENV.refurbish_args
-
-    pyver = Language::Python.major_minor_version "python3"
-
-    # prevent sandbox violation
-    inreplace "bindings/python/meson.build",
-              "install_dir: pygobject_override_dir",
-              "install_dir: '#{lib}/python#{pyver}/site-packages'"
+    pyver = Language::Python.major_minor_version Formula["python@3.8"].opt_bin/"python3"
 
     mkdir "build" do
-      system "meson", "--prefix=#{prefix}", ".."
+      system "meson", *std_meson_args, "-Dpygobject-override-dir=#{lib}/python#{pyver}/site-packages", ".."
+      system "ninja"
       system "ninja", "install"
     end
   end

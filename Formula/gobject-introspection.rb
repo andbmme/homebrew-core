@@ -1,20 +1,26 @@
 class GobjectIntrospection < Formula
+  include Language::Python::Shebang
+
   desc "Generate introspection data for GObject libraries"
-  homepage "https://live.gnome.org/GObjectIntrospection"
-  url "https://download.gnome.org/sources/gobject-introspection/1.54/gobject-introspection-1.54.1.tar.xz"
-  sha256 "b88ded5e5f064ab58a93aadecd6d58db2ec9d970648534c63807d4f9a7bb877e"
+  homepage "https://wiki.gnome.org/Projects/GObjectIntrospection"
+  url "https://download.gnome.org/sources/gobject-introspection/1.64/gobject-introspection-1.64.1.tar.xz"
+  sha256 "80beae6728c134521926affff9b2e97125749b38d38744dc901f4010ee3e7fa7"
+  revision 2
 
   bottle do
-    sha256 "af8872721600cf3b5c033bad125fcef08a59e3ddfde4093fe6bc6bce5331e004" => :high_sierra
-    sha256 "4f07bc2e12b9015a670a999744d8201c575ea9d49421ec617507aa01407d841e" => :sierra
-    sha256 "88736baecfbab3cf709cb6b09de85f9e4a4382ac1d1c59f33af22c522dab81a4" => :el_capitan
+    sha256 "4715d7cb549501fa75101266f6c49fe656666cb071a6e8f111b08cb3b74a2b15" => :catalina
+    sha256 "e6f0eacacdda25019941d42dd600c478f22de8c57a8975b2e26c4a5cfb8f367c" => :mojave
+    sha256 "b54f973af9b413e20a7b6485315da882f73e623c61f3573325a434d47e5b011a" => :high_sierra
   end
 
-  depends_on "pkg-config" => :run
-  depends_on "glib"
+  depends_on "bison" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "cairo"
+  depends_on "glib"
   depends_on "libffi"
-  depends_on :python if MacOS.version <= :mavericks
+  depends_on "pkg-config"
+  depends_on "python@3.8"
 
   resource "tutorial" do
     url "https://gist.github.com/7a0023656ccfe309337a.git",
@@ -24,13 +30,17 @@ class GobjectIntrospection < Formula
   def install
     ENV["GI_SCANNER_DISABLE_CACHE"] = "true"
     inreplace "giscanner/transformer.py", "/usr/share", "#{HOMEBREW_PREFIX}/share"
-    inreplace "configure" do |s|
-      s.change_make_var! "GOBJECT_INTROSPECTION_LIBDIR", "#{HOMEBREW_PREFIX}/lib"
-    end
+    inreplace "meson.build",
+      "config.set_quoted('GOBJECT_INTROSPECTION_LIBDIR', join_paths(get_option('prefix'), get_option('libdir')))",
+      "config.set_quoted('GOBJECT_INTROSPECTION_LIBDIR', '#{HOMEBREW_PREFIX}/lib')"
 
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}", "PYTHON=python"
-    system "make"
-    system "make", "install"
+    mkdir "build" do
+      system "meson", *std_meson_args,
+        "-Dpython=#{Formula["python@3.8"].opt_bin}/python3", ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+      bin.find { |f| rewrite_shebang detected_python_shebang, f }
+    end
   end
 
   test do

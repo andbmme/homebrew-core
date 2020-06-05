@@ -1,13 +1,13 @@
 class Sbt < Formula
   desc "Build tool for Scala projects"
-  homepage "http://www.scala-sbt.org"
-  url "https://github.com/sbt/sbt/releases/download/v1.0.3/sbt-1.0.3.tgz"
-  sha256 "2374bf494132e7bf316fa2b83155f166fdf6b042ad70fa681e51e3fe8ad82c10"
+  homepage "https://www.scala-sbt.org/"
+  url "https://github.com/sbt/sbt/releases/download/v1.3.12/sbt-1.3.12.tgz"
+  mirror "https://sbt-downloads.cdnedge.bluemix.net/releases/v1.3.12/sbt-1.3.12.tgz"
+  sha256 "b4e72bb95f5be8f6a83451ef254c2bff008204456cadfcdd6d1ca4b981c58d57"
 
   bottle :unneeded
 
-  # Set to 1.8+ for > 1.0.3; Java 9 compat https://github.com/sbt/launcher/pull/45
-  depends_on :java => "1.8"
+  depends_on "openjdk"
 
   def install
     inreplace "bin/sbt" do |s|
@@ -17,21 +17,29 @@ class Sbt < Formula
 
     libexec.install "bin", "lib"
     etc.install "conf/sbtopts"
-    (bin/"sbt").write_env_script libexec/"bin/sbt", Language::Java.java_home_env("1.8")
+
+    (bin/"sbt").write <<~EOS
+      #!/bin/sh
+      if [ -f "$HOME/.sbtconfig" ]; then
+        echo "Use of ~/.sbtconfig is deprecated, please migrate global settings to #{etc}/sbtopts" >&2
+        . "$HOME/.sbtconfig"
+      fi
+      export JAVA_HOME="${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
+      exec "#{libexec}/bin/sbt" "$@"
+    EOS
   end
 
-  def caveats;  <<~EOS
-    You can use $SBT_OPTS to pass additional JVM options to SBT:
-       SBT_OPTS="-XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256M"
-
-    This formula uses the standard Lightbend sbt launcher script.
-    Project specific options should be placed in .sbtopts in the root of your project.
-    Global settings should be placed in #{etc}/sbtopts
+  def caveats
+    <<~EOS
+      You can use $SBT_OPTS to pass additional JVM options to sbt.
+      Project specific options should be placed in .sbtopts in the root of your project.
+      Global settings should be placed in #{etc}/sbtopts
     EOS
   end
 
   test do
     ENV.append "_JAVA_OPTIONS", "-Dsbt.log.noformat=true"
+    system "#{bin}/sbt", "about"
     assert_match "[info] #{version}", shell_output("#{bin}/sbt sbtVersion")
   end
 end

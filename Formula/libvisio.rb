@@ -1,21 +1,22 @@
 class Libvisio < Formula
   desc "Interpret and import Visio diagrams"
   homepage "https://wiki.documentfoundation.org/DLP/Libraries/libvisio"
-  url "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.6.tar.xz"
-  sha256 "fe1002d3671d53c09bc65e47ec948ec7b67e6fb112ed1cd10966e211a8bb50f9"
+  url "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.7.tar.xz"
+  sha256 "8faf8df870cb27b09a787a1959d6c646faa44d0d8ab151883df408b7166bea4c"
+  revision 2
 
   bottle do
     cellar :any
-    sha256 "636f9fa0f3ee0eaa03f4102bf8e1d03cffea884fc727994051f760d8829b65ed" => :high_sierra
-    sha256 "4fe8c91165cb26818326c4e394f71641b7e06cc164287e78822461e95a2691e5" => :sierra
-    sha256 "bdf2da4a3f76d0f12d32a4d9854ed49ddbfc85cefd9feb354027a16aa5deb869" => :el_capitan
+    sha256 "a32916487b500b927b22b2e3cbd0f3ec5de65a56dd5306472ee6dc09080c7a38" => :catalina
+    sha256 "2866289c378dcf276526de732f830dff28d1dbb12eb690209140e987b6bf2f10" => :mojave
+    sha256 "793fa03c334b4faea7b94c2b4e2992b40070358a94914272a119c411060baabd" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "cppunit" => :build
+  depends_on "pkg-config" => :build
   depends_on "boost"
-  depends_on "librevenge"
   depends_on "icu4c"
+  depends_on "librevenge"
 
   def install
     # Needed for Boost 1.59.0 compatibility.

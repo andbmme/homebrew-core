@@ -1,18 +1,28 @@
 class Libogg < Formula
   desc "Ogg Bitstream Library"
   homepage "https://www.xiph.org/ogg/"
-  url "https://downloads.xiph.org/releases/ogg/libogg-1.3.3.tar.gz"
-  sha256 "c2e8a485110b97550f453226ec644ebac6cb29d1caef2902c007edab4308d985"
+
+  stable do
+    url "https://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz"
+    sha256 "fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e"
+
+    # os_types: fix unsigned typedefs for MacOS. This is already merged upstream; remove on next version
+    patch do
+      url "https://github.com/xiph/ogg/commit/c8fca6b4a02d695b1ceea39b330d4406001c03ed.patch?full_index=1"
+      sha256 "0f4d289aecb3d5f7329d51f1a72ab10c04c336b25481a40d6d841120721be485"
+    end
+  end
 
   bottle do
     cellar :any
-    sha256 "1b3faf0793a08736aa1baca0a64aeba93f9d8692472eadfbcca264c9a7308538" => :high_sierra
-    sha256 "fedf2c7b4aa2c5051851f47a2131a4f1802791ed3c948446442277ecbabcf32c" => :sierra
-    sha256 "67653400da7efbb94fd400c8b90124977d80280dd04ef6771dbe2d8fd2d5aec4" => :el_capitan
+    rebuild 1
+    sha256 "b95bbf935f48878bd96d1c0e6557a017aa18cb17a080bc3ef9308b6415c278ef" => :catalina
+    sha256 "3cc7656859154f6eb98d3ddbe4b74c810b505e2162af1357b3ed6b70cad35125" => :mojave
+    sha256 "95f271ec181f6b999674636272a3414db4242eabd0a0b0572cfa0f1f324f5ef8" => :high_sierra
   end
 
   head do
-    url "https://git.xiph.org/ogg.git"
+    url "https://gitlab.xiph.org/xiph/ogg.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build

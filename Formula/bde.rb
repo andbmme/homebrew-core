@@ -1,25 +1,28 @@
 class Bde < Formula
   desc "Basic Development Environment: foundational C++ libraries used at Bloomberg"
   homepage "https://github.com/bloomberg/bde"
-  url "https://github.com/bloomberg/bde/archive/BDE_3.0.0.0.tar.gz"
-  sha256 "c6f295947c1af5f0d4e728e4d6801c4b29bb35a742faebc058f86b36722e8cdd"
+  url "https://github.com/bloomberg/bde/archive/3.55.0.0.tar.gz"
+  sha256 "fed51e427067b25f9d39a064026a6dc7718c244a4456c4169d5f572b3fee8a41"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "f5bb245d5fe91341ba6d0ffaf4fa62de029b71c890e695b241a86d2058108798" => :high_sierra
-    sha256 "0f430f9f7d26e6d3ff03a6fa9b2d3f0e8042fb215c83e99a29741eca43f5a1a9" => :sierra
-    sha256 "40fa82df85e35baec799c061a67719d7ada109d150f7eb9043761c4a2e40b0a2" => :el_capitan
-    sha256 "3a95b87b049ba7aeb649a85a1948d80ba554d22603d0e336480f1b8787f75f4c" => :yosemite
-    sha256 "0a4219cc1a605d20000b22d6a8c1977216b60d99278a8b92553ac30f14b6c595" => :mavericks
+    sha256 "2916078b47cd41082b69d1eb6912c093da8c6b4774dab89c30a90d71815df84e" => :catalina
+    sha256 "adb3e9b12cc0811bdb5e18e2d792faa13e0c84dbebad9fa65ae2e8e51c99e810" => :mojave
+    sha256 "4d9bb6baeacfec561fe2e8c1cb77f8dda9cbb32ddec7bc42b6038087192b0076" => :high_sierra
   end
 
+  depends_on "cmake" => :build
+  depends_on "ninja" => :build
+
   resource "bde-tools" do
-    url "https://github.com/bloomberg/bde-tools/archive/v1.0.tar.gz"
-    sha256 "9b3936fecef23f8c072e62208d2068decfd13d144b771125afc9e0fb9ad16d30"
+    url "https://github.com/bloomberg/bde-tools/archive/v1.1.tar.gz"
+    sha256 "c5d77d5e811e79f824816ee06dbf92a2a7e3eb0b6d9f27088bcac8c06d930fd5"
   end
 
   def install
     buildpath.install resource("bde-tools")
+
+    ENV.cxx11
 
     system "python", "./bin/waf", "configure", "--prefix=#{prefix}"
     system "python", "./bin/waf", "build"

@@ -1,25 +1,27 @@
 class Gopass < Formula
   desc "The slightly more awesome Standard Unix Password Manager for Teams"
-  homepage "https://www.justwatch.com/gopass"
-  url "https://www.justwatch.com/gopass/releases/1.6.1/gopass-1.6.1.tar.gz"
-  sha256 "266cefda47b89dadbc76bc430b0d589a78475e330afc951230314ed36cc93a79"
-  head "https://github.com/justwatchcom/gopass.git"
+  homepage "https://github.com/gopasspw/gopass"
+  url "https://github.com/gopasspw/gopass/releases/download/v1.9.2/gopass-1.9.2.tar.gz"
+  sha256 "1017264678d3a2cdc862fc81e3829f390facce6c4a334cb314192ff321837bf5"
+  revision 1
+  head "https://github.com/gopasspw/gopass.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "938d153254f49937fe22efe1939f2994b8aeb1feb81e9bc58fe1f96843ad4f83" => :high_sierra
-    sha256 "1d928341dcd5f00ee3f4a609d9bb4fbca9e81a3fb7ece061ee6682f698b17748" => :sierra
-    sha256 "b506fac73e2fbe41ee261eec8e4e1a057980e22ee1c8eb2f7fce9b2996386414" => :el_capitan
+    sha256 "83aada8b02c42d7bc91b0dc2b5300033a6fb3277fe22a4196ff347626f218b9e" => :catalina
+    sha256 "60ce5c5b83c63d414a2091e900beeba0c415a38c63676e3a68d88cbec5ea496a" => :mojave
+    sha256 "484269488116e22c43fa7942461089d19a337d995c270d5b16a99b2fe68de80e" => :high_sierra
   end
 
   depends_on "go" => :build
-  depends_on :gpg => :run
+  depends_on "gnupg"
+  depends_on "terminal-notifier"
 
   def install
     ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/justwatchcom/gopass").install buildpath.children
+    (buildpath/"src/github.com/gopasspw/gopass").install buildpath.children
 
-    cd "src/github.com/justwatchcom/gopass" do
+    cd "src/github.com/gopasspw/gopass" do
       prefix.install_metafiles
       ENV["PREFIX"] = prefix
       system "make", "install"
@@ -46,7 +48,7 @@ class Gopass < Formula
     begin
       system Formula["gnupg"].opt_bin/"gpg", "--batch", "--gen-key", "batch.gpg"
 
-      system bin/"gopass", "init", "--nogit", "testing@foo.bar"
+      system bin/"gopass", "init", "--rcs", "noop", "testing@foo.bar"
       system bin/"gopass", "generate", "Email/other@foo.bar", "15"
       assert_predicate testpath/".password-store/Email/other@foo.bar.gpg", :exist?
     ensure

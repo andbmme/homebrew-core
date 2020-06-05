@@ -1,14 +1,14 @@
 class Par2 < Formula
   desc "Parchive: Parity Archive Volume Set for data recovery"
   homepage "https://github.com/Parchive/par2cmdline"
-  url "https://github.com/Parchive/par2cmdline/releases/download/v0.7.4/par2cmdline-0.7.4.tar.bz2"
-  sha256 "e602db3d8bdc49e2cb9e0e089ec31cd262e661ef7450f5d556e43a97a299e71d"
+  url "https://github.com/Parchive/par2cmdline/releases/download/v0.8.1/par2cmdline-0.8.1.tar.bz2"
+  sha256 "5fcd712cae2b73002b0bf450c939b211b3d1037f9bb9c3ae52d6d24a0ba075e4"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a825515ff251975d362998560f5e2e046ce3a9f753be106bbf3717c6d411b7fb" => :high_sierra
-    sha256 "6c3432e8a1b7e8ceeabb380af04d13123c9fb542fab7caf62fe8201f3d1adee2" => :sierra
-    sha256 "7257b39640dcf1894c2329129406a573b04dd263bf3b06283dc854b5ed17cf8e" => :el_capitan
+    sha256 "26609c45028599a4845f68cda2a5cd08c2a0dc37ae3987d4abf86aed99499f50" => :catalina
+    sha256 "cded10d8f18c5ab236ceb624854afb672681bd1a86f21e47d70de793db378580" => :mojave
+    sha256 "35477bcfecd91b7fe885739737f576b63545aab51ba997bc60f9a74927b775dc" => :high_sierra
   end
 
   def install

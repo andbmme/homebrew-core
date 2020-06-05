@@ -1,65 +1,30 @@
 class Cgal < Formula
-  desc "Computational Geometry Algorithm Library"
+  desc "Computational Geometry Algorithms Library"
   homepage "https://www.cgal.org/"
-  url "https://github.com/CGAL/cgal/releases/download/releases/CGAL-4.11/CGAL-4.11.tar.xz"
-  sha256 "27a7762e5430f5392a1fe12a3a4abdfe667605c40224de1c6599f49d66cfbdd2"
+  url "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.2/CGAL-5.0.2.tar.xz"
+  sha256 "bb3594ba390735404f0972ece301f369b1ff12646ad25e48056b4d49c976e1fa"
 
   bottle do
-    cellar :any
-    sha256 "c02e40322b63ebf5a5cb7e5c1040b5768286a04881177d893864ce51e28ac85c" => :high_sierra
-    sha256 "1549619deb616b977e519cddbe45e266eb66f8f59719ea3f22d8441e247becb9" => :sierra
-    sha256 "13e8723280f9b2de2a1d348cbe07f814dc3ea44e466b14781755552db9ac13c2" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "642c67e59a4bcfc9e22a15f2f7149045ce037c639eb9a8cf2deb3d3195e69ad0" => :catalina
+    sha256 "642c67e59a4bcfc9e22a15f2f7149045ce037c639eb9a8cf2deb3d3195e69ad0" => :mojave
+    sha256 "642c67e59a4bcfc9e22a15f2f7149045ce037c639eb9a8cf2deb3d3195e69ad0" => :high_sierra
   end
 
-  option :cxx11
-  option "with-qt", "Build ImageIO and Qt components of CGAL"
-  option "with-eigen", "Build with Eigen3 support"
-  option "with-lapack", "Build with LAPACK support"
-
-  deprecated_option "imaging" => "with-qt"
-  deprecated_option "with-imaging" => "with-qt"
-  deprecated_option "with-eigen3" => "with-eigen"
-  deprecated_option "with-qt5" => "with-qt"
-
-  depends_on "cmake" => :build
+  depends_on "cmake" => [:build, :test]
+  depends_on "boost"
+  depends_on "eigen"
+  depends_on "gmp"
   depends_on "mpfr"
 
-  depends_on "qt" => :optional
-  depends_on "eigen" => :optional
-
-  if build.cxx11?
-    depends_on "boost" => "c++11"
-    depends_on "gmp"   => "c++11"
-  else
-    depends_on "boost"
-    depends_on "gmp"
-  end
-
   def install
-    ENV.cxx11 if build.cxx11?
-
     args = std_cmake_args + %W[
-      -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
-      -DCMAKE_INSTALL_NAME_DIR=#{HOMEBREW_PREFIX}/lib
+      -DCMAKE_CXX_FLAGS='-std=c++14'
+      -DWITH_Eigen3=ON
+      -DWITH_LAPACK=ON
+      -DWITH_CGAL_Qt5=OFF
+      -DWITH_CGAL_ImageIO=OFF
     ]
-
-    if build.without? "qt"
-      args << "-DWITH_CGAL_Qt5=OFF" << "-DWITH_CGAL_ImageIO=OFF"
-    else
-      args << "-DWITH_CGAL_Qt5=ON" << "-DWITH_CGAL_ImageIO=ON"
-    end
-
-    if build.with? "eigen"
-      args << "-DWITH_Eigen3=ON"
-    else
-      args << "-DWITH_Eigen3=OFF"
-    end
-
-    if build.with? "lapack"
-      args << "-DWITH_LAPACK=ON"
-    else
-      args << "-DWITH_LAPACK=OFF"
-    end
 
     system "cmake", ".", *args
     system "make", "install"
@@ -85,8 +50,14 @@ class Cgal < Formula
           return 0;
       }
     EOS
-    system ENV.cxx, "-I#{include}", "-L#{lib}", "-lCGAL",
-                    "surprise.cpp", "-o", "test"
-    assert_equal "15\n15", shell_output("./test").chomp
+    (testpath/"CMakeLists.txt").write <<~EOS
+      cmake_minimum_required(VERSION 3.1...3.13)
+      find_package(CGAL)
+      add_executable(surprise surprise.cpp)
+      target_link_libraries(surprise PRIVATE CGAL::CGAL)
+    EOS
+    system "cmake", "-L", "-DCMAKE_BUILD_RPATH=#{HOMEBREW_PREFIX}/lib", "-DCMAKE_PREFIX_PATH=#{prefix}", "."
+    system "cmake", "--build", ".", "-v"
+    assert_equal "15\n15", shell_output("./surprise").chomp
   end
 end

@@ -1,17 +1,21 @@
 class Fmpp < Formula
   desc "Text file preprocessing tool using FreeMarker templates"
   homepage "https://fmpp.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/fmpp/fmpp/0.9.15/fmpp_0.9.15.tar.gz"
-  sha256 "b893451b5450a7f35fe680e934f6903ec8143d88959dcfca5d17467fbe4142f9"
+  url "https://downloads.sourceforge.net/project/fmpp/fmpp/0.9.16/fmpp_0.9.16.tar.gz"
+  sha256 "86561e3f3a2ccb436f5f3df88d79a7dad72549a33191901f49d12a38b53759cd"
+  revision 1
   head "https://github.com/freemarker/fmpp.git"
 
   bottle :unneeded
 
-  depends_on :java
+  depends_on "openjdk"
 
   def install
     libexec.install "lib"
-    bin.write_jar_script libexec/"lib/fmpp.jar", "fmpp", "-Dfmpp.home=#{libexec} $FMPP_OPTS $FMPP_ARGS"
+    (bin/"fmpp").write <<~EOS
+      #!/bin/bash
+      exec "#{Formula["openjdk"].opt_bin}/java" -Dfmpp.home="#{libexec}" $FMPP_OPTS $FMPP_ARGS -jar "#{libexec}/lib/fmpp.jar" "$@"
+    EOS
   end
 
   test do

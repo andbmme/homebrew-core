@@ -1,16 +1,14 @@
 class Fakeroot < Formula
   desc "Provide a fake root environment"
   homepage "https://tracker.debian.org/pkg/fakeroot"
-  url "https://mirrors.ocf.berkeley.edu/debian/pool/main/f/fakeroot/fakeroot_1.22.orig.tar.bz2"
-  mirror "https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.22.orig.tar.bz2"
-  sha256 "bd806a4a1e641203eb3d4571a10089e8a038c10ec7e492fa1e061b03ae3ec6fe"
+  url "https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.24.orig.tar.gz"
+  sha256 "2e045b3160370b8ab4d44d1f8d267e5d1d555f1bb522d650e7167b09477266ed"
 
   bottle do
     cellar :any
-    sha256 "999c3be4f098cab81b11516ce2b9e8ac41e5bf9255f9acf3c5cda90f1c657eb3" => :high_sierra
-    sha256 "dedb2018898785d98f98370fb88a89865d6a5e2f679166a457a511c305af0a30" => :sierra
-    sha256 "c7d19659c7d8bca8dead320d7d1ec49fda852629d5061a5760fcb88bd0059b4c" => :el_capitan
-    sha256 "d1be0e8562a2d80b505d253bc308ed0afee830b9e4c151a3039326adbd17b59c" => :yosemite
+    sha256 "c72ae187158b6cce73311fee527ba8bf8d2f0e18340bd66eef57b50b3d45c275" => :catalina
+    sha256 "6c23e4c601af569c2de802cac685de5d18e6ebafcb53e6c53107aa3feb3d1527" => :mojave
+    sha256 "df9be392f3579464893be013744b5aa40a7e4e91e01155bd1547e4104d381640" => :high_sierra
   end
 
   # Compile is broken. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=766649

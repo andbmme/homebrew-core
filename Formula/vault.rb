@@ -1,5 +1,3 @@
-require "language/go"
-
 # Please don't update this formula until the release is official via
 # mailing list or blog post. There's a history of GitHub tags moving around.
 # https://github.com/hashicorp/vault/issues/1051
@@ -7,30 +5,22 @@ class Vault < Formula
   desc "Secures, stores, and tightly controls access to secrets"
   homepage "https://vaultproject.io/"
   url "https://github.com/hashicorp/vault.git",
-      :tag => "v0.9.0",
-      :revision => "bdac1854478538052ba5b7ec9a9ec688d35a3335"
+      :tag      => "v1.4.2",
+      :revision => "18f1c494be8b06788c2fdda1a4296eb3c4b174ce"
+  revision 1
   head "https://github.com/hashicorp/vault.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c57077f8bb83f8abca3965389d379873166a0a2be9ffd3b424457eb7f0f80ccf" => :high_sierra
-    sha256 "7e1f8eadfac4d66576c036bfd55ae80571a19bb1695c8cc031a543a36a6c3dd6" => :sierra
-    sha256 "9c5ca2ff698d7d64f20f3eb22e1f432061ab0fb646065f9a2dff9f0564884431" => :el_capitan
+    sha256 "f4d90715d6b26da055402b19c8ed37a4dece5f913402ad24326bc6f002482f7f" => :catalina
+    sha256 "966faf03179f1d0a9944133d72e31058cc868a9c3a1b51f54130466967e04eb4" => :mojave
+    sha256 "b927910389472f03244c0e42058c31059169db9de2085dd9c1b536116e402097" => :high_sierra
   end
-
-  option "with-dynamic", "Build dynamic binary with CGO_ENABLED=1"
 
   depends_on "go" => :build
-
-  go_resource "github.com/mitchellh/iochan" do
-    url "https://github.com/mitchellh/iochan.git",
-        :revision => "87b45ffd0e9581375c491fef3d32130bb15c5bd7"
-  end
-
-  go_resource "github.com/mitchellh/gox" do
-    url "https://github.com/mitchellh/gox.git",
-        :revision => "c9740af9c6574448fd48eb30a71f964014c7a837"
-  end
+  depends_on "gox" => :build
+  depends_on "node@10" => :build
+  depends_on "yarn" => :build
 
   def install
     ENV["GOPATH"] = buildpath
@@ -38,20 +28,49 @@ class Vault < Formula
     contents = buildpath.children - [buildpath/".brew_home"]
     (buildpath/"src/github.com/hashicorp/vault").install contents
 
-    ENV.prepend_create_path "PATH", buildpath/"bin"
+    (buildpath/"bin").mkpath
 
-    Language::Go.stage_deps resources, buildpath/"src"
-
-    cd "src/github.com/mitchellh/gox" do
-      system "go", "install"
-    end
+    ENV.prepend_path "PATH", buildpath/"bin"
 
     cd "src/github.com/hashicorp/vault" do
-      target = build.with?("dynamic") ? "dev-dynamic" : "dev"
-      system "make", target
+      system "make", "bootstrap", "static-dist", "dev-ui"
       bin.install "bin/vault"
       prefix.install_metafiles
     end
+  end
+
+  plist_options :manual => "vault server -dev"
+
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/vault</string>
+            <string>server</string>
+            <string>-dev</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/vault.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/vault.log</string>
+        </dict>
+      </plist>
+    EOS
   end
 
   test do

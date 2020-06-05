@@ -3,30 +3,36 @@ class Ctl < Formula
   homepage "https://github.com/ampas/CTL"
   url "https://github.com/ampas/CTL/archive/ctl-1.5.2.tar.gz"
   sha256 "d7fac1439332c4d84abc3c285b365630acf20ea041033b154aa302befd25e0bd"
-  revision 1
+  revision 5
 
   bottle do
-    sha256 "1636fbe6e0ff3ed1f44b9e9eb1061065d40d9fe5e3239d29606eb72384e9f867" => :high_sierra
-    sha256 "3f8e680a2ffe275cf0b719c3d092d9d38d068bb90def12bb84021a1c95205e52" => :sierra
-    sha256 "c66847b6d0da88f917d5c701b0faeb91678f9622718fa09734973bef46a2599f" => :el_capitan
-    sha256 "d04f2f46eaa9b3fa1d6e67e0493e8b206f873c6211874962b8ef06865bbf5c71" => :yosemite
-    sha256 "59a4e155666ed1854a2b38204d750ddc0af75ebd988367b1629be4a9f00a6c1f" => :mavericks
-    sha256 "84aaaa696f7ea8837d13a3a1e58d826978be781c01dd5a77fa20197f45b7d25b" => :mountain_lion
+    sha256 "e44cbdbb013b350d22ff4cafeeb2a8e93dd164dc36bb6e181fb5cf086a8345c1" => :catalina
+    sha256 "6c88c03a0826a11e7267bf056e15362d4824cea2291b16af6db172d21f3654ce" => :mojave
+    sha256 "61b7606c62fb60aa86d887084e1cb0aa194ff5c64cb9726208ee364f870d7b43" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on "libtiff"
-  depends_on "ilmbase"
-  depends_on "openexr"
   depends_on "aces_container"
+  depends_on "ilmbase"
+  depends_on "libtiff"
+  depends_on "openexr"
+
+  patch do
+    url "https://github.com/ampas/CTL/pull/73.diff?full_index=1"
+    sha256 "119c2410403d16d1ecfe88bc687c16a0a5645f91824eec8de2d996d1248a06fd"
+  end
+
+  patch do
+    url "https://github.com/ampas/CTL/pull/74.diff?full_index=1"
+    sha256 "0c261caf34f14a097811ceb82fc1d9aa29bc6c4861921361e6eb1b4fe5f8ebae"
+  end
 
   def install
+    ENV.cxx11
     ENV.delete "CTL_MODULE_PATH"
 
     mkdir "build" do
       system "cmake", "..", *std_cmake_args
-      system "make"
-      system "make", "check"
       system "make", "install"
     end
   end

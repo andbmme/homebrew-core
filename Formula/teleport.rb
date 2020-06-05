@@ -1,13 +1,15 @@
 class Teleport < Formula
   desc "Modern SSH server for teams managing distributed infrastructure"
   homepage "https://gravitational.com/teleport"
-  url "https://github.com/gravitational/teleport/archive/v2.3.5.tar.gz"
-  sha256 "830a63a42d9d3cead7b7d4adfe248cbc6f3a47d490666dec53f315c15885513d"
+  url "https://github.com/gravitational/teleport/archive/v4.2.10.tar.gz"
+  sha256 "487ddde0bb5e303d0e116e3f4d3155f1ed6792b7cfb8d823d8843a69b37ceed9"
+  head "https://github.com/gravitational/teleport.git"
 
   bottle do
-    sha256 "b7e5f6b19506c74fbe4eea7ad2dea491e60bff6abe80c96c302b27db4578b35b" => :high_sierra
-    sha256 "cba7df719bcb69ed675cd93f8f72be54f115731564099aa1581dc3bdbd8b0e5b" => :sierra
-    sha256 "813e15f6a8b22dd2c3f7461e2417c10d85517158271f54d8929b187213085320" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "c286d1399cef486f233408988e7b24bf1ef79d5a098776634816e4720b960e00" => :catalina
+    sha256 "f0c6c00daf55cec32d583139e39c3cf594b5f683dc8b28a3b656a9b24e2531b5" => :mojave
+    sha256 "37568ddbe0367a0b26dfadf78b4c3aa438b16bce7ace5086b12b7c91554d17a3" => :high_sierra
   end
 
   depends_on "go" => :build
@@ -16,27 +18,20 @@ class Teleport < Formula
 
   def install
     ENV["GOOS"] = "darwin"
-    ENV["GOARCH"] = MacOS.prefer_64_bit? ? "amd64" : "386"
+    ENV["GOARCH"] = "amd64"
     ENV["GOPATH"] = buildpath
     ENV["GOROOT"] = Formula["go"].opt_libexec
 
-    (buildpath / "src/github.com/gravitational/teleport").install buildpath.children
-    ln_s buildpath/"src", buildpath / "src/github.com/gravitational/teleport"
-
+    (buildpath/"src/github.com/gravitational/teleport").install buildpath.children
     cd "src/github.com/gravitational/teleport" do
-      ENV.deparallelize { system "make", "release" }
-      system "/usr/bin/tar", "-xvf", "teleport-v#{version}-#{ENV["GOOS"]}-#{ENV["GOARCH"]}-bin.tar.gz"
-      cd "teleport" do
-        bin.install %w[teleport tctl tsh]
-        prefix.install_metafiles
-      end
+      ENV.deparallelize { system "make", "full" }
+      bin.install Dir["build/*"]
+      prefix.install_metafiles
     end
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/teleport version")
-    assert_match version.to_s, shell_output("#{bin}/tctl version")
-    assert_match version.to_s, shell_output("#{bin}/tsh version")
     (testpath/"config.yml").write shell_output("#{bin}/teleport configure")
       .gsub("0.0.0.0", "127.0.0.1")
       .gsub("/var/lib/teleport", testpath)

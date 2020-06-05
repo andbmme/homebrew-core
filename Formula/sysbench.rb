@@ -1,35 +1,33 @@
 class Sysbench < Formula
   desc "System performance benchmark tool"
   homepage "https://github.com/akopytov/sysbench"
-  url "https://github.com/akopytov/sysbench/archive/1.0.10.tar.gz"
-  sha256 "34cfe9989a4610c15359a2d88b59a09f5c18846f42ce49175953c3e600deebbe"
+  url "https://github.com/akopytov/sysbench/archive/1.0.20.tar.gz"
+  sha256 "e8ee79b1f399b2d167e6a90de52ccc90e52408f7ade1b9b7135727efe181347f"
 
   bottle do
-    sha256 "71501daf2051bcdc9bc34047e11e532128f7a7998559bf46e7478c54d92d6292" => :high_sierra
-    sha256 "b0ca4c4ba1b18d15810ebe62bf751df313870d29b6488b5cf584b62cd518cb47" => :sierra
-    sha256 "aa258212e72d3c3460a3ad741fd27e166d2d0c532d3a772a706a459b76b467a9" => :el_capitan
+    cellar :any
+    sha256 "2ca0e854823e63ecf84b27d81d0ea722aeae784fed39b436fed738fcd4450489" => :catalina
+    sha256 "ec55acf85be8a3cfbd57a72f1d67aad2104e545ec32464010d673c205075c809" => :mojave
+    sha256 "84363a4b7267f936a6e168fb4ed30fa21970ff1483bb81a5fba2bbe25d611cfc" => :high_sierra
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
   depends_on "pkg-config" => :build
-  depends_on "openssl"
-  depends_on :postgresql => :optional
-  depends_on :mysql => :recommended
+  depends_on "mysql-client"
+  depends_on "openssl@1.1"
 
   def install
     system "./autogen.sh"
 
-    args = ["--prefix=#{prefix}"]
-    if build.with? "mysql"
-      args << "--with-mysql"
-    else
-      args << "--without-mysql"
-    end
-    args << "--with-psql" if build.with? "postgresql"
+    # Fix for luajit build breakage.
+    # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
+    # is not set then it's forced to 10.4, which breaks compile on Mojave.
+    # https://github.com/LuaJIT/LuaJIT/issues/518: set to 10.14 to build on Catalina.
+    ENV["MACOSX_DEPLOYMENT_TARGET"] = (DevelopmentTools.clang_build_version >= 1100) ? "10.14" : MacOS.version
 
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--with-mysql"
     system "make", "install"
   end
 

@@ -1,24 +1,19 @@
 class Lumo < Formula
   desc "Fast, cross-platform, standalone ClojureScript environment"
   homepage "https://github.com/anmonteiro/lumo"
-  url "https://github.com/anmonteiro/lumo/archive/1.7.0.tar.gz"
-  sha256 "c5b37815d41581974dd026f2f02389102c4af4934c87e15d4c3c1d85f3211e1e"
+  url "https://github.com/anmonteiro/lumo/archive/1.10.1.tar.gz"
+  sha256 "16acbd5f74893af8a08c8132c0779294c5767ae23d13084db08240e0a0a1738c"
   head "https://github.com/anmonteiro/lumo.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "31dd6aae63a8fdeb82c59869219cf218212b2386af90410d3c0d046cf46e2f51" => :high_sierra
-    sha256 "f99d3b8cbd2fe4bd10f691477b353c5fc4acd430f441c086b46d1559969668c9" => :sierra
-    sha256 "27e79277bf35a0cfc401f2ba925f6ae914157522e6315a2cf4bae1af6244c4b2" => :el_capitan
-    sha256 "72dc7ea30baecd347ee8ebaa3cb822a4337088e02efd2dd5b4e6e62b38bf0dca" => :yosemite
-  end
-
-  devel do
-    url "https://github.com/anmonteiro/lumo/archive/1.8.0-beta.tar.gz"
-    sha256 "be267bd26f98a0963260af6848598786dcdf1576353f4dc9f40e13166ced2491"
+    sha256 "bb1a8b2993ef19affca4ec4f1d59b3d2ae147febc4a7dd9b3cf8d028829d38ef" => :mojave
+    sha256 "36f9ab9e14f544ecbc00685366c3050bebb598463f67d8b02cad5b5ef3c37c86" => :high_sierra
+    sha256 "4d21d87d8aae13c45f8cc501ae8132fc9e041db8f8ea4df1109180e7824f2bc1" => :sierra
   end
 
   depends_on "boot-clj" => :build
+  depends_on :java => ["1.8", :build]
   depends_on "node" => :build
   depends_on "yarn" => :build
 

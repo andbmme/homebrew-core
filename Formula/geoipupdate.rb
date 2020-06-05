@@ -1,35 +1,33 @@
 class Geoipupdate < Formula
   desc "Automatic updates of GeoIP2 and GeoIP Legacy databases"
   homepage "https://github.com/maxmind/geoipupdate"
-  url "https://github.com/maxmind/geoipupdate/releases/download/v2.5.0/geoipupdate-2.5.0.tar.gz"
-  sha256 "5119fd0e338cd083e886228b26679c64bcbaade8a815be092aecf865a610ab26"
+  url "https://github.com/maxmind/geoipupdate/archive/v4.3.0.tar.gz"
+  sha256 "0c6df6a563203e87e80c9998975c287cd4e3a5eb6c83b90dd5a0597298b098f0"
+  head "https://github.com/maxmind/geoipupdate.git"
 
   bottle do
-    sha256 "22feb6fb330b62c077482b443ac637c2fa3f60626b4113d815fc0fd85a255ee2" => :high_sierra
-    sha256 "d28503bce47a42732d54cece163675f6c6169539327a95bb8d4bbdfd16aa9e35" => :sierra
-    sha256 "ab7981329380d9bf0fee2efe0bfed2a1745cc3ecf681356ba21a02cd6604acf2" => :el_capitan
+    sha256 "8e03cdb8795a6a0dbd1a35a12c50e2021fee969926f6498369b0b04ea097c942" => :catalina
+    sha256 "710a53cf245d180e66f8b4626ff22cb2587912a8e8cd17b9cb34b6d5ffcc3174" => :mojave
+    sha256 "99a8bc8e63c1c8949e52fdd0fe04a27e1c2d973f2d2e9959fda52795bb7d01ed" => :high_sierra
   end
 
-  head do
-    url "https://github.com/maxmind/geoipupdate.git"
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
+  depends_on "go" => :build
+  depends_on "pandoc" => :build
+
+  uses_from_macos "curl"
+  uses_from_macos "zlib"
 
   def install
-    system "./bootstrap" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--datadir=#{var}",
-                          "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}"
-    system "make", "install"
+    system "make", "CONFFILE=#{etc}/GeoIP.conf", "DATADIR=#{var}/GeoIP", "VERSION=#{version} (homebrew)"
+
+    bin.install  "build/geoipupdate"
+    etc.install  "build/GeoIP.conf"
+    man1.install "build/geoipupdate.1"
+    man5.install "build/GeoIP.conf.5"
   end
 
   def post_install
     (var/"GeoIP").mkpath
-    system bin/"geoipupdate", "-v"
   end
 
   test do

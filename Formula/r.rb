@@ -1,34 +1,29 @@
 class R < Formula
   desc "Software environment for statistical computing"
   homepage "https://www.r-project.org/"
-  url "https://cran.rstudio.com/src/base/R-3/R-3.4.2.tar.gz"
-  sha256 "971e30c2436cf645f58552905105d75788bd9733bddbcb7c4fbff4c1a6d80c64"
+  url "https://cran.r-project.org/src/base/R-4/R-4.0.0.tar.gz"
+  sha256 "06beb0291b569978484eb0dcb5d2339665ec745737bdfb4e873e7a5a75492940"
+  revision 1
 
   bottle do
-    sha256 "6074e19280c7002ef3e99fcc77fefc4f37c1d90f89ef2ec22e3937aaa8cf79ec" => :high_sierra
-    sha256 "01a3ec41728feefac6b093d943e84fb912d8b82149e5533b2287bd97ffd38378" => :sierra
-    sha256 "54bccc2c6410fb1b4703bd818052010bfaa6c555b6f33bb471d90fad77f5ad88" => :el_capitan
+    rebuild 1
+    sha256 "cff148724950c35ef1f42450259ea2775e82101af114fd306dc20df04a9d13c0" => :catalina
+    sha256 "55bf4a20c65107934cad232c4e031d88920bb7e57d4b044350c0109899f53fcc" => :mojave
+    sha256 "1ebe182e8e6dde809cbb181a63a395d906ee0ea326bb80b432ecebacbea8b889" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
+  depends_on "gcc" # for gfortran
   depends_on "gettext"
   depends_on "jpeg"
   depends_on "libpng"
-  depends_on "pcre"
+  depends_on "openblas"
+  depends_on "pcre2"
   depends_on "readline"
   depends_on "xz"
-  depends_on :fortran
-  depends_on "openblas" => :optional
-  depends_on :java => :optional
 
   # needed to preserve executable permissions on files without shebangs
-  skip_clean "lib/R/bin"
-
-  resource "gss" do
-    url "https://cloud.r-project.org/src/contrib/gss_2.1-7.tar.gz", :using => :nounzip
-    mirror "https://mirror.las.iastate.edu/CRAN/src/contrib/gss_2.1-7.tar.gz"
-    sha256 "0405bb5e4c4d60b466335e5da07be4f9570045a24aed09e7bc0640e1a00f3adb"
-  end
+  skip_clean "lib/R/bin", "lib/R/doc"
 
   def install
     # Fix dyld: lazy symbol binding failed: Symbol not found: _clock_gettime
@@ -41,26 +36,15 @@ class R < Formula
       "--prefix=#{prefix}",
       "--enable-memory-profiling",
       "--without-cairo",
+      "--without-tcltk",
       "--without-x",
       "--with-aqua",
       "--with-lapack",
       "--enable-R-shlib",
       "SED=/usr/bin/sed", # don't remember Homebrew's sed shim
+      "--disable-java",
+      "--with-blas=-L#{Formula["openblas"].opt_lib} -lopenblas",
     ]
-
-    if build.with? "openblas"
-      args << "--with-blas=-L#{Formula["openblas"].opt_lib} -lopenblas"
-      ENV.append "LDFLAGS", "-L#{Formula["openblas"].opt_lib}"
-    else
-      args << "--with-blas=-framework Accelerate"
-      ENV.append_to_cflags "-D__ACCELERATE__" if ENV.compiler != :clang
-    end
-
-    if build.with? "java"
-      args << "--enable-java"
-    else
-      args << "--disable-java"
-    end
 
     # Help CRAN packages find gettext and readline
     ["gettext", "readline"].each do |f|
@@ -110,8 +94,7 @@ class R < Formula
     assert_equal "[1] 2", shell_output("#{bin}/Rscript -e 'print(1+1)'").chomp
     assert_equal ".dylib", shell_output("#{bin}/R CMD config DYLIB_EXT").chomp
 
-    testpath.install resource("gss")
-    system bin/"R", "CMD", "INSTALL", "--library=.", Dir["gss*"].first
+    system bin/"Rscript -e \'install.packages(\"gss\", \".\", \"https://cloud.r-project.org\")\'"
     assert_predicate testpath/"gss/libs/gss.so", :exist?,
                      "Failed to install gss package"
   end

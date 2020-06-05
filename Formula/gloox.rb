@@ -1,36 +1,27 @@
 class Gloox < Formula
   desc "C++ Jabber/XMPP library that handles the low-level protocol"
   homepage "https://camaya.net/gloox/"
-  url "https://camaya.net/download/gloox-1.0.20.tar.bz2"
-  sha256 "0243086c0f4f0440d6d8e55705f83249a4463a1d75a034be42b5312e8886dea8"
+  url "https://camaya.net/download/gloox-1.0.23.tar.bz2"
+  sha256 "97cb6a0c07e320ffa4a7c66e8ab06b2361086271dc87ed2398befef4e8435f8a"
 
   bottle do
     cellar :any
-    sha256 "d6acd544200f6524e6c6c4b4c12747e855abb0fb6129628e86166b921035dc39" => :high_sierra
-    sha256 "8268b106a2de45233f339630793ebdb46c501925faa758f0d61eb7485ced1c87" => :sierra
-    sha256 "7b0dafa8d25adac387410d0bd064c2645d4fb8826c0b24b840c71e3e783eaa3b" => :el_capitan
-    sha256 "12fa240ab11bad334840099b0a8574b6cce0064647b06bb433f3600669bd6cda" => :yosemite
+    sha256 "ae614fa73c886d568e4bb6916438affd3b081bccfc4904fef4a4110417f41e9d" => :catalina
+    sha256 "eea355a755180f72c719f06d0eae5c7b03223c35f39aae6379a007f0a6333ffe" => :mojave
+    sha256 "730858e264fc531556d60fd93f971614e9ce22ee1db1391f651a8fba2b257198" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "openssl" => :recommended
-  depends_on "gnutls" => :optional
-  depends_on "libidn" => :optional
+  depends_on "libidn"
+  depends_on "openssl@1.1"
+
+  uses_from_macos "zlib"
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --with-zlib
-      --disable-debug
-    ]
-
-    if build.with? "gnutls"
-      args << "--with-gnutls=yes"
-    else
-      args << "--with-openssl=#{Formula["openssl"].opt_prefix}"
-    end
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}",
+                          "--with-zlib",
+                          "--disable-debug",
+                          "--with-openssl=#{Formula["openssl@1.1"].opt_prefix}"
     system "make", "install"
   end
 

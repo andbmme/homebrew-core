@@ -1,13 +1,13 @@
 class Apktool < Formula
   desc "Tool for reverse engineering 3rd party, closed, binary Android apps"
   homepage "https://github.com/iBotPeaches/Apktool"
-  url "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.3.0.jar", :using => :nounzip
-  sha256 "b724c158ec99dbad723024e259fd73e5135c40d652a3c599cec6ade9264a568e"
+  url "https://github.com/iBotPeaches/Apktool/releases/download/v2.4.1/apktool_2.4.1.jar"
+  sha256 "bdeb66211d1dc1c71f138003ce35f6d0cd19af6f8de7ffbdd5b118d02d825a52"
 
   bottle :unneeded
 
   resource "sample.apk" do
-    url "https://github.com/downloads/stephanenicolas/RoboDemo/robodemo-sample-1.0.1.apk", :using => :nounzip
+    url "https://github.com/downloads/stephanenicolas/RoboDemo/robodemo-sample-1.0.1.apk"
     sha256 "bf3ec04631339538c8edb97ebbd5262c3962c5873a2df9022385156c775eb81f"
   end
 

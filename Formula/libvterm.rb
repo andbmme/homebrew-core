@@ -1,16 +1,15 @@
 class Libvterm < Formula
   desc "C99 library which implements a VT220 or xterm terminal emulator"
   homepage "http://www.leonerd.org.uk/code/libvterm/"
-  url "http://www.leonerd.org.uk/code/libvterm/libvterm-0+bzr681.tar.gz"
-  sha256 "abea46d1b0b831dec2af5d582319635cece63d260f8298d9ccce7c1c2e62a6e8"
+  url "http://www.leonerd.org.uk/code/libvterm/libvterm-0.1.3.tar.gz"
+  sha256 "e41724466a4658e0f095e8fc5aeae26026c0726dce98ee71d6920d06f7d78e2b"
+  version_scheme 1
 
   bottle do
     cellar :any
-    sha256 "d9890959bfaffea27748b69bdcd8f84b1ccc104829db37480dcfdd86701fa315" => :high_sierra
-    sha256 "1b0e1cd45ec1aa67280fa555c47139d2d0b36d7c28313148bd7d23d85a31178c" => :sierra
-    sha256 "fdab6481377220ea48474d7af256df3b82ee202d28ba010d644aa5ff200c2fbd" => :el_capitan
-    sha256 "e74dceb0e58c42be4c8e1ab96867ad71931b9412b7c692cfc40dc5bc924d0daa" => :yosemite
-    sha256 "a3b42686b7e365b71c766cfb44bb564e5d0e157ac85cf9b9ffba6b6d570f3ef8" => :mavericks
+    sha256 "74c971c0a3157f7b34c69360c7b76611dcbb949e50ba255603a70f3d643e7cca" => :catalina
+    sha256 "da5f5c504963d145c7a5e2ac9fd0fc0d9008251f98b11fbc6f818da59057c128" => :mojave
+    sha256 "3362cf826401b4c9d4012de2777eecd90b3b168b723f51371adb5eb18e22fbc9" => :high_sierra
   end
 
   depends_on "libtool" => :build

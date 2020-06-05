@@ -1,19 +1,18 @@
 class Sflowtool < Formula
   desc "Utilities and scripts for analyzing sFlow data"
-  homepage "http://www.inmon.com/technology/sflowTools.php"
-  url "https://github.com/sflow/sflowtool/releases/download/v3.41/sflowtool-3.41.tar.gz"
-  sha256 "0e807f182db5ca5b37d0fb55b77e970b1d51fee0cd8cb845646211befb35ca24"
+  homepage "https://inmon.com/technology/sflowTools.php"
+  url "https://github.com/sflow/sflowtool/releases/download/v5.05/sflowtool-5.05.tar.gz"
+  sha256 "048c52ead856a23e927fb826ac7663aeaac98795e678792fd6f74c588f90825d"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "b797a335bf9b9910fd4da5a8d54c5dca233527cbc9cf6f72e9c1205a0bef5a57" => :high_sierra
-    sha256 "359f80ea054dbb35c8878ac61aa0f18478e03e8e8c9a2a08d8f4fe8b86257469" => :sierra
-    sha256 "683d0468235a5d78035c4fc4b4db19d503d4042adec9c38fa1b7e9c1233354e8" => :el_capitan
-    sha256 "8957c4da2c6a3f9f17bd8a58b5472db7dcb4f4402467b3fba4f8beda76e4eff9" => :yosemite
+    sha256 "f3e55e3b91333c14463670cfc709aa6333a2e6170c668b130e54a4f6b34d1557" => :catalina
+    sha256 "59dac285649c6046b8e24a1308e9c56037cbb98e1223b5b37890b935b51edc91" => :mojave
+    sha256 "1df8d53ae9d3978eec0655b09c1988c77db62b1c619731e2997ae9d770246158" => :high_sierra
   end
 
   resource "scripts" do
-    url "http://www.inmon.com/bin/sflowutils.tar.gz"
+    url "https://inmon.com/bin/sflowutils.tar.gz"
     sha256 "45f6a0f96bdb6a1780694b9a4ef9bbd2fd719b9f7f3355c6af1427631b311d56"
   end
 

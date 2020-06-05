@@ -1,33 +1,33 @@
 class Harfbuzz < Formula
   desc "OpenType text shaping engine"
   homepage "https://wiki.freedesktop.org/www/Software/HarfBuzz/"
-  url "https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-1.7.1.tar.bz2"
-  sha256 "9645a6e83313b690602017f18d4eb2adf81f2e54c6fc4471e19331304965154e"
+  url "https://github.com/harfbuzz/harfbuzz/releases/download/2.6.6/harfbuzz-2.6.6.tar.xz"
+  sha256 "84d0f1fb4cf4b3ee398ac20eaa608ca9f7cd90d992a44540fdcb16469bb460e5"
+  revision 1
 
   bottle do
-    sha256 "e5b0de206e25403c985d2bab8fa7b0cc809edf85f8699931bddfe91888b0e02c" => :high_sierra
-    sha256 "49127c93683b61c0e9023803cc5e96c1e07734d014d825f63847c630d558ab61" => :sierra
-    sha256 "b0a716195ad42035fd2a370a64b38f76d83ea42efa956976718c45ec08ce7485" => :el_capitan
+    cellar :any
+    sha256 "bd970d1bc53e8b889a0609706d4c0571621a4a9a24f0a13c43c6fcdd481afb1a" => :catalina
+    sha256 "b6c0b06cc8472250f1f57eb00976e97e235655f257351646d2e12cbb40fe4033" => :mojave
+    sha256 "d4571cb7ba8503c645acb37976030b15b3a62abb259c77a8b7a43b81d25dd442" => :high_sierra
   end
 
   head do
     url "https://github.com/behdad/harfbuzz.git"
 
-    depends_on "ragel" => :build
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
+    depends_on "ragel" => :build
   end
 
-  option "with-cairo", "Build command-line utilities that depend on Cairo"
-
+  depends_on "gobject-introspection" => :build
   depends_on "pkg-config" => :build
-  depends_on "freetype" => :recommended
-  depends_on "glib" => :recommended
-  depends_on "gobject-introspection" => :recommended
-  depends_on "graphite2" => :recommended
-  depends_on "icu4c" => :recommended
-  depends_on "cairo" => :optional
+  depends_on "cairo"
+  depends_on "freetype"
+  depends_on "glib"
+  depends_on "graphite2"
+  depends_on "icu4c"
 
   resource "ttf" do
     url "https://github.com/behdad/harfbuzz/raw/fc0daafab0336b847ac14682e581a8838f36a0bf/test/shaping/fonts/sha1sum/270b89df543a7e48e206a2d830c0e10e5265c630.ttf"
@@ -38,45 +38,16 @@ class Harfbuzz < Formula
     args = %W[
       --disable-dependency-tracking
       --prefix=#{prefix}
-      --with-coretext=yes
+      --enable-introspection=yes
       --enable-static
+      --with-cairo=yes
+      --with-coretext=yes
+      --with-freetype=yes
+      --with-glib=yes
+      --with-gobject=yes
+      --with-graphite2=yes
+      --with-icu=yes
     ]
-
-    if build.with? "cairo"
-      args << "--with-cairo=yes"
-    else
-      args << "--with-cairo=no"
-    end
-
-    if build.with? "freetype"
-      args << "--with-freetype=yes"
-    else
-      args << "--with-freetype=no"
-    end
-
-    if build.with? "glib"
-      args << "--with-glib=yes"
-    else
-      args << "--with-glib=no"
-    end
-
-    if build.with? "gobject-introspection"
-      args << "--with-gobject=yes" << "--enable-introspection=yes"
-    else
-      args << "--with-gobject=no" << "--enable-introspection=no"
-    end
-
-    if build.with? "graphite2"
-      args << "--with-graphite2=yes"
-    else
-      args << "--with-graphite2=no"
-    end
-
-    if build.with? "icu4c"
-      args << "--with-icu=yes"
-    else
-      args << "--with-icu=no"
-    end
 
     system "./autogen.sh" if build.head?
     system "./configure", *args

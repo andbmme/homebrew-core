@@ -1,16 +1,15 @@
 class FuseZip < Formula
   desc "FUSE file system to create & manipulate ZIP archives"
   homepage "https://bitbucket.org/agalanin/fuse-zip"
-  url "https://bitbucket.org/agalanin/fuse-zip/downloads/fuse-zip-0.4.2.tar.gz"
-  sha256 "3d4ee113d4c7918ad3c660f8088473d5fabf67b3476fef16ec7f5bd8a4182fdc"
+  url "https://bitbucket.org/agalanin/fuse-zip/downloads/fuse-zip-0.7.0.tar.gz"
+  sha256 "47306bab2b8b0db8ca6fac01833ccfb4394ddae1943ab2e7020b1bdbb210410b"
   head "https://bitbucket.org/agalanin/fuse-zip", :using => :hg
 
   bottle do
     cellar :any
-    sha256 "d04fc011d91f917eef5c5181eb1692a396fc0bb3ee992b1f4267aadcd816485b" => :high_sierra
-    sha256 "0db3a9d8a30e24848ccfa2553d1b470f2b8c115e41a99e4a2cb282f110053f26" => :sierra
-    sha256 "0f443c4299364c8aa30b041c2e332e89623eb48a9a08543d5527b4020bf034cb" => :el_capitan
-    sha256 "d11e97976dbf996bfcab165624625e294b0a4f6bd46bc033d70c9860de90b327" => :yosemite
+    sha256 "f368e76466c6a341d2f08876d9c5c7d523db0cc84b1a4641457d02bc796fc4c3" => :catalina
+    sha256 "8aa19497fa708322ec386d9578ba0d323620bc4c26a9d257f9cbd25140aac908" => :mojave
+    sha256 "ffedaf1ee44691c491f2b0ab134cd97263ce27bb9ec110874c23af4bdcfd18cb" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
@@ -18,6 +17,11 @@ class FuseZip < Formula
   depends_on :osxfuse
 
   def install
+    # upstream issue: https://bitbucket.org/agalanin/fuse-zip/issues/66/cannot-build-fuze-zip-070-on-mac-osx
+    inreplace "lib/extraField.cpp", "#include <sys/sysmacros.h>", ""
+    inreplace "lib/fuse-zip.cpp", "stbuf->st_atim", "stbuf->st_atimespec"
+    inreplace "lib/fuse-zip.cpp", "stbuf->st_mtim", "stbuf->st_mtimespec"
+    inreplace "lib/fuse-zip.cpp", "stbuf->st_ctim", "stbuf->st_ctimespec"
     system "make", "prefix=#{prefix}", "install"
   end
 

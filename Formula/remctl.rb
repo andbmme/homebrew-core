@@ -1,19 +1,18 @@
 class Remctl < Formula
   desc "Client/server application for remote execution of tasks"
   homepage "https://www.eyrie.org/~eagle/software/remctl/"
-  url "https://archives.eyrie.org/software/kerberos/remctl-3.13.tar.xz"
-  sha256 "e8f249c5ef54d5cff95ae503278d262615b3e7ebe13dfb368a1576ef36ee9109"
-  revision 1
+  url "https://archives.eyrie.org/software/kerberos/remctl-3.16.tar.xz"
+  sha256 "d1c444ab6c817c82413ec9686d178b9d760cd684eae7d24782bbe5c9ce5b0908"
 
   bottle do
-    sha256 "b9772721b81ae319330a5f137c2989a9ccb5595c7f5de77f6e193bedc6605510" => :high_sierra
-    sha256 "edfe97b717e944a87d29abe653d9ffafee8c1b70f5809d94434bf9d5b9430725" => :sierra
-    sha256 "ca265d9856564ddc2b72f671760be7d06a16718ec7f16cf8c6a548eaa83fcb8d" => :el_capitan
-    sha256 "85aca4fa0248cdf724a304ba559144c69b487d25e1870d9b89bb52558bd34b6b" => :yosemite
+    cellar :any
+    sha256 "0c94a53cbd26ed882a5b4c8f973562120dd1cf0a6f76457d392cc5fe59d5ee89" => :catalina
+    sha256 "3472db7e7bd12cb03c12b6dc2db8168439a24eef73bde7fbec775a41db628042" => :mojave
+    sha256 "777fb3b5f47e4da6caeacba3c4959a38ebf7113a89555aebe74d41854c70104a" => :high_sierra
   end
 
-  depends_on "pcre"
   depends_on "libevent"
+  depends_on "pcre"
 
   def install
     system "./configure", "--disable-dependency-tracking",

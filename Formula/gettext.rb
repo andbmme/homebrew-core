@@ -1,23 +1,18 @@
 class Gettext < Formula
   desc "GNU internationalization (i18n) and localization (l10n) library"
   homepage "https://www.gnu.org/software/gettext/"
-  url "https://ftp.gnu.org/gnu/gettext/gettext-0.19.8.1.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gettext/gettext-0.19.8.1.tar.xz"
-  sha256 "105556dbc5c3fbbc2aa0edb46d22d055748b6f5c7cd7a8d99f8e7eb84e938be4"
+  url "https://ftp.gnu.org/gnu/gettext/gettext-0.20.2.tar.xz"
+  mirror "https://ftpmirror.gnu.org/gettext/gettext-0.20.2.tar.xz"
+  sha256 "b22b818e644c37f6e3d1643a1943c32c3a9bff726d601e53047d2682019ceaba"
+  revision 1
 
   bottle do
-    sha256 "99d2dbd4c9ebfe9bf2a64bd99f3a695a18635f0d9110eaff34bab8022abef6a8" => :high_sierra
-    sha256 "8368522242c5fe33acd5c80b5f1321559da9efe20878da6e4b9507683a740c21" => :sierra
-    sha256 "311475f36f3fd314ae0db4fb52e4ab769f62ded6c8c81678ad8295f41762e4ba" => :el_capitan
-    sha256 "ca8fe572e7c8db00bb1bdfd66c379ba4a960927f4b829f47f9e2335c51dc7376" => :yosemite
-    sha256 "e3091192716347fc54f6e8a8184d892feed5309672daa061a1407b071af80c05" => :mavericks
+    sha256 "71f4ded03e8258b5e6896eebb00d26ed48307fbebece1a884b17ca3fb40e3121" => :catalina
+    sha256 "52067198cab528f05fdc0b06f7b9711f7614f60a7361f1e764c4f46d3342ff22" => :mojave
+    sha256 "4a999c75dcc53cbc711e3ac6545db69ab3aeca6c29c1cb6b21c353f237342457" => :high_sierra
   end
 
-  keg_only :shadowed_by_osx,
-    "macOS provides the BSD gettext library & some software gets confused if both are in the library path"
-
-  # https://savannah.gnu.org/bugs/index.php?46844
-  depends_on "libxml2" if MacOS.version <= :mountain_lion
+  uses_from_macos "ncurses"
 
   def install
     system "./configure", "--disable-dependency-tracking",
@@ -25,6 +20,8 @@ class Gettext < Formula
                           "--disable-debug",
                           "--prefix=#{prefix}",
                           "--with-included-gettext",
+                          # Work around a gnulib issue with macOS Catalina
+                          "gl_cv_func_ftello_works=yes",
                           "--with-included-glib",
                           "--with-included-libcroco",
                           "--with-included-libunistring",

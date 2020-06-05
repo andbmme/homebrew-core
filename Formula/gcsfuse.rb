@@ -1,21 +1,19 @@
 class Gcsfuse < Formula
   desc "User-space file system for interacting with Google Cloud"
   homepage "https://github.com/googlecloudplatform/gcsfuse"
-  url "https://github.com/GoogleCloudPlatform/gcsfuse/archive/v0.23.0.tar.gz"
-  sha256 "beb90ef68d5ab673bf09357c90d1ace94695bebb6f823ba715a92b30e61e7c39"
+  url "https://github.com/GoogleCloudPlatform/gcsfuse/archive/v0.29.0.tar.gz"
+  sha256 "4f994d694a12691b7ea5bd293c50ba4a37bc329cf531780015daf0a5fd265b30"
   head "https://github.com/GoogleCloudPlatform/gcsfuse.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "4b0e7e4e145c199f18d21293e4002b8a6d3e626e5b5f330daee08ccfc3f1d7d9" => :high_sierra
-    sha256 "9f42846472bbe6bc06b1016f6494415b16e148de6262fdcbb5bf9677fbee0a36" => :sierra
-    sha256 "f4a837589708aed85da5762394004fa2398a2e907b37cb1c9554282578e635e7" => :el_capitan
-    sha256 "4f1e5e0db02f9f148a61d9062626f754ba3f55dcf8df9ff69fc0f84cf5363577" => :yosemite
+    sha256 "0f77f535e3f254ee258ff0fc2789c3e3cbdcd5ae82752f20ba4b9d81f08b9784" => :catalina
+    sha256 "34f2669361a227f30c00f70aa0e8787a049c845ef4ad010a5adcd98fecf3db34" => :mojave
+    sha256 "6edf61db4afc7f42c57b2dd4867e8ca80224b5c924c5d1e8d5bfea9b24abf4a3" => :high_sierra
   end
 
-  depends_on :osxfuse
-
   depends_on "go" => :build
+  depends_on :osxfuse
 
   def install
     # Build the build_gcsfuse tool. Ensure that it doesn't pick up any
@@ -24,10 +22,10 @@ class Gcsfuse < Formula
     system "go", "build", "./tools/build_gcsfuse"
 
     # Use that tool to build gcsfuse itself.
-    if build.head?
-      gcsfuse_version = `git rev-parse --short HEAD`.strip
+    gcsfuse_version = if build.head?
+      `git rev-parse --short HEAD`.strip
     else
-      gcsfuse_version = version
+      version
     end
 
     system "./build_gcsfuse", buildpath, prefix, gcsfuse_version

@@ -1,50 +1,25 @@
 class Doxygen < Formula
   desc "Generate documentation for several programming languages"
-  homepage "http://www.doxygen.org/"
-  revision 1
+  homepage "https://www.doxygen.org/"
+  url "https://doxygen.nl/files/doxygen-1.8.18.src.tar.gz"
+  mirror "https://downloads.sourceforge.net/project/doxygen/rel-1.8.18/doxygen-1.8.18.src.tar.gz"
+  sha256 "18173d9edc46d2d116c1f92a95d683ec76b6b4b45b817ac4f245bb1073d00656"
   head "https://github.com/doxygen/doxygen.git"
-
-  stable do
-    url "https://ftp.stack.nl/pub/users/dimitri/doxygen-1.8.13.src.tar.gz"
-    mirror "https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/d/doxygen/doxygen_1.8.13.orig.tar.gz"
-    sha256 "af667887bd7a87dc0dbf9ac8d86c96b552dfb8ca9c790ed1cbffaa6131573f6b"
-
-    # Remove for > 1.8.13
-    # "Bug 776791 - [1.8.13 Regression] Segfault building the breathe docs"
-    # Upstream PR from 4 Jan 2017 https://github.com/doxygen/doxygen/pull/555
-    patch do
-      url "https://github.com/doxygen/doxygen/commit/0f02761a158a5e9ddbd5801682482af8986dbc35.patch?full_index=1"
-      sha256 "6705eb83b419ad9a696290c624b8ff363ff39b94b250008d0ef36200254c2a08"
-    end
-  end
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "c5173aa74ee4c609a11ce80ecf26588dc5f682356c382fe833960f91e386476e" => :high_sierra
-    sha256 "a5e7436a64a38db42f85d8f48c683423288933d61e7607b82883388c73a8a724" => :sierra
-    sha256 "d42d176ead71b9276a1f55d13936132fd51627ceec4ab309de3abb79def891a1" => :el_capitan
-    sha256 "215437e6278729e060526ada23b9e2c75eb93028269c4613610b9391b8976c81" => :yosemite
+    sha256 "7a9d0dcd889aba7e0e96fc62b1e5cce048adacbab03d3b924f9940b50c7b2d3c" => :catalina
+    sha256 "ac54e6ace4d6167a03b7c0c8dbb956f696921eb32a5507e842227220852385df" => :mojave
+    sha256 "630a2c57c428c9ae42d5d6f6f5986a08292db010c51f407c1bbb6224c4d9ddf7" => :high_sierra
   end
 
-  option "with-graphviz", "Build with dot command support from Graphviz."
-  option "with-qt", "Build GUI frontend with Qt support."
-  option "with-llvm", "Build with libclang support."
-
-  deprecated_option "with-dot" => "with-graphviz"
-  deprecated_option "with-doxywizard" => "with-qt"
-  deprecated_option "with-libclang" => "with-llvm"
-  deprecated_option "with-qt5" => "with-qt"
-
+  depends_on "bison" => :build
   depends_on "cmake" => :build
-  depends_on "graphviz" => :optional
-  depends_on "qt" => :optional
-  depends_on "llvm" => :optional
 
   def install
-    args = std_cmake_args << "-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=#{MacOS.version}"
-    args << "-Dbuild_wizard=ON" if build.with? "qt"
-    args << "-Duse_libclang=ON -DLLVM_CONFIG=#{Formula["llvm"].opt_bin}/llvm-config" if build.with? "llvm"
+    args = std_cmake_args + %W[
+      -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=#{MacOS.version}
+    ]
 
     mkdir "build" do
       system "cmake", "..", *args

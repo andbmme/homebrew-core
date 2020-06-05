@@ -1,49 +1,47 @@
 class Folly < Formula
   desc "Collection of reusable C++ library artifacts developed at Facebook"
   homepage "https://github.com/facebook/folly"
-  url "https://github.com/facebook/folly/archive/v2017.11.13.00.tar.gz"
-  sha256 "dc892c2b53cb3bb3a9707d808ab70a5cea460f1f0590528336da076486f4ed1b"
+  url "https://github.com/facebook/folly/archive/v2020.06.01.00.tar.gz"
+  sha256 "75b2f24790eb213cc96979b916bdafa4d5b4e8a7a1461f8c87cc53828ae19896"
   head "https://github.com/facebook/folly.git"
 
   bottle do
     cellar :any
-    sha256 "f90d44b6152d13a9c3d00dfe24fd9bcdfbc1156801af3e489b4a449448281d04" => :high_sierra
-    sha256 "187580c4b14c4896918ad3cca7491becf050c185ebc9a2c3cdb6cb4a378fd50e" => :sierra
-    sha256 "4acc81157457ca8069515caf79ce5e4486847099605c874b18144145c2773c0c" => :el_capitan
+    sha256 "ac19a1e8358f41311b9d5feaeb2986e98f1b84e2822c3948115f049c0ca2bbcf" => :catalina
+    sha256 "e933eba7dec13fc9781ebbebd88bc831e1e41400034564b6bced08e8bc913c9d" => :mojave
+    sha256 "705689ef5dd8370da9fd7916350c69f376c0cc9dfbb7168adbd6ae200ed14843" => :high_sierra
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  depends_on "cmake" => :build
   depends_on "pkg-config" => :build
-  depends_on "double-conversion"
-  depends_on "glog"
-  depends_on "gflags"
   depends_on "boost"
+  depends_on "double-conversion"
+  depends_on "fmt"
+  depends_on "gflags"
+  depends_on "glog"
   depends_on "libevent"
-  depends_on "xz"
-  depends_on "snappy"
   depends_on "lz4"
-  depends_on "openssl"
-
-  # https://github.com/facebook/folly/issues/451
-  depends_on :macos => :el_capitan
-
-  needs :cxx11
-
-  # Known issue upstream. They're working on it:
-  # https://github.com/facebook/folly/pull/445
-  fails_with :gcc => "6"
+  # https://github.com/facebook/folly/issues/966
+  depends_on :macos => :high_sierra
+  depends_on "openssl@1.1"
+  depends_on "snappy"
+  depends_on "xz"
+  depends_on "zstd"
 
   def install
-    ENV.cxx11
+    mkdir "_build" do
+      args = std_cmake_args + %w[
+        -DFOLLY_USE_JEMALLOC=OFF
+      ]
 
-    cd "folly" do
-      system "autoreconf", "-fvi"
-      system "./configure", "--prefix=#{prefix}", "--disable-silent-rules",
-                            "--disable-dependency-tracking"
+      system "cmake", "..", *args, "-DBUILD_SHARED_LIBS=ON"
       system "make"
       system "make", "install"
+
+      system "make", "clean"
+      system "cmake", "..", *args, "-DBUILD_SHARED_LIBS=OFF"
+      system "make"
+      lib.install "libfolly.a", "folly/libfollybenchmark.a"
     end
   end
 
@@ -60,7 +58,7 @@ class Folly < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11", "test.cc", "-I#{include}", "-L#{lib}",
+    system ENV.cxx, "-std=c++14", "test.cc", "-I#{include}", "-L#{lib}",
                     "-lfolly", "-o", "test"
     system "./test"
   end

@@ -1,23 +1,20 @@
 class Capnp < Formula
   desc "Data interchange format and capability-based RPC system"
   homepage "https://capnproto.org/"
-  url "https://capnproto.org/capnproto-c++-0.6.1.tar.gz"
-  sha256 "8082040cd8c3b93c0e4fc72f2799990c72fdcf21c2b5ecdae6611482a14f1a04"
+  url "https://capnproto.org/capnproto-c++-0.8.0.tar.gz"
+  sha256 "d1f40e47574c65700f0ec98bf66729378efabe3c72bc0cda795037498541c10d"
   head "https://github.com/capnproto/capnproto.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "dd976dfecf6bb362aa6f4471722b7a66c9dede1b231a77b56231ed31a66660ad" => :high_sierra
-    sha256 "02d729a3d9c6267ff0bea777ade442da70410f04f4f478e789d6f02ca4ad8069" => :sierra
-    sha256 "2393cf083cccf35613b7bd293d87a52f201a4f0cd48bce8d0cd60300808ee203" => :el_capitan
-    sha256 "726278b97a0fab5be359b604b08dc8ea9b5cd7a8a1e350e6724aaa40b7bbd5a2" => :yosemite
+    sha256 "741c2079361cdb5881a60684190bc4aa98ff9cc6f8d29aa46880e809ac1b06c3" => :catalina
+    sha256 "f389012b8211b70af4fa7d2eed8db8ad399ef2bdc98e286fb57a4b1beb93dfe4" => :mojave
+    sha256 "9c3beb8d8db3b372e4d2fd07d99a553fde6ff53824c6cfec82c3db41e212bc5b" => :high_sierra
   end
 
-  needs :cxx11
   depends_on "cmake" => :build
 
   def install
-    ENV.cxx11
     mkdir "build" do
       system "cmake", "..", *std_cmake_args
       system "make", "install"

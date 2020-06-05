@@ -1,21 +1,21 @@
 class Pc6001vx < Formula
   desc "PC-6001 emulator"
-  homepage "http://eighttails.seesaa.net/"
-  url "http://eighttails.up.seesaa.net/bin/PC6001VX_2.31.1_src.tar.gz"
-  sha256 "eb00ab18ce6f165bc86e1355dc330a9a5129dc155176622e0ee000f9706682b3"
+  homepage "https://eighttails.seesaa.net/"
+  url "https://eighttails.up.seesaa.net/bin/PC6001VX_3.4.0_src.tar.gz"
+  sha256 "4149b4c4a53d002748b7ad6c06a2e0d967ce8a72c6d14e06672df4eb1d968044"
   head "https://github.com/eighttails/PC6001VX.git"
 
   bottle do
     cellar :any
-    sha256 "4a4d77fa8ede4197f2b28c7d065e59e119cd99f515867fdc9540ebe3bed01d8d" => :high_sierra
-    sha256 "83f39f11e2a2f169c35c009df6951120eac59cc6320b4dc05b553b768c9eb9c4" => :sierra
-    sha256 "1c480ada4c50ee19cf41dafa981fe57b019ed0eddca3ddb56d3157154ad5ee93" => :el_capitan
+    sha256 "6d79315d4f41941bd35f8f9452b91aae330f19d1f1e843d19a7aa4b063fab235" => :catalina
+    sha256 "725e10f29d21fb556d51b61b988433e6524164918270c7c4321df5866a485162" => :mojave
+    sha256 "7ece9b228973e43ae606c210e608aac6a4779cb49fb72ffe7d817f18f93c1ca7" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
+  depends_on "ffmpeg"
   depends_on "qt"
   depends_on "sdl2"
-  depends_on "ffmpeg"
 
   def install
     # Need to explicitly set up include directories
@@ -25,11 +25,6 @@ class Pc6001vx < Formula
     ENV.append_to_cflags "-Wno-reserved-user-defined-literal"
     # Use libc++ explicitly, otherwise build fails
     ENV.append_to_cflags "-stdlib=libc++" if ENV.compiler == :clang
-
-    # Unix scope in the QT project file includes MacOS, always enabling x11 and x11widgets
-    # As a workaround, remove 'macx' from the unix scope in this instance
-    inreplace "PC6001VX.pro", "\#Configuration for UNIX variants\nunix {",
-                              "\#Configuration for UNIX variants\nunix:!macx {"
 
     system "qmake", "PREFIX=#{prefix}", "QMAKE_CXXFLAGS=#{ENV.cxxflags}", "CONFIG+=c++11"
     system "make"

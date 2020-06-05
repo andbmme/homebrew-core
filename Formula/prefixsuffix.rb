@@ -3,20 +3,17 @@ class Prefixsuffix < Formula
   homepage "https://github.com/murraycu/prefixsuffix"
   url "https://download.gnome.org/sources/prefixsuffix/0.6/prefixsuffix-0.6.9.tar.xz"
   sha256 "fc3202bddf2ebbb93ffd31fc2a079cfc05957e4bf219535f26e6d8784d859e9b"
+  revision 4
 
   bottle do
-    sha256 "adf52f2e594b7e519fc4cbe02d07f30020bcef48d37b580b8ad5a66ad1a17030" => :high_sierra
-    sha256 "cf1ee40aeaa52ad6fe92570c1f914d98275a3d9c2bbc6f93ca1ea9f061c0f973" => :sierra
-    sha256 "1143a29769e566e030bec8f3bf7a3f24a9c7fc69638511b6964571cc255b696f" => :el_capitan
-    sha256 "544f17fbc8873abb8725d469f2cb076245d93527008f805f7b29416b6b20a82f" => :yosemite
-    sha256 "eb984287bf98618cf61cf5e9ed85103077aaf4a36c8309fdcb6c9ecb736b4272" => :mavericks
+    sha256 "48603e67c0d43035c166ba203fd9f615ba35280f06f8827b98597da67f4d2c62" => :catalina
+    sha256 "9a9b7ba884860fa4a3534e05118d08e0501e5b195b84a9baa476b49516d2b0a2" => :mojave
+    sha256 "41422acfc4dfd9a6948623ad544174e70648d2644d763b22f3219bd832f28a7d" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gtkmm3"
-
-  needs :cxx11
 
   def install
     ENV.cxx11

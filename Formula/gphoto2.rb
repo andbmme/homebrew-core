@@ -1,14 +1,15 @@
 class Gphoto2 < Formula
   desc "Command-line interface to libgphoto2"
-  homepage "http://gphoto.org/"
-  url "https://downloads.sourceforge.net/project/gphoto/gphoto/2.5.15/gphoto2-2.5.15.tar.bz2"
-  sha256 "ae571a227983dc9997876702a73af5431d41f287ea0f483cda897c57a6084a77"
+  homepage "http://www.gphoto.org/"
+  url "https://downloads.sourceforge.net/project/gphoto/gphoto/2.5.23/gphoto2-2.5.23.tar.bz2"
+  sha256 "df87092100e7766c9d0a4323217c91908a9c891c0d3670ebf40b76903be458d1"
 
   bottle do
     cellar :any
-    sha256 "28856ab94ba2f28245649734265ac41cb29911d78818bd5aea0dddbbfc005510" => :high_sierra
-    sha256 "1c1e980bde3f0cd72de42d9196254ffbec516b4ee667232090f0f68bb9284a73" => :sierra
-    sha256 "f663e168d3e139ea2544e560aa4666441622a95bc425fa755c7fbd6060c5aaa0" => :el_capitan
+    sha256 "41373d501ce514558ba5ef0ba1511a4e1b340157eb900adc50c27c3712f479e5" => :catalina
+    sha256 "da5cc508f296a7830b969ac4689ed9decb2242f1f2ce847bbffa76bc4ee535db" => :mojave
+    sha256 "5d8185b94ff870dbea0947367b66b839a48523be64eef5b351e67d94fb3d3587" => :high_sierra
+    sha256 "058a04c33c80cfaad20f5bf35f1afee9624c390cf163e96df60f6c9c0c06f7e3" => :sierra
   end
 
   depends_on "pkg-config" => :build

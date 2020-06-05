@@ -1,26 +1,23 @@
 class Fzf < Formula
   desc "Command-line fuzzy finder written in Go"
   homepage "https://github.com/junegunn/fzf"
-  url "https://github.com/junegunn/fzf/archive/0.17.1.tar.gz"
-  sha256 "9c881e55780c0f56b5a30b87df756634d853bfd3938e7e53cb2df6ed63aa84a7"
+  url "https://github.com/junegunn/fzf/archive/0.21.1.tar.gz"
+  sha256 "47adf138f17c45d390af81958bdff6f92157d41e2c4cb13773df078b905cdaf4"
   head "https://github.com/junegunn/fzf.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ee36f59c2458c37180dbd9e4216e1b61e6a72cef9942ba23c1e3b930381a9016" => :high_sierra
-    sha256 "f22ebf6cdeb1986cca64d211cfeae3155241f5126b61b038a4e22096b6d9497c" => :sierra
-    sha256 "84ad9a940e489058b2a0ec55bdbe367a8c0eaf14c9ea2f4def920496c04df36d" => :el_capitan
+    sha256 "733f79496c3246979ca05eeb5677a5fd9e8ec532e69e8b2012102cacddba8ae6" => :catalina
+    sha256 "3c03bb9715be153a0f776d06cf4acd436ad4faa4266f7bd875a0d37594291516" => :mojave
+    sha256 "d15a616156eb92071f1cfc50f10366532af92ca1635d309162141ad67f785865" => :high_sierra
   end
 
-  depends_on "glide" => :build
   depends_on "go" => :build
 
+  uses_from_macos "ncurses"
+
   def install
-    ENV["GLIDE_HOME"] = buildpath/"glide_home"
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/junegunn").mkpath
-    ln_s buildpath, buildpath/"src/github.com/junegunn/fzf"
-    system "glide", "install"
+    ENV["GOPATH"] = HOMEBREW_CACHE/"go_cache"
     system "go", "build", "-o", bin/"fzf", "-ldflags", "-X main.revision=brew"
 
     prefix.install "install", "uninstall"
@@ -31,12 +28,13 @@ class Fzf < Formula
     bin.install "bin/fzf-tmux"
   end
 
-  def caveats; <<~EOS
-    To install useful keybindings and fuzzy completion:
-      #{opt_prefix}/install
+  def caveats
+    <<~EOS
+      To install useful keybindings and fuzzy completion:
+        #{opt_prefix}/install
 
-    To use fzf in Vim, add the following line to your .vimrc:
-      set rtp+=#{opt_prefix}
+      To use fzf in Vim, add the following line to your .vimrc:
+        set rtp+=#{opt_prefix}
     EOS
   end
 

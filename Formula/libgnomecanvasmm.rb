@@ -3,21 +3,19 @@ class Libgnomecanvasmm < Formula
   homepage "https://launchpad.net/libgnomecanvasmm"
   url "https://download.gnome.org/sources/libgnomecanvasmm/2.26/libgnomecanvasmm-2.26.0.tar.bz2"
   sha256 "996577f97f459a574919e15ba7fee6af8cda38a87a98289e9a4f54752d83e918"
-  revision 3
+  revision 6
 
   bottle do
     cellar :any
-    sha256 "f202bad470d91c3cb60944da3693de3942c82644f52ef6b4e86d86e2b0ab9a87" => :high_sierra
-    sha256 "404eca75023dead784e6d4f66935852441cffbef97904efaa71398752c582877" => :sierra
-    sha256 "0ad818d20c460a6667b00ebf568323bac65e75028c4ab310e50d2bf050b40c00" => :el_capitan
-    sha256 "1d96bae9e5f10677f2d30a2681ceaec4d82e416940ce7ef8b067a273144c619a" => :yosemite
+    sha256 "ea6c93668fcd91aecd935009e2925b0327b26caa979e2b2bdcb03e6caf013b40" => :catalina
+    sha256 "cbb72a9f16194a63a21980edb7eb4c770a72ca4774a82c1e25b3ac2beecc99f5" => :mojave
+    sha256 "cf11cecd2caa375fe050597099fd572725ef154b33d9e9756f129d8b2085fa62" => :high_sierra
+    sha256 "91af30097a9c61e83ff6ce5f1bf6a689a15614d807c498717d9c74bba82361ea" => :sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libgnomecanvas"
   depends_on "gtkmm"
-
-  needs :cxx11
+  depends_on "libgnomecanvas"
 
   def install
     ENV.cxx11
@@ -50,7 +48,7 @@ class Libgnomecanvasmm < Formula
     libart = Formula["libart"]
     libgnomecanvas = Formula["libgnomecanvas"]
     libpng = Formula["libpng"]
-    libsigcxx = Formula["libsigc++"]
+    libsigcxx = Formula["libsigc++@2"]
     pango = Formula["pango"]
     pangomm = Formula["pangomm"]
     pixman = Formula["pixman"]

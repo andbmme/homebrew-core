@@ -1,20 +1,32 @@
 class Calcurse < Formula
   desc "Text-based personal organizer"
-  homepage "http://calcurse.org/"
-  url "http://calcurse.org/files/calcurse-4.3.0.tar.gz"
-  sha256 "31ecc3dc09e1e561502b4c94f965ed6b167c03e9418438c4a7ad5bad2c785f9a"
+  homepage "https://calcurse.org/"
+  url "https://calcurse.org/files/calcurse-4.6.0.tar.gz"
+  sha256 "fa090307a157e24e790819b20c93e037b89c6132f473abaaa7b21c3be76df043"
+  head "https://git.calcurse.org/calcurse.git"
 
   bottle do
-    sha256 "0fbabcf326ec92cf28ec57ff76f77e1a6fa41217f7d11ef5090c18b7bfc5b8aa" => :high_sierra
-    sha256 "0a4237919a02a48d0c661ae43a4da579c69bf826921af07d14d9ade6f835374a" => :sierra
-    sha256 "4cca241225bacb88ffd8c9f97e8c7b4027068551523f07874975362995eacf54" => :el_capitan
+    sha256 "21cb64443bbffe19f0adb8dfc8f5e49eabed5fc5c0347215bbb7aa3383126719" => :catalina
+    sha256 "0d114c613163c192e9f156750ffa9c3c9a4a303c103a7bc7091c369da151a4c4" => :mojave
+    sha256 "41886cc820da1133c6c5f57fea4f9fbe072a0735e3ef8522a9301736216f4e70" => :high_sierra
   end
 
   depends_on "gettext"
 
+  if build.head?
+    depends_on "asciidoc" => :build
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+  end
+
   def install
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
-    system "make"
+    system "./autogen.sh" if build.head?
+
+    system "./configure", "--disable-dependency-tracking",
+                          "--prefix=#{prefix}"
+
+    # Specify XML_CATALOG_FILES for asciidoc
+    system "make", "XML_CATALOG_FILES=/usr/local/etc/xml/catalog"
     system "make", "install"
   end
 

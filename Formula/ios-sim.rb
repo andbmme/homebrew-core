@@ -3,18 +3,17 @@ require "language/node"
 class IosSim < Formula
   desc "Command-line application launcher for the iOS Simulator"
   homepage "https://github.com/phonegap/ios-sim"
-  url "https://registry.npmjs.org/ios-sim/-/ios-sim-6.1.2.tgz"
-  sha256 "b0d9e6101ac8f3c2ee9cbb123d9d2bd68a8dc24f83b822f7e64b546033f4098a"
+  url "https://github.com/ios-control/ios-sim/archive/9.0.0.tar.gz"
+  sha256 "8c72c8c5f9b0682c218678549c08ca01b3ac2685417fc2ab5b4b803d65a21958"
   head "https://github.com/phonegap/ios-sim.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "379955a35ac341fa19eae987a941047ffcd6fb2c56a040294235551b90e71355" => :high_sierra
-    sha256 "fadd81993914e35a09afaf60ce846befbb5f99a0ca23b96044aff2a3a7d88425" => :sierra
-    sha256 "4f2f61d51031e95de2087d180deae32766a5e6251c43237460ae0b9a69e78627" => :el_capitan
+    sha256 "8c48bcbabb9ddb5b3781c16a2af67518881ff23bd5d7f0723436cb438ef7088e" => :catalina
+    sha256 "87ddbe7f7341fa207ac5d4a1212e81a3fe838c474bdbcbc2c7239ac2bf8ccc7e" => :mojave
+    sha256 "ddbe9d541710ab4dd219db3f766e878ff8698dcd88c25a247e5c44e165ea2773" => :high_sierra
   end
 
-  depends_on :macos => :mountain_lion
   depends_on "node"
 
   def install

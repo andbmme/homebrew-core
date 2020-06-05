@@ -1,21 +1,19 @@
 class Neon < Formula
   desc "HTTP and WebDAV client library with a C interface"
-  homepage "http://www.webdav.org/neon/"
-  url "http://www.webdav.org/neon/neon-0.30.2.tar.gz"
-  sha256 "db0bd8cdec329b48f53a6f00199c92d5ba40b0f015b153718d1b15d3d967fbca"
+  homepage "https://notroj.github.io/neon/"
+  url "https://notroj.github.io/neon/neon-0.31.1.tar.gz"
+  mirror "https://fossies.org/linux/www/neon-0.31.1.tar.gz"
+  sha256 "c9dfcee723050df37ce18ba449d7707b78e7ab8230f3a4c59d9112e17dc2718d"
 
   bottle do
     cellar :any
-    sha256 "6866235177ca4c311257547ca644e50a5011d5bb60ef3631cfb42a01a0fb7df9" => :high_sierra
-    sha256 "6f44e5c1db3418612bf871f9551acef119162eac40585f045f02d2612ade356e" => :sierra
-    sha256 "2aafd9bf8e7fb42d8cce9b6a7467e8beccc11931b824766e341a8d72331e0c48" => :el_capitan
-    sha256 "7348fcda6d13a8cba37a98b7ac6c9876a2ffa037714954872832d390c5a475d7" => :yosemite
+    sha256 "bcac044d4f80150fdad61b8fb79a50dc750918cb6d95bf28cdb97d3ee83b131d" => :catalina
+    sha256 "ed9208368b808c3e5bae4b4b754f71cc836b0814c8ff6ab0f2c508cb00d0564f" => :mojave
+    sha256 "b3920327bff10523afc83dc19a488da3519d78860623718ca0c0cc2611e611ee" => :high_sierra
   end
 
-  keg_only :provided_pre_mountain_lion
-
   depends_on "pkg-config" => :build
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   # Configure switch unconditionally adds the -no-cpp-precomp switch
   # to CPPFLAGS, which is an obsolete Apple-only switch that breaks
@@ -30,7 +28,7 @@ class Neon < Formula
                           "--disable-static",
                           "--disable-nls",
                           "--with-ssl=openssl",
-                          "--with-libs=#{Formula["openssl"].opt_prefix}"
+                          "--with-libs=#{Formula["openssl@1.1"].opt_prefix}"
     system "make", "install"
   end
 end

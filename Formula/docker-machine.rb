@@ -2,19 +2,20 @@ class DockerMachine < Formula
   desc "Create Docker hosts locally and on cloud providers"
   homepage "https://docs.docker.com/machine"
   url "https://github.com/docker/machine.git",
-      :tag => "v0.13.0",
-      :revision => "9ba6da9ebd1140b65eb73e1ce08086ca72764c60"
+      :tag      => "v0.16.2",
+      :revision => "bd45ab13d88c32a3dd701485983354514abc41fa"
   head "https://github.com/docker/machine.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "f69505083b87c7964014ecaa1ccf5615f5e5b331aa682429a148113f9a480261" => :high_sierra
-    sha256 "5c2daef1c95e61be256fd1c2e428e342a3f1c5d895e33a3666fabdf9c3dbf1e4" => :sierra
-    sha256 "67c92599ec8b67662dda5f75ad187b5c53896eedf81c6af808b36bd84f01e5ad" => :el_capitan
+    sha256 "99b50d9809a0aa881e01686e3356fbd17fa61e5a5e8cb937a2a9e9ff103be097" => :catalina
+    sha256 "cc56a9c37702ecaeea1a5034326d87fa145fbc4cb613d151756571b78ca8f1ab" => :mojave
+    sha256 "320ef0f8b7fba8e679c784f854155314c7bdcbc4e7d43fd11dbce6e0e3e0f85b" => :high_sierra
+    sha256 "23a2165e741ea1a9321476d3037a5d76bc24bd494ae0bd8b16f35e3248c0aa77" => :sierra
   end
 
-  depends_on "go" => :build
   depends_on "automake" => :build
+  depends_on "go" => :build
 
   def install
     ENV["GOPATH"] = buildpath

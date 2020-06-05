@@ -1,29 +1,28 @@
 class GnuGetopt < Formula
-  desc "Command-line option parsing library"
-  homepage "http://software.frodo.looijaard.name/getopt/"
-  url "http://frodo.looijaard.name/system/files/software/getopt/getopt-1.1.6.tar.gz"
-  sha256 "d0bf1dc642a993e7388a1cddfb9409bed375c21d5278056ccca3a0acd09dc5fe"
+  desc "Command-line option parsing utility"
+  homepage "https://github.com/karelzak/util-linux"
+  url "https://www.kernel.org/pub/linux/utils/util-linux/v2.35/util-linux-2.35.2.tar.xz"
+  sha256 "21b7431e82f6bcd9441a01beeec3d57ed33ee948f8a5b41da577073c372eb58a"
 
   bottle do
-    sha256 "5dc8b07eb3425e5b57d7deb4dea187fc992ef358c9c053d3a2dc230d748b4252" => :high_sierra
-    sha256 "05391b0dd0876ead74b18a4c5bb9c7db996586bf6918bd014db534027fd9ae2a" => :sierra
-    sha256 "5e9e87fe18c5681e80f1cf940fed275ed895831304326bc5e7be6fb6e53e8594" => :el_capitan
-    sha256 "f8dbbec03aaaeb1bc774d9bf606701901cc9a8ad15cecc5473567e51845057e6" => :yosemite
-    sha256 "27938c615808c8e4ff2eacac0a4059c76dee5518a5c8bbfb304b24b70736b429" => :mavericks
-    sha256 "88a02cd609a91253e9b996a1fcb1e8837161673e413fe792e5d05aa3ff9a94cf" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "4eda655b18149121dd39d19928b64b63f7310469ad1d64a232996b61afb5016c" => :catalina
+    sha256 "ff402c05420ff975374689ce0f185c8d9f9578f3e9113e935cf3030f0743c31c" => :mojave
+    sha256 "a9c00a4e5483a0636b9a8dc6def5cc73c53f7b6ef16a476af5d470d4d6e1e5c4" => :high_sierra
   end
 
-  keg_only :provided_by_osx
-
-  depends_on "gettext"
+  keg_only :provided_by_macos
 
   def install
-    inreplace "Makefile" do |s|
-      gettext = Formula["gettext"]
-      s.change_make_var! "CPPFLAGS", "\\1 -I#{gettext.include}"
-      s.change_make_var! "LDFLAGS", "\\1 -L#{gettext.lib} -lintl"
-    end
-    system "make", "prefix=#{prefix}", "mandir=#{man}", "install"
+    system "./configure", "--disable-dependency-tracking",
+                          "--disable-silent-rules",
+                          "--prefix=#{prefix}"
+
+    system "make", "getopt"
+
+    bin.install "getopt"
+    man1.install "misc-utils/getopt.1"
+    bash_completion.install "bash-completion/getopt"
   end
 
   test do

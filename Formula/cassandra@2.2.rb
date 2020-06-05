@@ -1,38 +1,41 @@
 class CassandraAT22 < Formula
   desc "Eventually consistent, distributed key-value db"
   homepage "https://cassandra.apache.org"
-  url "https://www.apache.org/dyn/closer.cgi?path=/cassandra/2.2.10/apache-cassandra-2.2.10-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/cassandra/2.2.10/apache-cassandra-2.2.10-bin.tar.gz"
-  sha256 "850a4f3d4d9fe67bfd6c77bc79d22c5acfc3c00ba883d5a7d9e3ee41c7d92943"
+  url "https://www.apache.org/dyn/closer.lua?path=cassandra/2.2.16/apache-cassandra-2.2.16-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/cassandra/2.2.16/apache-cassandra-2.2.16-bin.tar.gz"
+  sha256 "827474c965242be4788beefa3e28d05d909e0bb068e03b65c73f1669796ddb84"
 
-  bottle :unneeded
+  bottle do
+    cellar :any_skip_relocation
+    sha256 "da62e2b0ecaecaa18153a41a4dfd7e4d3430e46e6b8b48fcc1e8af70e01a60dd" => :catalina
+    sha256 "4dd86f0e2a8966109ea77ac5003898c604f1c1239138588c2fded53eb9ac7302" => :mojave
+    sha256 "34f2cf7cd565fbfabfbea6137859835dad092935c47df06391eca2824f9c4552" => :high_sierra
+  end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  keg_only :versioned_formula
+
+  depends_on "cython" => :build
+  depends_on :macos # Due to Python 2 (does not support Python 3)
 
   # Only >=Yosemite has new enough setuptools for successful compile of the below deps.
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/7a/a8/5877fa2cec00f7678618fb465878fd9356858f0894b60c6960364b5cf816/setuptools-24.0.1.tar.gz"
-    sha256 "5d3ae6f1cc9f1d3e1fe420c5daaeb8d79059fcb12624f4897d5ed8a9348ee1d2"
-  end
-
-  resource "Cython" do
-    url "https://files.pythonhosted.org/packages/b1/51/bd5ef7dff3ae02a2c6047aa18d3d06df2fb8a40b00e938e7ea2f75544cac/Cython-0.24.tar.gz"
-    sha256 "6de44d8c482128efc12334641347a9c3e5098d807dd3c69e867fa8f84ec2a3f1"
+    url "https://files.pythonhosted.org/packages/a4/c8/9a7a47f683d54d83f648d37c3e180317f80dc126a304c45dc6663246233a/setuptools-36.5.0.zip"
+    sha256 "ce2007c1cea3359870b80657d634253a0765b0c7dc5a988d77ba803fc86f2c64"
   end
 
   resource "futures" do
-    url "https://files.pythonhosted.org/packages/55/db/97c1ca37edab586a1ae03d6892b6633d8eaa23b23ac40c7e5bbc55423c78/futures-3.0.5.tar.gz"
-    sha256 "0542525145d5afc984c88f914a0c85c77527f65946617edb5274f72406f981df"
+    url "https://files.pythonhosted.org/packages/cc/26/b61e3a4eb50653e8a7339d84eeaa46d1e93b92951978873c220ae64d0733/futures-3.1.1.tar.gz"
+    sha256 "51ecb45f0add83c806c68e4b06106f90db260585b25ef2abfcda0bd95c0132fd"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/b3/b2/238e2590826bfdd113244a40d9d3eb26918bd798fc187e2360a8367068db/six-1.10.0.tar.gz"
-    sha256 "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a"
+    url "https://files.pythonhosted.org/packages/16/d8/bc6316cf98419719bd59c91742194c111b6f2e85abac88e496adefaf7afe/six-1.11.0.tar.gz"
+    sha256 "70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9"
   end
 
   resource "thrift" do
-    url "https://files.pythonhosted.org/packages/ae/58/35e3f0cd290039ff862c2c9d8ae8a76896665d70343d833bdc2f748b8e55/thrift-0.9.3.tar.gz"
-    sha256 "dfbc3d3bd19d396718dab05abaf46d93ae8005e2df798ef02e32793cd963877e"
+    url "https://files.pythonhosted.org/packages/a3/ea/84a41e03f1ab14fb314c8bcf1c451090efa14c5cdfb9797d1079f502b54e/thrift-0.10.0.zip"
+    sha256 "b7f6c09155321169af03f9fb20dc15a4a0c7481e7c334a5ba8f7f0d864633209"
   end
 
   resource "cql" do
@@ -41,8 +44,8 @@ class CassandraAT22 < Formula
   end
 
   resource "cassandra-driver" do
-    url "https://files.pythonhosted.org/packages/de/d0/38682a3bc9d581444e2106366ceaaa684bff4b2b5977e5f85b6014f7b6cc/cassandra-driver-3.5.0.tar.gz"
-    sha256 "924ea4f3458d39fad54eab5e2f0f5b98ccc636d1ee415f869f66c5163d405e0f"
+    url "https://files.pythonhosted.org/packages/5a/96/a5b2458a0483d3cefdf13064d40119754c1552ea34b7f0e8c6e03e66eb0a/cassandra-driver-3.11.0.tar.gz"
+    sha256 "643bed0fac08ee91630f0f35556bb62c3b4b007c20d4e6e8d349f769ea648150"
   end
 
   def install
@@ -60,17 +63,23 @@ class CassandraAT22 < Formula
     inreplace "conf/cassandra.yaml", "/var/lib/cassandra", "#{var}/lib/cassandra"
     inreplace "conf/cassandra-env.sh", "/lib/", "/"
 
-    inreplace "bin/cassandra", "-Dcassandra.logdir\=$CASSANDRA_HOME/logs", "-Dcassandra.logdir\=#{var}/log/cassandra"
+    inreplace "bin/cassandra", "-Dcassandra.logdir\=$CASSANDRA_HOME/logs",
+                               "-Dcassandra.logdir\=#{var}/log/cassandra"
     inreplace "bin/cassandra.in.sh" do |s|
-      s.gsub! "CASSANDRA_HOME=\"`dirname \"$0\"`/..\"", "CASSANDRA_HOME=\"#{libexec}\""
+      s.gsub! "CASSANDRA_HOME=\"`dirname \"$0\"`/..\"",
+              "CASSANDRA_HOME=\"#{libexec}\""
       # Store configs in etc, outside of keg
-      s.gsub! "CASSANDRA_CONF=\"$CASSANDRA_HOME/conf\"", "CASSANDRA_CONF=\"#{etc}/cassandra\""
+      s.gsub! "CASSANDRA_CONF=\"$CASSANDRA_HOME/conf\"",
+              "CASSANDRA_CONF=\"#{etc}/cassandra\""
       # Jars installed to prefix, no longer in a lib folder
-      s.gsub! "\"$CASSANDRA_HOME\"/lib/*.jar", "\"$CASSANDRA_HOME\"/*.jar"
+      s.gsub! "\"$CASSANDRA_HOME\"/lib/*.jar",
+              "\"$CASSANDRA_HOME\"/*.jar"
       # The jammm Java agent is not in a lib/ subdir either:
-      s.gsub! "JAVA_AGENT=\"$JAVA_AGENT -javaagent:$CASSANDRA_HOME/lib/jamm-", "JAVA_AGENT=\"$JAVA_AGENT -javaagent:$CASSANDRA_HOME/jamm-"
+      s.gsub! "JAVA_AGENT=\"$JAVA_AGENT -javaagent:$CASSANDRA_HOME/lib/jamm-",
+              "JAVA_AGENT=\"$JAVA_AGENT -javaagent:$CASSANDRA_HOME/jamm-"
       # Storage path
-      s.gsub! "cassandra_storagedir\=\"$CASSANDRA_HOME/data\"", "cassandra_storagedir\=\"#{var}/lib/cassandra\""
+      s.gsub! "cassandra_storagedir\=\"$CASSANDRA_HOME/data\"",
+              "cassandra_storagedir\=\"#{var}/lib/cassandra\""
     end
 
     rm Dir["bin/*.bat", "bin/*.ps1"]
@@ -83,37 +92,42 @@ class CassandraAT22 < Formula
     libexec.install Dir["lib/*.jar"]
 
     share.install [libexec+"bin/cassandra.in.sh", libexec+"bin/stop-server"]
-    inreplace Dir["#{libexec}/bin/cassandra*", "#{libexec}/bin/debug-cql", "#{libexec}/bin/nodetool", "#{libexec}/bin/sstable*"],
-              %r{`dirname "?\$0"?`/cassandra.in.sh},
-              "#{share}/cassandra.in.sh"
+    inreplace Dir[
+      "#{libexec}/bin/cassandra*",
+      "#{libexec}/bin/debug-cql",
+      "#{libexec}/bin/nodetool",
+      "#{libexec}/bin/sstable*"
+    ], %r{`dirname "?\$0"?`/cassandra.in.sh},
+       "#{share}/cassandra.in.sh"
 
     bin.write_exec_script Dir["#{libexec}/bin/*"]
     rm bin/"cqlsh" # Remove existing exec script
     (bin/"cqlsh").write_env_script libexec/"bin/cqlsh", :PYTHONPATH => pypath
   end
 
-  plist_options :manual => "cassandra -f"
+  plist_options :manual => "#{HOMEBREW_PREFIX}/opt/cassandra@2.2/bin/cassandra -f"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
-        <true/>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>#{opt_bin}/cassandra</string>
-            <string>-f</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}/lib/cassandra</string>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <true/>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+              <string>#{opt_bin}/cassandra</string>
+              <string>-f</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}/lib/cassandra</string>
+        </dict>
+      </plist>
     EOS
   end
 

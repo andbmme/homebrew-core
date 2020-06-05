@@ -3,29 +3,28 @@ class OsmGpsMap < Formula
   homepage "https://nzjrs.github.com/osm-gps-map/"
   url "https://github.com/nzjrs/osm-gps-map/releases/download/1.1.0/osm-gps-map-1.1.0.tar.gz"
   sha256 "8f2ff865ed9ed9786cc5373c37b341b876958416139d0065ebb785cf88d33586"
+  revision 3
 
   bottle do
-    rebuild 1
-    sha256 "9b59eb8f7d3143f88a068684a7f5485bde724fb10819e778a6a84b00a8d2c150" => :high_sierra
-    sha256 "39d671106b914b85fb0730b3d35f96c501d287cedae1c8ad71683ec4c540a0ee" => :sierra
-    sha256 "8bb0e6b77b1eb48fb6ea0700828a9b7cb15967ba09b21f35dbdf0f3f1451e585" => :el_capitan
-    sha256 "30748d2eed1125991271b993672bfb7d90385802e1c2feba5f6f2dd22340fc95" => :yosemite
+    sha256 "4ef711a7499c6aecaa1e11e2fb0d2ecd12ec9a06bfa769b0c62ac4bfd23ec318" => :catalina
+    sha256 "181971cd05297972cacd6549e73738bf78ee6cbf069b16a56c960f1835257697" => :mojave
+    sha256 "f6bf2bb29f95988e3ed566488905535b519dd51fb3711329d80b046379b3728a" => :high_sierra
   end
 
   head do
     url "https://github.com/nzjrs/osm-gps-map.git"
-    depends_on "gnome-common" => :build
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
-    depends_on "libtool" => :build
+    depends_on "automake" => :build
+    depends_on "gnome-common" => :build
     depends_on "gtk-doc" => :build
+    depends_on "libtool" => :build
   end
 
+  depends_on "gobject-introspection" => :build
   depends_on "pkg-config" => :build
+  depends_on "gdk-pixbuf"
   depends_on "glib"
   depends_on "gtk+3"
-  depends_on "gdk-pixbuf"
-  depends_on "gobject-introspection"
   depends_on "libsoup"
 
   def install
@@ -51,6 +50,7 @@ class OsmGpsMap < Formula
     glib = Formula["glib"]
     gdk_pixbuf = Formula["gdk-pixbuf"]
     gtkx3 = Formula["gtk+3"]
+    harfbuzz = Formula["harfbuzz"]
     pango = Formula["pango"]
     flags = %W[
       -I#{atk.opt_include}/atk-1.0
@@ -59,6 +59,7 @@ class OsmGpsMap < Formula
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gtkx3.opt_include}/gtk-3.0
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{pango.opt_include}/pango-1.0
       -I#{include}/osmgpsmap-1.0
       -D_REENTRANT

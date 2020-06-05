@@ -3,19 +3,25 @@ class Ntopng < Formula
   homepage "https://www.ntop.org/products/traffic-analysis/ntop/"
 
   stable do
-    url "https://github.com/ntop/ntopng/archive/3.0.tar.gz"
-    sha256 "3780f1e71bc7aa404f40ea9b805d195943cdb5095d712f41669eae138d388ad5"
+    url "https://github.com/ntop/ntopng/archive/4.0.tar.gz"
+    sha256 "caf3aeec5c66eca7ddc3a1d4edc4a109b6c963a22bfcf6843e402a569c8e12a1"
 
     resource "nDPI" do
-      url "https://github.com/ntop/nDPI.git", :branch => "2.0-stable"
+      url "https://github.com/ntop/nDPI/archive/3.2.tar.gz"
+      sha256 "6808c8c4495343e67863f4d30bb261c1e2daec5628ae0be257ba2a2dea7ec70a"
+
+      # Contains an API change which ntopng 4.0 uses.
+      patch do
+        url "https://github.com/ntop/nDPI/commit/e4512dbcb9e1db0500290b712257e501d1440d71.patch?full_index=1"
+        sha256 "b753532c7c4e68bd20ac432e4ea2159b38609ee7bf6296e96b511222813cc633"
+      end
     end
   end
 
   bottle do
-    sha256 "79c57356858ac4802d889e612b206cc3257e798e5c525c150568fdac7f88252b" => :high_sierra
-    sha256 "accef6e537eca111021c9eefb3b142b80ddeec313b0c3f8924aaf785a9f839ed" => :sierra
-    sha256 "ec35e60a6fd33a1ed3631b2bc99845923388ba8f5ee5d61d06b342fe78547061" => :el_capitan
-    sha256 "6b0c53620382b61d40c1553fcfe15f0d8da5cefc8f3687627540f81ddb827edb" => :yosemite
+    sha256 "d08132368d27fea0ff63c81b4db8932b2d735e71810e8127415f805bf0d9147c" => :catalina
+    sha256 "2f59d60faccbcf2fff0da313b62e9d705fd88c239b3adf19a1c25575570da1c1" => :mojave
+    sha256 "3eb0fbddd488fa3368f7eab4fe574ac2598530f9393d5b08cf5d49a5151c6d62" => :high_sierra
   end
 
   head do
@@ -26,30 +32,22 @@ class Ntopng < Formula
     end
   end
 
-  option "with-mariadb", "Build with mariadb support"
-
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "libtool" => :build
-  depends_on "json-glib" => :build
-  depends_on "zeromq" => :build
   depends_on "gnutls" => :build
-
-  depends_on "json-c"
-  depends_on "rrdtool"
-  depends_on "luajit"
+  depends_on "json-glib" => :build
+  depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
+  depends_on "zeromq" => :build
   depends_on "geoip"
+  depends_on "json-c"
+  depends_on "libmaxminddb"
+  depends_on "lua"
+  depends_on "mysql-client"
   depends_on "redis"
-  depends_on "mysql" if build.without? "mariadb"
-  depends_on "mariadb" => :optional
+  depends_on "rrdtool"
 
   def install
-    # Prevent "make install" failure "cp: the -H, -L, and -P options may not be
-    # specified with the -r option"
-    # Reported 2 Jun 2017 https://github.com/ntop/ntopng/issues/1285
-    inreplace "Makefile.in", "cp -Lr", "cp -LR"
-
     resource("nDPI").stage do
       system "./autogen.sh"
       system "make"

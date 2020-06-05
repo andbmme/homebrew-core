@@ -2,38 +2,26 @@ class Reposurgeon < Formula
   desc "Edit version-control repository history"
   homepage "http://www.catb.org/esr/reposurgeon/"
   url "https://gitlab.com/esr/reposurgeon.git",
-      :tag => "3.42",
-      :revision => "885502d6c8bebd4efcf680babb28d7bc4e464a2f"
+      :tag      => "3.48",
+      :revision => "911d5c1168f7839855b577ea43971c7c35cacef8"
   head "https://gitlab.com/esr/reposurgeon.git"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "bd78fba0b4fc9a47fb10e089b9775c45e9d65bbe9cfbeb1eb975f9a8181c13ce" => :high_sierra
-    sha256 "c854e5ad35c59bd1c717f8f232f7e581b2423d80836541156255f44f0de6aecb" => :sierra
-    sha256 "38730f4bde6958779efb2f19096f45579920d18e926eedc9adc55311d9b05efa" => :el_capitan
-    sha256 "0aaefd3b688bdcfda7a3b53c485c97d5a7bcd50138dd84b9626da15aa07cfe38" => :yosemite
+    sha256 "aba7163a5984e3fb606b59b70e6c4233cf3d0aa69e400bad156c2a41c4800f3e" => :catalina
+    sha256 "7e3c1b86b32535b698098ffc82231ce1cde18512ffce1ea21cc7b70d0a85a535" => :mojave
+    sha256 "22f79c6f4746a5fcffe63be2247c748e5335082384a9309bdba061ff686813d0" => :high_sierra
   end
 
-  option "without-cython", "Build without cython (faster compile)"
-
-  depends_on :python if MacOS.version <= :snow_leopard
   depends_on "asciidoc" => :build
+  depends_on "go" => :build
   depends_on "xmlto" => :build
-  depends_on "cython" => [:build, :recommended]
+  depends_on "pypy"
 
   def install
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
     system "make", "install", "prefix=#{prefix}"
     elisp.install "reposurgeon-mode.el"
-
-    if build.with? "cython"
-      pyincludes = Utils.popen_read("python-config --cflags").chomp
-      pylib = Utils.popen_read("python-config --ldflags").chomp
-      system "make", "install-cyreposurgeon", "prefix=#{prefix}",
-                     "CYTHON=#{Formula["cython"].opt_bin}/cython",
-                     "pyinclude=#{pyincludes}", "pylib=#{pylib}"
-    end
   end
 
   test do
@@ -41,7 +29,7 @@ class Reposurgeon < Formula
       [user]
         name = Real Person
         email = notacat@hotmail.cat
-      EOS
+    EOS
     system "git", "init"
     system "git", "commit", "--allow-empty", "--message", "brewing"
 

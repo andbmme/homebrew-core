@@ -5,18 +5,25 @@ class Bench < Formula
 
   desc "Command-line benchmark tool"
   homepage "https://github.com/Gabriel439/bench"
-  url "https://hackage.haskell.org/package/bench-1.0.6/bench-1.0.6.tar.gz"
-  sha256 "09c37660d68d103553b79336bfe20383d608cdbaedebfbe289e1b87055a4456b"
+  url "https://hackage.haskell.org/package/bench-1.0.12/bench-1.0.12.tar.gz"
+  sha256 "a6376f4741588201ab6e5195efb1e9921bc0a899f77a5d9ac84a5db32f3ec9eb"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "b8d3039bacf0a9fa9b10188779b8c79bf7b309f79b7a98495cf04e7ef7f5f99b" => :high_sierra
-    sha256 "5b668c20f1e2ec14f81aee4c84df692741f46d5b1663cebac949c769eeb04ec3" => :sierra
-    sha256 "bad9f0285cc2f6307e001dc62950b35afd940f38ff1f6157bab2757aca8b9a3c" => :el_capitan
+    rebuild 1
+    sha256 "a1e643d10bcde9bd745eba1b515488c65493cf7d9879cbd7a58bd3661bb6bbdc" => :catalina
+    sha256 "ea2a40fb086803f1b7f6a35a9f34aa89509bbbc010a37228fa83ed4ccd1139be" => :mojave
+    sha256 "2263dbeca7bcff6a01109ea94a3d27fd4aed15b8c0fe27be5f78f86919c631d4" => :high_sierra
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc" => :build
+  depends_on "ghc@8.8" => :build
+
+  # Compatibility with GHC 8.8. Remove with the next release.
+  patch do
+    url "https://github.com/Gabriel439/bench/commit/846dea7caeb0aee81870898b80345b9d71484f86.patch?full_index=1"
+    sha256 "fac63cd1ddb0af3bda78900df3ac5a4e6b6d2bb8a3d4d94c2f55d3f21dc681d1"
+  end
 
   def install
     install_cabal_package

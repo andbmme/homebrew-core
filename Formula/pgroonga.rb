@@ -1,14 +1,15 @@
 class Pgroonga < Formula
   desc "PostgreSQL plugin to use Groonga as index"
   homepage "https://pgroonga.github.io/"
-  url "https://packages.groonga.org/source/pgroonga/pgroonga-2.0.2.tar.gz"
-  sha256 "4d644f9e59661e5aa8b1cd372d5aa345f976b0aae850523e287274110f394300"
+  url "https://packages.groonga.org/source/pgroonga/pgroonga-2.2.5.tar.gz"
+  sha256 "ff9962e4f5e54deb9876720739cb10bf0e14e4558e9ee636b96ea6de664a9253"
 
   bottle do
     cellar :any
-    sha256 "11bff1f45d9e6f1f633285c071da9d71ca441e74e1638d67bf37c3705b8eeff8" => :high_sierra
-    sha256 "1e43cf3e31c4517f71dfc661895fb0b94ddf6addb25b4841171674f89675f680" => :sierra
-    sha256 "ef3ec18dc482103a27c1777b9385d9deea506ebc22b496aae334a7660b4f14a4" => :el_capitan
+    rebuild 1
+    sha256 "458692b4139547d2660c7e859062fa2b2106da8e3ef8852950c73398bfd5b147" => :catalina
+    sha256 "1d5e7bddbb7ac76384681638fcb9f549a2be37491a33bc1aa8f869b9b72ed677" => :mojave
+    sha256 "2b968c6c23d92257b60a166a29efd74f714a0e4c15cfe8b6d16ab6e79e1e56c2" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
@@ -25,6 +26,8 @@ class Pgroonga < Formula
   end
 
   test do
+    return if ENV["CI"]
+
     pg_bin = Formula["postgresql"].opt_bin
     pg_port = "55561"
     system "#{pg_bin}/initdb", testpath/"test"

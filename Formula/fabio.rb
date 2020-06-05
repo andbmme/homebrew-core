@@ -1,28 +1,24 @@
 class Fabio < Formula
   desc "Zero-conf load balancing HTTP(S) router"
   homepage "https://github.com/fabiolb/fabio"
-  url "https://github.com/fabiolb/fabio/archive/v1.5.3.tar.gz"
-  sha256 "bad6442a9c3424986ff55839efd3ac20839dfee2acdbb05206b013f7e9272f1f"
+  url "https://github.com/fabiolb/fabio/archive/v1.5.13.tar.gz"
+  sha256 "66af6e8dbd0e7cbd171a868fa42a611d445701fadd9782bb077cf9101ac08cdf"
   head "https://github.com/fabiolb/fabio.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "81e9966383aa941b9ee2f043060d15990adaed962a004d1005080652978e48db" => :high_sierra
-    sha256 "76b727eb7592f82953753c23da05167e8b2642f53df0762493af64257c3bef37" => :sierra
-    sha256 "24e9bf94e082d6298094da3b1a71efc9192aa05573044e6eeb4c2a786a8b255a" => :el_capitan
+    rebuild 1
+    sha256 "9ed48161ee4b2c5bcf0ce9ce520c2506bec689b2d21735d1eb4f3a3cb470fb57" => :catalina
+    sha256 "3fe400520ea3af9c28baef9b376f14d8a96c88d6c79bc057f0949e15ea9c0efe" => :mojave
+    sha256 "41ae1110be9335004d77846ab554cb5ecf45f6c48f83942b95bd752c243dcc14" => :high_sierra
   end
 
   depends_on "go" => :build
-  depends_on "consul" => :recommended
+  depends_on "consul"
 
   def install
-    mkdir_p buildpath/"src/github.com/fabiolb"
-    ln_s buildpath, buildpath/"src/github.com/fabiolb/fabio"
-
-    ENV["GOPATH"] = buildpath.to_s
-
-    system "go", "install", "github.com/fabiolb/fabio"
-    bin.install "#{buildpath}/bin/fabio"
+    system "go", "build", "-ldflags", "-s -w", "-trimpath", "-o", bin/"fabio"
+    prefix.install_metafiles
   end
 
   test do
@@ -33,16 +29,12 @@ class Fabio < Formula
     FABIO_DEFAULT_PORT = 9999
     LOCALHOST_IP = "127.0.0.1".freeze
 
-    def port_open?(ip, port, seconds = 1)
+    def port_open?(ip_address, port, seconds = 1)
       Timeout.timeout(seconds) do
-        begin
-          TCPSocket.new(ip, port).close
-          true
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-          false
-        end
+        TCPSocket.new(ip_address, port).close
       end
-    rescue Timeout::Error
+      true
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Timeout::Error
       false
     end
 

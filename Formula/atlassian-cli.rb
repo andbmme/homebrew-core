@@ -1,26 +1,23 @@
 class AtlassianCli < Formula
   desc "Command-line interface clients for Atlassian products"
   homepage "https://bobswift.atlassian.net/wiki/pages/viewpage.action?pageId=1966101"
-  url "https://bobswift.atlassian.net/wiki/download/attachments/16285777/atlassian-cli-7.1.0-distribution.zip"
-  sha256 "d5b1a8c9ad30792e87a1cc562c55ec40dfc9d403f43af66d2b8d9ee78fb39a49"
+  url "https://bobswift.atlassian.net/wiki/download/attachments/16285777/atlassian-cli-9.2.0-distribution.zip"
+  sha256 "ba37552b8bd1c637d3444346e4fbc851f35db07dbbbee2919e7f732ab2d482a0"
 
   bottle :unneeded
 
-  depends_on :java => "1.8+"
+  depends_on "openjdk"
 
   def install
-    Dir.glob("*.sh") do |f|
-      cmd = File.basename(f, ".sh")
-      inreplace cmd + ".sh", "`dirname $0`", share
-      bin.install cmd + ".sh" => cmd
+    inreplace "acli.sh" do |s|
+      s.sub! "`find \"$directory/lib\" -name acli-*.jar`", "'#{share}/lib/acli-#{version}.jar'"
+      s.sub! "java", "'#{Formula["openjdk"].opt_bin}/java'"
     end
+    bin.install "acli.sh" => "acli"
     share.install "lib", "license"
   end
 
   test do
-    Dir.glob(bin/"*") do |f|
-      cmd = File.basename(f, ".sh")
-      assert_match "Usage:", shell_output(bin/"#{cmd} --help 2>&1 | head") unless cmd == "atlassian"
-    end
+    assert_match "Welcome to the Bob Swift Atlassian CLI", shell_output("#{bin}/acli --help 2>&1 | head")
   end
 end

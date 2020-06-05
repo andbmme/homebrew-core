@@ -1,15 +1,15 @@
 class Pgrouting < Formula
   desc "Provides geospatial routing for PostGIS/PostgreSQL database"
-  homepage "http://www.pgrouting.org"
-  url "https://github.com/pgRouting/pgrouting/archive/v2.5.2.tar.gz"
-  sha256 "9251d5955e00456ce8fd7f4fade0f40158687fd58814cbb961ba3588edc31153"
+  homepage "https://pgrouting.org/"
+  url "https://github.com/pgRouting/pgrouting/releases/download/v3.0.0/pgrouting-3.0.0.tar.gz"
+  sha256 "83915b697764756c9bd854ba93c1fab6ff4ecdee8f04603bfe566339d416d2cc"
   head "https://github.com/pgRouting/pgrouting.git"
 
   bottle do
-    cellar :any
-    sha256 "5a642c2d88ebaa7e0a0f9ae9369a716dd6dc2ab97c7fa4969c477be85b9490c8" => :high_sierra
-    sha256 "41d721ab350e6c2e3ba26c7178581c6a2935e089af7b366a738311ded552a998" => :sierra
-    sha256 "f98c878047ae5b781926f2d771cf11c6937df2a4938a24f58042d5c652167f38" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "8223d5c056df78d8d6bcf03f1ab94b7708d078f3722d885cfd42b22bc9dfbb6c" => :catalina
+    sha256 "ef46068511f063482b227a1d124eeb003d80dff963e4d6864f0708446f1d1c50" => :mojave
+    sha256 "468a144c221ba21ff2d3dec53a41428448417bc079f5398a090a26a4bcc83e6d" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -32,6 +32,8 @@ class Pgrouting < Formula
   end
 
   test do
+    return if ENV["CI"]
+
     pg_bin = Formula["postgresql"].opt_bin
     pg_port = "55561"
     system "#{pg_bin}/initdb", testpath/"test"

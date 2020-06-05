@@ -1,30 +1,22 @@
 class Redis < Formula
   desc "Persistent key-value database, with built-in net interface"
   homepage "https://redis.io/"
-  url "http://download.redis.io/releases/redis-4.0.2.tar.gz"
-  sha256 "b1a0915dbc91b979d06df1977fe594c3fa9b189f1f3d38743a2948c9f7634813"
+  url "http://download.redis.io/releases/redis-6.0.4.tar.gz"
+  sha256 "3337005a1e0c3aa293c87c313467ea8ac11984921fab08807998ba765c9943de"
+  revision 1
   head "https://github.com/antirez/redis.git", :branch => "unstable"
 
   bottle do
-    cellar :any_skip_relocation
-    rebuild 1
-    sha256 "ae08d93f77ee795c4a64349cd548febc759043b587b530c624a80c1c97d210e7" => :high_sierra
-    sha256 "bff73385bc94ceba943c4f880bc4f6fe9a3286c86cdda236da40882440485958" => :sierra
-    sha256 "3df2b75202ed8ecf8be630fe8e4179c5fea26156f1b02fe32b4e0d47a2604701" => :el_capitan
+    cellar :any
+    sha256 "bb93b0a7b0176cad197f016aad08f84aeb310c901018bfecb9a6fb973d424d76" => :catalina
+    sha256 "0496d421d4ce024d2336a68adcf27569a5075d313420b4804080559af54199e2" => :mojave
+    sha256 "d50a4af7f067d64a0b70aa4e3d10aeff83e9cd64f5541719a5a94e25a1c0a2b2" => :high_sierra
   end
 
-  option "with-jemalloc", "Select jemalloc as memory allocator when building Redis"
+  depends_on "openssl@1.1"
 
   def install
-    # Architecture isn't detected correctly on 32bit Snow Leopard without help
-    ENV["OBJARCH"] = "-arch #{MacOS.preferred_arch}"
-
-    args = %W[
-      PREFIX=#{prefix}
-      CC=#{ENV.cc}
-    ]
-    args << "MALLOC=jemalloc" if build.with? "jemalloc"
-    system "make", "install", *args
+    system "make", "install", "PREFIX=#{prefix}", "CC=#{ENV.cc}", "BUILD_TLS=yes"
 
     %w[run db/redis log].each { |p| (var/p).mkpath }
 
@@ -41,34 +33,35 @@ class Redis < Formula
 
   plist_options :manual => "redis-server #{HOMEBREW_PREFIX}/etc/redis.conf"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/redis-server</string>
+            <string>#{etc}/redis.conf</string>
+            <string>--daemonize no</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/redis.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/redis.log</string>
         </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/redis-server</string>
-          <string>#{etc}/redis.conf</string>
-          <string>--daemonize no</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/redis.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/redis.log</string>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 

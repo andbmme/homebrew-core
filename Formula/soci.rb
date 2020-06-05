@@ -1,46 +1,50 @@
 class Soci < Formula
   desc "Database access library for C++"
   homepage "https://soci.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/soci/soci/soci-3.2.3/soci-3.2.3.zip"
-  sha256 "ab0f82873b0c5620e0e8eb2ff89abad6517571fd63bae4bdcac64dd767ac9a05"
+  url "https://downloads.sourceforge.net/project/soci/soci/soci-4.0.0/soci-4.0.0.zip"
+  sha256 "c7fffa74867182d9559e20c6e8d291936c3bd8cfa8c7d0c13bb2eeb09e0f318b"
 
   bottle do
-    sha256 "b6186caa197c5111b9704cc4b4f133f0f5f656727ed3211c7351e2a97302f10f" => :high_sierra
-    sha256 "61ac3ada591371a743198251fa35d70a18cc6018d23e4a36e3ec45aa6ec99db2" => :sierra
-    sha256 "4b8d8acc29c2ed8e826be84c9dc777d947033396336885440fb823530460b470" => :el_capitan
-    sha256 "b802ee253ceb25ebfd2b5a90ef4dc8b229a90c7b1cae1a33533c9bd2ff9e7d50" => :yosemite
+    sha256 "b25ecdd8f098dc48dc20195cd8852533e47e12fe6cbac8bccb31db99854d9c5b" => :catalina
+    sha256 "0dc4c5223dcefeefbdbc647dc7827adf7fc01fe52a23f3bd325d6cf32624e532" => :mojave
+    sha256 "76d7380ed18a0cac1d883d6d38aea9f7a43b587584f4dceab1c32f56596341cf" => :high_sierra
   end
-
-  option "with-oracle", "Enable Oracle support."
-  option "with-boost", "Enable boost support."
-  option "with-mysql", "Enable MySQL support."
-  option "with-odbc", "Enable ODBC support."
-  option "with-pg", "Enable PostgreSQL support."
 
   depends_on "cmake" => :build
-  depends_on "boost" => [:build, :optional]
-  depends_on "sqlite" if MacOS.version <= :snow_leopard
-
-  def translate(a)
-    (a == "pg") ? "postgresql" : a
-  end
-
-  fails_with :clang do
-    build 421
-    cause "Template oddities"
-  end
+  depends_on "sqlite"
 
   def install
-    args = std_cmake_args + %w[.. -DWITH_SQLITE3:BOOL=ON]
-
-    %w[boost mysql oracle odbc pg].each do |a|
-      bool = build.with?(a) ? "ON" : "OFF"
-      args << "-DWITH_#{translate(a).upcase}:BOOL=#{bool}"
-    end
+    args = std_cmake_args + %w[
+      -DWITH_SQLITE3:BOOL=ON
+      -DWITH_BOOST:BOOL=OFF
+      -DWITH_MYSQL:BOOL=OFF
+      -DWITH_ODBC:BOOL=OFF
+      -DWITH_ORACLE:BOOL=OFF
+      -DWITH_POSTGRESQL:BOOL=OFF
+    ]
 
     mkdir "build" do
-      system "cmake", *args
+      system "cmake", "..", *args
       system "make", "install"
     end
+  end
+
+  test do
+    (testpath/"test.cxx").write <<~EOS
+      #include "soci/soci.h"
+      #include "soci/empty/soci-empty.h"
+      #include <string>
+
+      using namespace soci;
+      std::string connectString = "";
+      backend_factory const &backEnd = *soci::factory_empty();
+
+      int main(int argc, char* argv[])
+      {
+        soci::session sql(backEnd, connectString);
+      }
+    EOS
+    system ENV.cxx, "-o", "test", "test.cxx", "-std=c++11", "-L#{lib}", "-lsoci_core", "-lsoci_empty"
+    system "./test"
   end
 end

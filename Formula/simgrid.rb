@@ -1,43 +1,54 @@
 class Simgrid < Formula
+  include Language::Python::Shebang
+
   desc "Studies behavior of large-scale distributed systems"
-  homepage "http://simgrid.gforge.inria.fr"
-  url "https://gforge.inria.fr/frs/download.php/file/37148/SimGrid-3.17.tar.gz"
-  sha256 "f5e44f41983e83f65261598ab0de1909d3a8a3feb77f28e37d38f04631dbb908"
+  homepage "https://simgrid.org/"
+  url "https://framagit.org/simgrid/simgrid/uploads/0365f13697fb26eae8c20fc234c5af0e/SimGrid-3.25.tar.gz"
+  sha256 "0b5dcdde64f1246f3daa7673eb1b5bd87663c0a37a2c5dcd43f976885c6d0b46"
+  revision 1
 
   bottle do
-    sha256 "25156b23d0a2779e9d8207266d621c4328d83f1089005969991733e5007bb1d0" => :high_sierra
-    sha256 "5b383b0c5f6c6191a4843f7e419ca4739254d96d3c33bcba7cc19e05efd8b537" => :sierra
-    sha256 "a9a7b7d60cb9b7f586767d1225bd2a0ca10708285c2fb41ee84d8233b531d288" => :el_capitan
+    sha256 "5f6acdf27e6f658a180026c72c52b36de25ee08d9eac609f762358277613ae0b" => :catalina
+    sha256 "66357d6bbddedef44f1f35db0870592b1d4a1786d4f7ff87417ce0a88e1f0486" => :mojave
+    sha256 "9fab4d4bb4eadbb23a20295d29c0fe2bd2823a85790c0287b315d80615eed649" => :high_sierra
   end
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
   depends_on "boost"
-  depends_on "pcre"
-  depends_on :python3
   depends_on "graphviz"
+  depends_on "pcre"
+  depends_on "python@3.8"
 
   def install
+    # Avoid superenv shim references
+    inreplace "src/smpi/smpicc.in", "@CMAKE_C_COMPILER@", "/usr/bin/clang"
+    inreplace "src/smpi/smpicxx.in", "@CMAKE_CXX_COMPILER@", "/usr/bin/clang++"
+
     system "cmake", ".",
                     "-Denable_debug=on",
                     "-Denable_compile_optimizations=off",
+                    "-Denable_fortran=off",
                     *std_cmake_args
     system "make", "install"
+
+    bin.find { |f| rewrite_shebang detected_python_shebang, f }
   end
 
   test do
     (testpath/"test.c").write <<~EOS
       #include <stdio.h>
       #include <stdlib.h>
-      #include <simgrid/msg.h>
+      #include <simgrid/engine.h>
 
       int main(int argc, char* argv[]) {
-        printf("%f", MSG_get_clock());
+        printf("%f", simgrid_get_clock());
         return 0;
       }
     EOS
 
-    system ENV.cc, "test.c", "-lsimgrid", "-o", "test"
+    system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lsimgrid",
+                   "-o", "test"
     system "./test"
   end
 end

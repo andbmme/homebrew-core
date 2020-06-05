@@ -2,22 +2,22 @@ class Ffms2 < Formula
   desc "Libav/ffmpeg based source library and Avisynth plugin"
   homepage "https://github.com/FFMS/ffms2"
   url "https://github.com/FFMS/ffms2/archive/2.23.tar.gz"
-  mirror "https://mirrors.ocf.berkeley.edu/debian/pool/main/f/ffms2/ffms2_2.23.orig.tar.gz"
+  mirror "https://deb.debian.org/debian/pool/main/f/ffms2/ffms2_2.23.orig.tar.gz"
   sha256 "b09b2aa2b1c6f87f94a0a0dd8284b3c791cbe77f0f3df57af99ddebcd15273ed"
+  revision 4
 
   bottle do
     cellar :any
-    sha256 "efb2256552ea109584cf77921af66221a8b363df017d2918fc9b2f0abd0edf86" => :high_sierra
-    sha256 "44fe8152389302c40f8bae3b61871ec118e33ccdf52fd58d1051882c841a3a75" => :sierra
-    sha256 "c82bf5a6b23a8b60edce118b8fffa947226024be2fac1ccbc36881149be8d14a" => :el_capitan
-    sha256 "ccc6ffb553c748f94df62088b699245ca8972056cc592bb3abfd353abfffe61e" => :yosemite
+    sha256 "b6495a6e71b67427d075abbf334d41179593fd1576ab230f7a7da1f02f329500" => :catalina
+    sha256 "4e445388ec5eadeec544cc4f6dc119bd2c321194c1d7628ca61413d9ebdbe749" => :mojave
+    sha256 "8ff0f417a1455cc0c6f823ebb916c3be18f0a4cf8edecfda6970351060c07665" => :high_sierra
   end
 
   head do
     url "https://github.com/FFMS/ffms2.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
 
   depends_on "pkg-config" => :build

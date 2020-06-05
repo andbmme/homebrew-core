@@ -1,33 +1,25 @@
 class X3270 < Formula
   desc "IBM 3270 terminal emulator for the X Window System and Windows"
   homepage "http://x3270.bgp.nu/"
-  url "https://downloads.sourceforge.net/project/x3270/x3270/3.5ga9/suite3270-3.5ga9-src.tgz"
-  sha256 "654756cc1204fd69a861d416d350a0ab3c9cea317173a80b06aca0402a517d3e"
+  url "https://downloads.sourceforge.net/project/x3270/x3270/3.6ga9/suite3270-3.6ga9-src.tgz"
+  sha256 "674689a12d09ed9097d9d62a2422e65bf6d40c06dd217f0d618fb7e3673b7568"
 
   bottle do
-    rebuild 1
-    sha256 "fcb185056300588a933723599dd3142f20829eee764b5c61264451cacfa04586" => :high_sierra
-    sha256 "a02bd6ef6daa2fc941c2db69ae51dd5849593df4186b8a8fd0de58527faedcdd" => :sierra
-    sha256 "ebd2763771ac4dd5e0675bd70d7877d258f09775721f6c2dfbec6beb07280bb5" => :el_capitan
-    sha256 "345e32a6ff0343ff370d7562138da8a3dba3a248e601a5a23ca6a1c7588f76b8" => :yosemite
+    sha256 "4a688250d91e04d91aa9c0983f630fe0b682d35769387e4fa490f03f977be7fb" => :catalina
+    sha256 "c5448a7a24aa77b54c9473ea62b4aeac4c87930e79bc7a229dea02427d87c1fe" => :mojave
+    sha256 "962a25eb052b7f3f2a8c01fd1f2d0e90c5e70fd91ac7c63a038a4fd710661557" => :high_sierra
   end
 
-  option "with-x11", "Include x3270 (X11-based version)"
-  option "without-c3270", "Exclude c3270 (curses-based version)"
-  option "without-s3270", "Exclude s3270 (displayless version)"
-  option "without-tcl3270", "Exclude tcl3270 (integrated with Tcl)"
-  option "without-pr3287", "Exclude pr3287 (printer emulation)"
-
-  depends_on :x11 => :optional
-  depends_on "openssl"
+  depends_on "readline"
 
   def install
-    args = ["--prefix=#{prefix}"]
-    args << "--enable-x3270" if build.with? "x11"
-    args << "--enable-c3270" if build.with? "c3270"
-    args << "--enable-s3270" if build.with? "s3270"
-    args << "--enable-tcl3270" if build.with? "tcl3270"
-    args << "--enable-pr3287" if build.with? "pr3287"
+    args = %W[
+      --prefix=#{prefix}
+      --enable-c3270
+      --enable-pr3287
+      --enable-s3270
+      --enable-tcl3270
+    ]
 
     system "./configure", *args
     system "make", "install"

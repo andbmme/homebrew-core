@@ -3,14 +3,24 @@ class Bazaar < Formula
   homepage "https://bazaar.canonical.com/"
   url "https://launchpad.net/bzr/2.7/2.7.0/+download/bzr-2.7.0.tar.gz"
   sha256 "0d451227b705a0dd21d8408353fe7e44d3a5069e6c4c26e5f146f1314b8fdab3"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "184ea0c9b6dd3cb287257070325188828c669ecdf5f231b477182e9d616357cc" => :high_sierra
-    sha256 "506f81fddaadfb97bf1e923e16374d3bc6fba066e94d6cf4b0feadbc7bcf91a7" => :sierra
-    sha256 "75e4a4aa57887371b783839667da3a142805c60f13197d599f6c8ef95c104707" => :el_capitan
-    sha256 "7919335ffdd76bd54a3b58da3e7d9499f8bc6dd895b1d117390bb19ceaf08818" => :yosemite
-    sha256 "51a058a4ff6b070a62ce30d01a673bba74d65d4eab6a13a9d53696f24cceb80d" => :mavericks
+    rebuild 1
+    sha256 "c9ab575e1e27fe8e550690c760464c37890ca5c1fa8ea111c74d0172d0fa1453" => :catalina
+    sha256 "32411a9e28eb27b3637bc915150581524897a18ba223313e5bc2f776785aae9b" => :mojave
+    sha256 "cb1c0c8b5f19abef4043195d8cbd19f363a78581596de1ddcc763621964335b3" => :high_sierra
+  end
+
+  depends_on :macos # Due to Python 2
+
+  # CVE-2017-14176
+  # https://bugs.launchpad.net/brz/+bug/1710979
+  patch do
+    url "https://deb.debian.org/debian/pool/main/b/bzr/bzr_2.7.0+bzr6622-15.debian.tar.xz"
+    sha256 "d2198b93059cc9d37c551f7bfda19a199c18f4c9c6104a8c40ccd6d0c65e6fd3"
+    apply "patches/27_fix_sec_ssh"
   end
 
   def install

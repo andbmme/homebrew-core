@@ -1,25 +1,26 @@
 class Libstrophe < Formula
   desc "XMPP library for C"
-  homepage "http://strophe.im/libstrophe/"
-  url "https://github.com/strophe/libstrophe/archive/0.9.1.tar.gz"
-  sha256 "c90493f986e5bd407132c5a3e174378c02cb80fa4eaee29875e06b4bba6afcc3"
+  homepage "https://strophe.im/libstrophe/"
+  url "https://github.com/strophe/libstrophe/archive/0.9.3.tar.gz"
+  sha256 "8a3b79f62177ed59c01d4d4108357ff20bd933d53b845ee4e350d304c051a4fe"
   head "https://github.com/strophe/libstrophe.git"
 
   bottle do
     cellar :any
-    sha256 "3ff6c06cc05c83889e74a1fb06dd38bcd4ccf179d29210f0b0aacd6b6980ae63" => :high_sierra
-    sha256 "f0de1f0155ec4b9d7c936d0c3a0c0ecae7ccf0d1306baa4df47d58d6116e75fe" => :sierra
-    sha256 "da3d292e0c9d6e642038fffb8f79b4ec7eeced72900135b7cfc7cb4dfead5dc0" => :el_capitan
-    sha256 "7ae2803a6ad206a7642b822a9ad8078beeb5bd1108bd3ef1cf46cc72094c6653" => :yosemite
-    sha256 "6a6a3d52acff666a214cfdfb5e7559b3c32903d61c12405018ba25043d9e3416" => :mavericks
+    sha256 "da52155acc06ec67fb84cc51403bdecc76c6431a3d827ef3e30ea138b880b803" => :catalina
+    sha256 "040195fb364d82bbc32e11bfd37e2dbabae64bc898602064c1a432b7c3869efd" => :mojave
+    sha256 "149335c1a3224dbcfdb10bf4c5271edcc224c030d667fc9a8012244b4c2f06ed" => :high_sierra
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
   depends_on "libtool" => :build
-  depends_on "openssl"
+  depends_on "pkg-config" => :build
   depends_on "check"
+  depends_on "openssl@1.1"
+
+  uses_from_macos "expat"
+  uses_from_macos "libxml2"
 
   def install
     system "./bootstrap.sh"
@@ -49,7 +50,7 @@ class Libstrophe < Formula
         xmpp_shutdown();
         return 0;
       }
-      EOS
+    EOS
     flags = ["-I#{include}/", "-L#{lib}", "-lstrophe"]
     system ENV.cc, "-o", "test", "test.c", *(flags + ENV.cflags.to_s.split)
     system "./test"

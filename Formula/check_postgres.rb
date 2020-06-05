@@ -1,21 +1,18 @@
 class CheckPostgres < Formula
   desc "Monitor Postgres databases"
   homepage "https://bucardo.org/wiki/Check_postgres"
-  url "https://bucardo.org/downloads/check_postgres-2.22.0.tar.gz"
-  sha256 "29cd8ea0a0c0fcd79a1e6afb3f5a1d662c1658eef207ea89276ddb30121b85a8"
-  revision 2
-
+  url "https://bucardo.org/downloads/check_postgres-2.25.0.tar.gz"
+  sha256 "11b52f86c44d6cc26e9a4129e67c2589071dbe1b8ac1f8895761517491c6e44b"
   head "https://github.com/bucardo/check_postgres.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "1f7c7742a460bc88cce9855d2427cf0b8a09f4bc636dbdc7b8cd2557b1542de7" => :high_sierra
-    sha256 "36f0895bc5985115dd5b3525b7fbc1f49a2e432e4a52de0a148d8279ac548daf" => :sierra
-    sha256 "36f0895bc5985115dd5b3525b7fbc1f49a2e432e4a52de0a148d8279ac548daf" => :el_capitan
-    sha256 "36f0895bc5985115dd5b3525b7fbc1f49a2e432e4a52de0a148d8279ac548daf" => :yosemite
+    sha256 "2f164aefe3706e144350278db4e9246359a8a58bba1f16fae289344553e33b64" => :catalina
+    sha256 "2f164aefe3706e144350278db4e9246359a8a58bba1f16fae289344553e33b64" => :mojave
+    sha256 "e0ae2298e162d333e8833ad294906ba369ac5adaf704b8478ebf54c7a134b9f4" => :high_sierra
   end
 
-  depends_on :postgresql
+  depends_on "postgresql"
 
   def install
     system "perl", "Makefile.PL", "PREFIX=#{prefix}"

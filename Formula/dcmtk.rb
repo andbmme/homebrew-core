@@ -1,38 +1,26 @@
 class Dcmtk < Formula
   desc "OFFIS DICOM toolkit command-line utilities"
-  homepage "http://dicom.offis.de/dcmtk.php.en"
-  url "http://dicom.offis.de/download/dcmtk/dcmtk362/dcmtk-3.6.2.tar.gz"
-  sha256 "1b5cf1dcb23cad401310c3afeb961c3613e3d20ab2d161dcc8bf0735b443218d"
-  head "git://git.dcmtk.org/dcmtk.git"
+  homepage "https://dicom.offis.de/dcmtk.php.en"
+  url "https://dicom.offis.de/download/dcmtk/dcmtk365/dcmtk-3.6.5.tar.gz"
+  sha256 "a05178665f21896dbb0974106dba1ad144975414abd760b4cf8f5cc979f9beb9"
+  head "https://git.dcmtk.org/dcmtk.git"
 
   bottle do
-    sha256 "9b328afaa927a5001da453c3020ce895e2456c532289dd09b7a570a7517c54df" => :high_sierra
-    sha256 "667469116e8e934360205c525fc3cf30290e64f44bc99ee85adf516dfcb39298" => :sierra
-    sha256 "b245dc0c76c6075b9756a16ff50337b4fdfe33ded46c788f19925635c09344b2" => :el_capitan
+    sha256 "5b49e8b8d34cd1472f5091fc4d6e4b4a05133ac3cd85f6f428aef6c1013234b0" => :catalina
+    sha256 "3d149b4aa7f6d76df7ddda09d845c4c43a0aa0617800b9ea25602183e213f5b0" => :mojave
+    sha256 "70ba2b42c6a522f2da68ac47834f240db316afd12b388edb4bc7c1f586a18f2c" => :high_sierra
   end
 
-  option "with-docs", "Install development libraries/headers and HTML docs"
-  option "with-libiconv", "Build with brewed libiconv. Dcmtk and system libiconv can have problems with utf8."
-  option "with-dicomdict", "Build with baked-in DICOM data dictionary."
-
   depends_on "cmake" => :build
-  depends_on "doxygen" => :build if build.with? "docs"
   depends_on "libpng"
   depends_on "libtiff"
-  depends_on "openssl" => :recommended
-  depends_on "libiconv" => :optional
+  depends_on "openssl@1.1"
+
+  uses_from_macos "libxml2"
 
   def install
-    args = std_cmake_args
-    args << "-DDCMTK_WITH_OPENSSL=NO" if build.without? "openssl"
-    args << "-DDCMTK_WITH_DOXYGEN=YES" if build.with? "docs"
-    args << "-DDCMTK_ENABLE_BUILTIN_DICTIONARY=YES -DDCMTK_ENABLE_EXTERNAL_DICTIONARY=NO" if build.with? "dicomdict"
-    args << "-DDCMTK_WITH_ICONV=YES -DLIBICONV_DIR=#{Formula["libiconv"].opt_prefix}" if build.with? "libiconv"
-    args << ".."
-
     mkdir "build" do
-      system "cmake", *args
-      system "make", "DOXYGEN" if build.with? "docs"
+      system "cmake", *std_cmake_args, ".."
       system "make", "install"
     end
   end

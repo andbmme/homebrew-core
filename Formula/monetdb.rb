@@ -1,74 +1,49 @@
-class RRequirement < Requirement
-  fatal true
-
-  satisfy { which("r") }
-
-  def message; <<~EOS
-    R not found. The R integration module requires R.
-    Do one of the following:
-    - install R
-    -- run brew install r or brew cask install r-app
-    - remove the --with-r option
-    EOS
-  end
-end
-
 class Monetdb < Formula
   desc "Column-store database"
   homepage "https://www.monetdb.org/"
-  url "https://www.monetdb.org/downloads/sources/Jul2017-SP2/MonetDB-11.27.9.tar.xz"
-  sha256 "21b60aacb55894334d167d6c82ea43320b0cc116414d451d64c54bba8b32d1ed"
+  url "https://www.monetdb.org/downloads/sources/Jun2020/MonetDB-11.37.7.tar.xz"
+  sha256 "8496c9cb3a5e8d5493060f173ad92f773e804d6ba03b0e0f6fa607b57642b447"
 
   bottle do
-    sha256 "d5d26fa59961d0c9d869fe84b8acfc76ec794a50e12b7558646cf63121f0d1b4" => :high_sierra
-    sha256 "8a2dd3fd20b34cd20a367b281ef9feacb048ab54b6e29a41e45ceb13377ee649" => :sierra
-    sha256 "09d0e6e755dc22b8c095413cb3dafbe9d52a9077248f0a2e5558c2850aeccab6" => :el_capitan
+    sha256 "e5182b41a9272283bf4b60e3ba8089e45ec3a4d03962f93437acf69fddf116fb" => :catalina
+    sha256 "f347e8be9160164414b050afbc703ceca8c76acb693839464488b5bfb0237085" => :mojave
+    sha256 "35e8c854759ebcd3abd073d820f3ce92e2c5aa5a64dfa2f28211f19b23d37650" => :high_sierra
   end
 
   head do
     url "https://dev.monetdb.org/hg/MonetDB", :using => :hg
 
-    depends_on "libtool" => :build
-    depends_on "gettext" => :build
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "bison" => :build
+    depends_on "gettext" => :build
+    depends_on "libtool" => :build
   end
 
-  option "with-java", "Build the JDBC driver"
-  option "with-ruby", "Build the Ruby driver"
-  option "with-r", "Build the R integration module"
-
-  depends_on RRequirement => :optional
-
+  depends_on "libatomic_ops" => :build
   depends_on "pkg-config" => :build
-  depends_on :ant => :build
-  depends_on "libatomic_ops" => [:build, :recommended]
+  depends_on "openssl@1.1"
   depends_on "pcre"
-  depends_on "readline" # Compilation fails with libedit.
-  depends_on "openssl"
-
-  depends_on "unixodbc" => :optional # Build the ODBC driver
-  depends_on "geos" => :optional # Build the GEOM module
-  depends_on "gsl" => :optional
-  depends_on "cfitsio" => :optional
-  depends_on "homebrew/php/libsphinxclient" => :optional
+  depends_on "readline" # Compilation fails with libedit
 
   def install
     ENV["M4DIRS"] = "#{Formula["gettext"].opt_share}/aclocal" if build.head?
     system "./bootstrap" if build.head?
 
-    args = ["--prefix=#{prefix}",
-            "--enable-debug=no",
-            "--enable-assert=no",
-            "--enable-optimize=yes",
-            "--enable-testing=no",
-            "--with-readline=#{Formula["readline"].opt_prefix}"]
-
-    args << "--with-java=no" if build.without? "java"
-    args << "--with-rubygem=no" if build.without? "ruby"
-    args << "--disable-rintegration" if build.without? "r"
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}",
+                          "--enable-assert=no",
+                          "--enable-debug=no",
+                          "--enable-optimize=yes",
+                          "--enable-testing=no",
+                          "--with-readline=#{Formula["readline"].opt_prefix}",
+                          "--disable-rintegration"
+    system "make"
     system "make", "install"
+  end
+
+  test do
+    # assert_match "Usage", shell_output("#{bin}/mclient --help 2>&1")
+    system("#{bin}/monetdbd create #{testpath}/dbfarm")
+    assert_predicate testpath/"dbfarm", :exist?
   end
 end

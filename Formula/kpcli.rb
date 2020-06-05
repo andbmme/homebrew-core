@@ -1,18 +1,23 @@
+require "language/perl"
+
 class Kpcli < Formula
+  include Language::Perl::Shebang
+
   desc "Command-line interface to KeePass database files"
   homepage "https://kpcli.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/kpcli/kpcli-3.1.pl"
-  sha256 "f1f07704a30d0eae126717d5dae0d24ccced43c316454e4a7b868fe0a239a21a"
-  revision 2
+  url "https://downloads.sourceforge.net/project/kpcli/kpcli-3.4.pl"
+  sha256 "403e5d73cc4685722a5e4207c5fcbdad8e30475434cfba151c095e13a2658668"
 
   bottle do
     cellar :any
-    sha256 "390fa6b02583a52c1366eb973f7b9c33378d141ae51dca8e43ce5cf7af5c1b78" => :high_sierra
-    sha256 "eddb81e2651f4059dc693815b998b1654f4263f8dacb47b9b2bf9ec961747979" => :sierra
-    sha256 "6674de4994678bd403908abb50927cec118e2e4423f39306011e5f2f951e3b75" => :el_capitan
+    sha256 "efd9da40a0733bc1da58ab3ba12149743cc4bf034b1e91bb4cc00d09e8532552" => :catalina
+    sha256 "416401e644f180dc05d3da14486c1c281e860752d5e525888bfaa2ea34d83e5e" => :mojave
+    sha256 "40f4fe9bf01d09f432bb55c4d1f4c52d3a8466e2b62b0793b65c20ef4bd3ee4d" => :high_sierra
   end
 
   depends_on "readline"
+
+  uses_from_macos "perl"
 
   resource "File::KeePass" do
     url "https://cpan.metacpan.org/authors/id/R/RH/RHANDOM/File-KeePass-2.03.tar.gz"
@@ -20,8 +25,8 @@ class Kpcli < Formula
   end
 
   resource "Crypt::Rijndael" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Crypt-Rijndael-1.13.tar.gz"
-    sha256 "cd7209a6dfe0a3dc8caffe1aa2233b0e6effec7572d76a7a93feefffe636214e"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Crypt-Rijndael-1.14.tar.gz"
+    sha256 "6451c3dffe8703523be2bb08d1adca97e77df2a8a4dd46944d18a99330b7850e"
   end
 
   resource "Sort::Naturally" do
@@ -35,8 +40,8 @@ class Kpcli < Formula
   end
 
   resource "Term::Readline::Gnu" do
-    url "https://cpan.metacpan.org/authors/id/H/HA/HAYASHI/Term-ReadLine-Gnu-1.35.tar.gz"
-    sha256 "575d32d4ab67cd656f314e8d0ee3d45d2491078f3b2421e520c4273e92eb9125"
+    url "https://cpan.metacpan.org/authors/id/H/HA/HAYASHI/Term-ReadLine-Gnu-1.36.tar.gz"
+    sha256 "9a08f7a4013c9b865541c10dbba1210779eb9128b961250b746d26702bab6925"
   end
 
   resource "Data::Password" do
@@ -45,18 +50,18 @@ class Kpcli < Formula
   end
 
   resource "Clipboard" do
-    url "https://cpan.metacpan.org/authors/id/K/KI/KING/Clipboard-0.13.tar.gz"
-    sha256 "eebf1c9cb2484be850abdae017147967cf47f8ccd99293771517674b0046ec8a"
+    url "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/Clipboard-0.22.tar.gz"
+    sha256 "9fdb4dfc2e9bc2f3990b5b71649094dfe83aa12172c5a1809cf7e8b3be295ca7"
   end
 
   resource "Mac::Pasteboard" do
-    url "https://cpan.metacpan.org/authors/id/W/WY/WYANT/Mac-Pasteboard-0.008.tar.gz"
-    sha256 "62e5f55c423d033f8f5caff5d1678bb0b327144655aeaeb48a11cf633baa8f15"
+    url "https://cpan.metacpan.org/authors/id/W/WY/WYANT/Mac-Pasteboard-0.011.tar.gz"
+    sha256 "bd8c4510b1e805c43e4b55155c0beaf002b649fe30b6a7841ff05e7399ba02a9"
   end
 
   resource "Capture::Tiny" do
-    url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.44.tar.gz"
-    sha256 "3ad2bb950a112c282a90018e91e60ddc4c4d2d351de2869d46a8c3db5b611160"
+    url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.48.tar.gz"
+    sha256 "6c23113e87bad393308c90a207013e505f659274736638d8c79bac9c67cc3e19"
   end
 
   def install
@@ -89,6 +94,8 @@ class Kpcli < Formula
                      "--libdir=#{Formula["readline"].opt_lib}"
       system "make", "install"
     end
+
+    rewrite_shebang detected_perl_shebang, "kpcli-#{version}.pl"
 
     libexec.install "kpcli-#{version}.pl" => "kpcli"
     chmod 0755, libexec/"kpcli"

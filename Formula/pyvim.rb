@@ -1,74 +1,59 @@
 class Pyvim < Formula
+  include Language::Python::Virtualenv
+
   desc "Pure Python Vim clone"
-  homepage "https://pypi.python.org/pypi/pyvim"
-  url "https://pypi.python.org/packages/f7/ae/21857aac8acb73f8f91aa50ba5319c5000257c5fa8ff13f29ce4698865f1/pyvim-0.0.18.tar.gz"
-  sha256 "8a676fcb5bf78db5ad70c26131128f631f21556c4431f9a7fa6a5fdcdbb7e2e5"
+  homepage "https://github.com/jonathanslenders/pyvim"
+  url "https://files.pythonhosted.org/packages/7b/7c/4c44b77642e866bbbe391584433c11977aef5d1dc05da879d3e8476cab10/pyvim-3.0.2.tar.gz"
+  sha256 "da94f7a8e8c4b2b4611196987c3ca2840b0011cc399618793e551f7149f26c6a"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "4fb3d51c6c7e061fe3eae2ad3b9d62a9b79f1541217fd70c68c63d7f8dd6032e" => :high_sierra
-    sha256 "a2a2f3d091eb0d197276646bc092a2317443527574cd015d3862526613c455ea" => :sierra
-    sha256 "02b67a7b79ef341d0140de636ceabdddf8dee46212cdc303b0110fcbf5b08a4f" => :el_capitan
-    sha256 "b88954d67cb3cc4663e58b835bba56d2827b84b71e239ef58c036aac7b0b5c12" => :yosemite
-    sha256 "ff4daf14062aca74555c3d8e1a90bc464051c804300d7222e197b374ee196d2c" => :mavericks
+    sha256 "00673aa2851bbd2112035bf5fcb7e4ee5a7a594f5b43c0cf14a27f3727058902" => :catalina
+    sha256 "3526d256cf5ab2be293f7b3a0d80ef648b9847780456de3b21992ec79bb58af6" => :mojave
+    sha256 "b2c764a4186e90c37d43af45fe31432f74ea12566af67a7a9a1103d388fd168c" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
-
-  resource "ptpython" do
-    url "https://pypi.python.org/packages/39/cc/5cd0ff55d774fd287bf3f07fd5ed57c25117b68fa3d7fc7a9649d9b3a02d/ptpython-0.34.tar.gz"
-    sha256 "23ccb0e9f28cfc8001b9db4cfd0193862e56f8e9c21425fea91059e0be8fabd6"
-  end
-
-  resource "prompt_toolkit" do
-    url "https://pypi.python.org/packages/0b/2c/ab26db81e5b9c2f179a2e9d797f2ce0d11f7cc3308830831de0daad8629e/prompt_toolkit-1.0.0.tar.gz"
-    sha256 "5108ed9e6e40d28cb1dc90ba563987859231289700d0def999007b08f4f74ea4"
-  end
-
-  resource "pyflakes" do
-    url "https://pypi.python.org/packages/54/80/6a641f832eb6c6a8f7e151e7087aff7a7c04dd8b4aa6134817942cdda1b6/pyflakes-1.2.3.tar.gz"
-    sha256 "2e4a1b636d8809d8f0a69f341acf15b2e401a3221ede11be439911d23ce2139e"
-  end
+  depends_on "python@3.8"
 
   resource "docopt" do
-    url "https://pypi.python.org/packages/source/d/docopt/docopt-0.6.2.tar.gz"
+    url "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz"
     sha256 "49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"
   end
 
-  resource "jedi" do
-    url "https://pypi.python.org/packages/source/j/jedi/jedi-0.9.0.tar.gz"
-    sha256 "3b4c19fba31bdead9ab7350fb9fa7c914c59b0a807dcdd5c00a05feb85491d31"
+  resource "prompt_toolkit" do
+    url "https://files.pythonhosted.org/packages/69/19/3aa4bf17e1cbbdfe934eb3d5b394ae9a0a7fb23594a2ff27e0fdaf8b4c59/prompt_toolkit-3.0.5.tar.gz"
+    sha256 "563d1a4140b63ff9dd587bda9557cffb2fe73650205ab6f4383092fb882e7dc8"
   end
 
-  resource "wcwidth" do
-    url "https://pypi.python.org/packages/source/w/wcwidth/wcwidth-0.1.6.tar.gz"
-    sha256 "dcb3ec4771066cc15cf6aab5d5c4a499a5f01c677ff5aeb46cf20500dccd920b"
+  resource "pyflakes" do
+    url "https://files.pythonhosted.org/packages/f1/e2/e02fc89959619590eec0c35f366902535ade2728479fc3082c8af8840013/pyflakes-2.2.0.tar.gz"
+    sha256 "35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"
   end
 
-  resource "pygments" do
-    url "https://pypi.python.org/packages/source/P/Pygments/Pygments-2.1.3.tar.gz"
-    sha256 "88e4c8a91b2af5962bfa5ea2447ec6dd357018e86e94c7d14bd8cacbc5b55d81"
+  resource "Pygments" do
+    url "https://files.pythonhosted.org/packages/6e/4d/4d2fe93a35dfba417311a4ff627489a947b01dc0cc377a3673c00cf7e4b2/Pygments-2.6.1.tar.gz"
+    sha256 "647344a061c249a3b74e230c739f434d7ea4d8b1d5f3721bc0f3558049b38f44"
   end
 
   resource "six" do
-    url "https://pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz"
-    sha256 "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a"
+    url "https://files.pythonhosted.org/packages/21/9f/b251f7f8a76dec1d6651be194dfba8fb8d7781d10ab3987190de8391d08e/six-1.14.0.tar.gz"
+    sha256 "236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a"
+  end
+
+  resource "wcwidth" do
+    url "https://files.pythonhosted.org/packages/25/9d/0acbed6e4a4be4fc99148f275488580968f44ddb5e69b8ceb53fc9df55a0/wcwidth-0.1.9.tar.gz"
+    sha256 "ee73862862a156bf77ff92b09034fc4825dd3af9cf81bc5b360668d425f3c5f1"
   end
 
   def install
-    resources.each do |r|
-      r.stage do
-        system "python", *Language::Python.setup_install_args(libexec)
-      end
-    end
-
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"
-    system "python", *Language::Python.setup_install_args(libexec)
-    bin.install Dir[libexec/"bin/*"]
-    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
+    virtualenv_install_with_resources
   end
 
   test do
-    system "#{bin}/pyvim", "--help"
+    # Need a pty due to https://github.com/jonathanslenders/pyvim/issues/101
+    require "pty"
+    PTY.spawn(bin/"pyvim", "--help") do |r, _w, _pid|
+      assert_match "Vim clone", r.read
+    end
   end
 end

@@ -1,23 +1,63 @@
 class CfrDecompiler < Formula
   desc "Yet Another Java Decompiler"
-  homepage "http://www.benf.org/other/cfr/"
-  url "http://www.benf.org/other/cfr/cfr_0_122.jar"
-  sha256 "65c2dfb76c4904014092663b74c2ea4a8e2f18ca75e98a1e4e064352c618360f"
+  homepage "https://www.benf.org/other/cfr/"
+  url "https://github.com/leibnitz27/cfr.git",
+      :tag      => "0.150",
+      :revision => "1361cd7fa74f25f30a6bbf72c825d83647d2cdaf"
+  head "https://github.com/leibnitz27/cfr.git"
 
-  bottle :unneeded
+  bottle do
+    cellar :any_skip_relocation
+    sha256 "05d1bff6093077a4f9789606c7b8d77d26f66f341aa491a9412da3e85669c932" => :catalina
+    sha256 "0235b4a3204736079b3790db8de5bb02f99162318bff390aea45168f2bd1ea48" => :mojave
+    sha256 "c6866f8e6b6c8e849936d2b5a45c3827dda9acacfe49ca2e831041e633617ac5" => :high_sierra
+  end
 
-  depends_on :java => "1.6+"
+  depends_on "maven" => :build
+  depends_on "openjdk"
 
   def install
-    jar_version = version.to_s.tr(".", "_")
-    libexec.install "cfr_#{jar_version}.jar"
-    bin.write_jar_script libexec/"cfr_#{jar_version}.jar", "cfr-decompiler"
+    # Homebrew's OpenJDK no longer accepts Java 6 source, so:
+    inreplace "pom.xml", "<javaVersion>1.6</javaVersion>", "<javaVersion>1.7</javaVersion>"
+    inreplace "cfr.iml", 'LANGUAGE_LEVEL="JDK_1_6"', 'LANGUAGE_LEVEL="JDK_1_7"'
+
+    # build
+    ENV["JAVA_HOME"] = Formula["openjdk"].opt_prefix
+    system Formula["maven"].bin/"mvn", "package"
+
+    cd "target" do
+      # switch on jar names
+      if build.head?
+        lib_jar = Dir["cfr-*-SNAPSHOT.jar"]
+        doc_jar = Dir["cfr-*-SNAPSHOT-javadoc.jar"]
+        odie "Unexpected number of artifacts!" unless (lib_jar.length == 1) && (doc_jar.length == 1)
+        lib_jar = lib_jar[0]
+        doc_jar = doc_jar[0]
+      else
+        lib_jar = "cfr-#{version}.jar"
+        doc_jar = "cfr-#{version}-javadoc.jar"
+      end
+
+      # install library and binary
+      libexec.install lib_jar
+      (bin/"cfr-decompiler").write <<~EOS
+        #!/bin/bash
+        export JAVA_HOME="${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
+        exec "${JAVA_HOME}/bin/java" -jar "#{libexec/lib_jar}" "$@"
+      EOS
+
+      # install library docs
+      doc.install doc_jar
+      mkdir doc/"javadoc"
+      cd doc/"javadoc" do
+        system Formula["openjdk"].bin/"jar", "-xf", doc/doc_jar
+        rm_rf "META-INF"
+      end
+    end
   end
 
   test do
     fixture = <<~EOS
-      import java.io.PrintStream;
-
       class T {
           T() {
           }
@@ -28,8 +68,8 @@ class CfrDecompiler < Formula
       }
     EOS
     (testpath/"T.java").write fixture
-    system "javac", "T.java"
-    output = pipe_output("#{bin}/cfr-decompiler T.class")
+    system Formula["openjdk"].bin/"javac", "T.java"
+    output = pipe_output("#{bin}/cfr-decompiler --comments false T.class")
     assert_match fixture, output
   end
 end

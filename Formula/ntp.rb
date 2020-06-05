@@ -1,45 +1,32 @@
 class Ntp < Formula
   desc "The Network Time Protocol (NTP) Distribution"
   homepage "https://www.eecis.udel.edu/~mills/ntp/html/"
-  url "https://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.8p10.tar.gz"
-  version "4.2.8p10"
-  sha256 "ddd2366e64219b9efa0f7438e06800d0db394ac5c88e13c17b70d0dcdf99b99f"
+  url "https://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.8p14.tar.gz"
+  version "4.2.8p14"
+  sha256 "1960e4f081f6aafd108d721bc3ab15f9e8dfd08dc08339aa95bca9d2545e4eb7"
 
   bottle do
-    sha256 "5bda263067c4c0fe391c49734680e3f682f8c64672cf0628344db78df6cfa371" => :sierra
-    sha256 "eca0868f7a11c02bd5007602a534257fbdaa06aca5348e32cd06264728569e14" => :el_capitan
-    sha256 "766d2595c081694b7da0e5cfa6818e60483329f5ec7e2f1bf179f180735bbdc2" => :yosemite
+    cellar :any
+    sha256 "ab0e452c294590e48d80f2905b8088c4ec393d4e0fd5e53e260667c67634ccf4" => :catalina
+    sha256 "281e84d4a074ddb75937e9f6a1e5b58502e79c4255dc5c5ee2c9e0f9117f78b4" => :mojave
+    sha256 "3369881e6bff45235eb11c23a034247a63dfb16077d5a8ecaeea2aca59866fbc" => :high_sierra
   end
 
-  devel do
-    url "https://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-dev/ntp-dev-4.3.93.tar.gz"
-    sha256 "a07e73d7a3ff139bba33ee4b1110d5f3f4567465505d6317c9b50eefb9720c42"
-  end
-
-  option "with-net-snmp", "Build ntpsnmpd, the SNMP MIB agent for ntpd"
-
-  depends_on "openssl"
-  depends_on "net-snmp" => :optional
+  depends_on "openssl@1.1"
 
   def install
-    system "./bootstrap" if build.head?
-
-    args = [
-      "--disable-debug",
-      "--disable-dependency-tracking",
-      "--disable-silent-rules",
-      "--prefix=#{prefix}",
-      "--with-openssl-libdir=#{Formula["openssl"].lib}",
-      "--with-openssl-incdir=#{Formula["openssl"].include}",
+    args = %W[
+      --disable-debug
+      --disable-dependency-tracking
+      --disable-silent-rules
+      --prefix=#{prefix}
+      --with-openssl-libdir=#{Formula["openssl@1.1"].lib}
+      --with-openssl-incdir=#{Formula["openssl@1.1"].include}
+      --with-net-snmp-config=no
     ]
-    if build.with?("net-snmp")
-      args << "--with-net-snmp-config"
-    else
-      args << "--with-net-snmp-config=no"
-    end
 
     system "./configure", *args
-    system "make", "install"
+    system "make", "install", "LDADD_LIBNTP=-lresolv -undefined dynamic_lookup"
   end
 
   test do

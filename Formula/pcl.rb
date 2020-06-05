@@ -1,15 +1,15 @@
 class Pcl < Formula
   desc "Library for 2D/3D image and point cloud processing"
-  homepage "http://www.pointclouds.org/"
-  url "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.8.1.tar.gz"
-  sha256 "5a102a2fbe2ba77c775bf92c4a5d2e3d8170be53a68c3a76cfc72434ff7b9783"
-  revision 1
+  homepage "https://pointclouds.org/"
+  url "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.9.1.tar.gz"
+  sha256 "0add34d53cd27f8c468a59b8e931a636ad3174b60581c0387abb98a9fc9cddb6"
+  revision 8
   head "https://github.com/PointCloudLibrary/pcl.git"
 
   bottle do
-    sha256 "4dbf8e5e03660daafb06e438267ded29b828eeef66c23a7d1a004979e1558e8f" => :high_sierra
-    sha256 "68bb8e8ec843a00c4e7a168e212e0a6f506835b0f106bb6f6139874a108e9a3e" => :sierra
-    sha256 "66c06c3740fbb4d300f4beb5463ec5b48ed2a5dbe2b5857831aa0e381da0d626" => :el_capitan
+    sha256 "0e408f6ad1633329c683b143d9e9f83e3f54479858a97b129c17f7f7cae61396" => :catalina
+    sha256 "24dc417213bdb7a011f48f59fc67b9f384e3a4a66b8af842f79719b49b0ddf54" => :mojave
+    sha256 "a475a533876210af501953be0b3aa01c6163e5a2d13f5591cb881d0a42483542" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -22,8 +22,12 @@ class Pcl < Formula
   depends_on "libusb"
   depends_on "qhull"
   depends_on "vtk"
-  depends_on "homebrew/science/openni" => :optional
-  depends_on "homebrew/science/openni2" => :optional
+
+  # Upstream patch for boost 1.70.0
+  patch do
+    url "https://github.com/PointCloudLibrary/pcl/commit/648932bc.diff?full_index=1"
+    sha256 "23f2cced7786715c59b49a48e4037eb9dea9abee099c4c5c92d95a647636b5ec"
+  end
 
   def install
     args = std_cmake_args + %w[
@@ -45,22 +49,10 @@ class Pcl < Formula
       -DWITH_TUTORIALS:BOOL=OFF
     ]
 
-    if build.head?
-      args << "-DBUILD_apps_modeler=AUTO_OFF"
+    args << if build.head?
+      "-DBUILD_apps_modeler=AUTO_OFF"
     else
-      args << "-DBUILD_apps_modeler:BOOL=OFF"
-    end
-
-    if build.with? "openni"
-      args << "-DOPENNI_INCLUDE_DIR=#{Formula["openni"].opt_include}/ni"
-    else
-      args << "-DCMAKE_DISABLE_FIND_PACKAGE_OpenNI:BOOL=TRUE"
-    end
-
-    if build.with? "openni2"
-      ENV.append "OPENNI2_INCLUDE", "#{Formula["openni2"].opt_include}/ni2"
-      ENV.append "OPENNI2_LIB", "#{Formula["openni2"].opt_lib}/ni2"
-      args << "-DBUILD_OPENNI2:BOOL=ON"
+      "-DBUILD_apps_modeler:BOOL=OFF"
     end
 
     mkdir "build" do

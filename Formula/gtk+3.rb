@@ -1,53 +1,65 @@
 class Gtkx3 < Formula
   desc "Toolkit for creating graphical user interfaces"
   homepage "https://gtk.org/"
-  url "https://download.gnome.org/sources/gtk+/3.22/gtk+-3.22.26.tar.xz"
-  sha256 "61eef0d320e541976e2dfe445729f12b5ade53050ee9de6184235cb60cd4b967"
+  url "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.18.tar.xz"
+  sha256 "f5eaff7f4602e44a9ca7bfad5382d7a73e509a8f00b0bcab91c198d096172ad2"
+  revision 1
 
   bottle do
-    sha256 "2c3dc61e844ad559a517579285babab8ea01ca4e6346f4688360e89a0d27a15c" => :high_sierra
-    sha256 "b95e13c01b37aa3ed7ed41bc95a25a70525151e549c003e22d5d5a4f76890b77" => :sierra
-    sha256 "fc654db7a0c82221301c7334c540edda503087f866af5bdcc173a0e5576b7014" => :el_capitan
+    sha256 "a45ed17500b46bd419b997e075fb3a582879f3047015fe9cb66e16160ea3f15b" => :catalina
+    sha256 "f81129c8d12fc7add02cab6767463ec2e6a39175d3a1cccb39481da0074db573" => :mojave
+    sha256 "ea6753e8e8266c289c131211ee420527673f5c5339d6128cafe052241fb82cf9" => :high_sierra
   end
 
-  option "with-quartz-relocation", "Build with quartz relocation support"
-
+  depends_on "docbook" => :build
+  depends_on "docbook-xsl" => :build
+  depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
-  depends_on "gdk-pixbuf"
   depends_on "atk"
-  depends_on "gobject-introspection"
+  depends_on "gdk-pixbuf"
+  depends_on "glib"
+  depends_on "gsettings-desktop-schemas"
+  depends_on "hicolor-icon-theme"
   depends_on "libepoxy"
   depends_on "pango"
-  depends_on "glib"
-  depends_on "hicolor-icon-theme"
-  depends_on "gsettings-desktop-schemas" => :recommended
-  depends_on "jasper" => :optional
+
+  uses_from_macos "libxslt" => :build # for xsltproc
+
+  # Fixes version in pkg-config file -> remove when gtk+3 is updated
+  # See https://github.com/Homebrew/linuxbrew-core/issues/20221
+  patch :DATA
 
   def install
-    args = %W[
-      --enable-debug=minimal
-      --disable-dependency-tracking
-      --prefix=#{prefix}
-      --disable-glibtest
-      --enable-introspection=yes
-      --disable-schemas-compile
-      --enable-quartz-backend
-      --disable-x11-backend
+    args = std_meson_args + %w[
+      -Dx11_backend=false
+      -Dquartz_backend=true
+      -Dgtk_doc=false
+      -Dman=true
+      -Dintrospection=true
     ]
 
-    args << "--enable-quartz-relocation" if build.with?("quartz-relocation")
+    # ensure that we don't run the meson post install script
+    ENV["DESTDIR"] = "/"
 
-    system "./configure", *args
-    # necessary to avoid gtk-update-icon-cache not being found during make install
-    bin.mkpath
-    ENV.prepend_path "PATH", bin
-    system "make", "install"
+    # Find our docbook catalog
+    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
+
+    mkdir "build" do
+      system "meson", *args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
+
     # Prevent a conflict between this and Gtk+2
     mv bin/"gtk-update-icon-cache", bin/"gtk3-update-icon-cache"
   end
 
   def post_install
     system "#{Formula["glib"].opt_bin}/glib-compile-schemas", "#{HOMEBREW_PREFIX}/share/glib-2.0/schemas"
+    system bin/"gtk3-update-icon-cache", "-f", "-t", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
+    system "#{bin}/gtk-query-immodules-3.0 > #{HOMEBREW_PREFIX}/lib/gtk-3.0/3.0.0/immodules.cache"
   end
 
   test do
@@ -66,6 +78,7 @@ class Gtkx3 < Formula
     gdk_pixbuf = Formula["gdk-pixbuf"]
     gettext = Formula["gettext"]
     glib = Formula["glib"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libpng = Formula["libpng"]
     pango = Formula["pango"]
@@ -80,6 +93,7 @@ class Gtkx3 < Formula
       -I#{glib.opt_include}/gio-unix-2.0/
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}
       -I#{include}/gtk-3.0
       -I#{libepoxy.opt_include}
@@ -109,5 +123,21 @@ class Gtkx3 < Formula
     ]
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
+    # include a version check for the pkg-config files
+    assert_match version.to_s, shell_output("cat #{lib}/pkgconfig/gtk+-3.0.pc").strip
   end
 end
+
+__END__
+diff --git a/meson.build b/meson.build
+index 0240cc3..7ec6a9e 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('gtk+-3.0', 'c',
+-        version: '3.24.17',
++        version: '3.24.18',
+         default_options: [
+           'buildtype=debugoptimized',
+           'warning_level=1'
+

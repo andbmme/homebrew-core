@@ -5,18 +5,21 @@ class Mighttpd2 < Formula
 
   desc "HTTP server"
   homepage "https://www.mew.org/~kazu/proj/mighttpd/en/"
-  url "https://hackage.haskell.org/package/mighttpd2-3.4.2/mighttpd2-3.4.2.tar.gz"
-  sha256 "7330e73d5b07d5dded9e18d04681f6c34e46df6b4635ff483c57c90c344bb128"
+  url "https://hackage.haskell.org/package/mighttpd2-3.4.6/mighttpd2-3.4.6.tar.gz"
+  sha256 "fe14264ea0e45281591c86030cad2b349480f16540ad1d9e3a29657ddf62e471"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e29221e4447f87a83fb9853247db324f14e4621048ac5a7d8aefe3f864c7df55" => :high_sierra
-    sha256 "ddbaad5489107e4eaa59215c1158e97a1ae6b70dfbed71fb843c001f4ea5aeac" => :sierra
-    sha256 "5d90e9953d3fda3d9777a8b3451c48b7aabeaa6b3e162a2771859c3683a74f2c" => :el_capitan
+    rebuild 1
+    sha256 "3deac246044c856f3b85c98ad7de72f3da58078a4a8fb1f8b621a3d0ac4ddf93" => :catalina
+    sha256 "c0ead6b222cc7564253a15ce33a4db37e4b08a3e65d9a035e901c76484b2f8f3" => :mojave
+    sha256 "e583e8b97857ae8cd8c545355e4f2f257584ada8c678a534096277b3ac323de4" => :high_sierra
   end
 
-  depends_on "ghc" => :build
   depends_on "cabal-install" => :build
+  depends_on "ghc@8.8" => :build
+
+  uses_from_macos "zlib"
 
   def install
     install_cabal_package

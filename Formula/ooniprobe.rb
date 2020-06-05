@@ -3,23 +3,23 @@ class Ooniprobe < Formula
 
   desc "Network interference detection tool"
   homepage "https://ooni.torproject.org/"
-  url "https://pypi.python.org/packages/46/eb/e44d255dbd6b2bc8cc6de680ff8ce3c279c9b0694a6eec9059bdf4806dfc/ooniprobe-2.2.0.tar.gz"
-  sha256 "971f7630587b7ba771383f93c10973871e2c5e866a7fde98754a788679361ac3"
+  url "https://files.pythonhosted.org/packages/d8/c0/b4a2ae442dd95160a75251110313d1f9b22834a76ef9bd8f70603b4a867a/ooniprobe-2.3.0.tar.gz"
+  sha256 "b4c4a5665d37123b1a30f26ffb37b8c06bc722f7b829cf83f6c3300774b7acb6"
+  revision 3
 
   bottle do
     cellar :any
-    sha256 "e0ddf8e7eec2b52ad4ffec112a6b06a86d87a472fa4ed162fb2d93a5b22feb01" => :high_sierra
-    sha256 "fbc47fc71b679c09454f56636756ef33532e91ecedff6c04c88b8cc5ac6ad149" => :sierra
-    sha256 "6f5cc72156fd51da46d88aa3223c5b938e0c5fa0fc05ed9d7fa2a952f5f9bc24" => :el_capitan
-    sha256 "854d30be6dad8cbf5972a64e8c0a011d17c04d5afe83b9b470d39acbe4e3a462" => :yosemite
+    sha256 "9a5d8c8b6bda3609642113631ba7c39b2cbf4fc27b09bd4b2fccc832befdd3e5" => :catalina
+    sha256 "e8e120b4342f22d48efbcfa45cde2faa28c9edd045121373f3b2ba8349e1d6fc" => :mojave
+    sha256 "3e13549c0175e9f3167f24526ed0c45bd7096b84c0360042654be9b4dff980f7" => :high_sierra
   end
 
   depends_on "geoip"
   depends_on "libdnet"
   depends_on "libyaml"
-  depends_on "openssl"
+  depends_on :macos # Due to Python 2 (Unmaintained, use https://github.com/ooni/probe-cli once out of pre-release)
+  depends_on "openssl@1.1"
   depends_on "tor"
-  depends_on :python
 
   # these 4 need to come first or else cryptography will let setuptools
   # easy_install them (which is bad)
@@ -50,8 +50,8 @@ class Ooniprobe < Formula
   end
 
   resource "asn1crypto" do
-    url "https://files.pythonhosted.org/packages/ce/39/17e90c2efacc4060915f7d1f9b8d2a5b20e54e46233bdf3092e68193407d/asn1crypto-0.21.1.tar.gz"
-    sha256 "4e6d7b22814d680114a439faafeccb9402a78095fb23bf0b25f9404c6938a017"
+    url "https://files.pythonhosted.org/packages/c1/a9/86bfedaf41ca590747b4c9075bc470d0b2ec44fb5db5d378bc61447b3b6b/asn1crypto-1.2.0.tar.gz"
+    sha256 "87620880a477123e01177a1f73d0f327210b43a3cdbd714efcd2fa49a8d7b384"
   end
 
   resource "attrs" do
@@ -75,8 +75,8 @@ class Ooniprobe < Formula
   end
 
   resource "cryptography" do
-    url "https://files.pythonhosted.org/packages/ec/5f/d5bc241d06665eed93cd8d3aa7198024ce7833af7a67f6dc92df94e00588/cryptography-1.8.1.tar.gz"
-    sha256 "323524312bb467565ebca7e50c8ae5e9674e544951d28a2904a50012a8828190"
+    url "https://files.pythonhosted.org/packages/c2/95/f43d02315f4ec074219c6e3124a87eba1d2d12196c2767fadfdc07a83884/cryptography-2.7.tar.gz"
+    sha256 "e6347742ac8f35ded4a46ff835c60e68c22a536a8ae5c4422966d06946b6d4c6"
   end
 
   resource "GeoIP" do
@@ -135,8 +135,16 @@ class Ooniprobe < Formula
   end
 
   resource "pypcap" do
-    url "https://files.pythonhosted.org/packages/83/25/dab6b3fda95a5699503c91bf722abf9d9a5c960a4480208e4bad8747dd0c/pypcap-1.1.5.tar.gz"
-    sha256 "4b60d331e83c5bff3e25c7d99e902ea0910027fe9ce7986f0eecf5e0af6e8274"
+    url "https://files.pythonhosted.org/packages/33/21/d1f24d8a93e4e11bf604d77e04080c05ecb0308a5606936a051bd2b2b5da/pypcap-1.2.2.tar.gz"
+    sha256 "a32322f45d63ff6196e33004c568b9f5019202a40aa2b16008b7f94e7e119c1f"
+
+    # https://github.com/pynetwork/pypcap/pull/79
+    # Adds support for the new CLT SDK with the 10.x
+    # series of development tools.
+    patch do
+      url "https://github.com/pynetwork/pypcap/pull/79.patch?full_index=1"
+      sha256 "cb0c9b271d293e49e504793bed296e0fa73cca546dbc2814e0ea01351e66d9b2"
+    end
   end
 
   resource "PyYAML" do
@@ -201,6 +209,8 @@ class Ooniprobe < Formula
       etc = #{etc}/ooni
     EOS
 
+    ENV.append "CPPFLAGS", "-I#{MacOS.sdk_path}/usr/include/ffi" if MacOS.sdk_path_if_needed
+
     virtualenv_install_with_resources
 
     man1.install Dir["data/*.1"]
@@ -209,12 +219,14 @@ class Ooniprobe < Formula
 
   def post_install
     return if (pkgshare/"decks-available").exist?
+
     ln_s pkgshare/"decks", pkgshare/"decks-available"
     ln_s pkgshare/"decks/web.yaml", pkgshare/"current.deck"
   end
 
-  def caveats; <<~EOS
-    Decks are installed to #{opt_pkgshare}/decks.
+  def caveats
+    <<~EOS
+      Decks are installed to #{opt_pkgshare}/decks.
     EOS
   end
 

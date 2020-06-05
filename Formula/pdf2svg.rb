@@ -3,13 +3,14 @@ class Pdf2svg < Formula
   homepage "http://www.cityinthesky.co.uk/opensource/pdf2svg"
   url "https://github.com/db9052/pdf2svg/archive/v0.2.3.tar.gz"
   sha256 "4fb186070b3e7d33a51821e3307dce57300a062570d028feccd4e628d50dea8a"
-  revision 3
+  revision 5
 
   bottle do
     cellar :any
-    sha256 "1ab2d2aa1abc0ecec13d0465cab9844854e95b5cfaa0014c8c16e2961beb526a" => :high_sierra
-    sha256 "f2d8ad8defe79c2ca36145297aa8e24558ab248e5e45defe9d5c249184b699c0" => :sierra
-    sha256 "35b6af439ce9c6be306df8c7fbe4855a50673db6ba1261c6a87f78583cc17205" => :el_capitan
+    sha256 "8350da4f06838454cf26788b9ea27cbd9255d567be906d4fde5dea332b035734" => :catalina
+    sha256 "3999f52a6638bd2090feabd62cf91112a6b98bf6577a112771941ec6781eabd8" => :mojave
+    sha256 "9477928316e8a5cb7edc7d03568a22a2f2fb87e1440a96e100c79695c1b5cde9" => :high_sierra
+    sha256 "ec7f985d7a62787268265f4e05c87d59926a7f242c22972e32418e7cfaa5448e" => :sierra
   end
 
   depends_on "pkg-config" => :build

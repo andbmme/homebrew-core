@@ -1,17 +1,17 @@
 class Stunnel < Formula
   desc "SSL tunneling program"
   homepage "https://www.stunnel.org/"
-  url "https://www.stunnel.org/downloads/stunnel-5.43.tar.gz"
-  mirror "https://www.usenix.org.uk/mirrors/stunnel/stunnel-5.43.tar.gz"
-  sha256 "05915babf705a0494886a72a7367913d403d07fc908ebb7b380d639e2d8bcee2"
+  url "https://www.stunnel.org/downloads/stunnel-5.56.tar.gz"
+  sha256 "7384bfb356b9a89ddfee70b5ca494d187605bb516b4fff597e167f97e2236b22"
 
   bottle do
-    sha256 "71e7990924db19820f957912192cd5a07d07a68544c62727b9aede76ed09a635" => :high_sierra
-    sha256 "3a1b119d4aeaf8475521e22fa84527c3297c6339c1777708a990594aa25711df" => :sierra
-    sha256 "bcde32d3084d5a35afd9da5395d8e0d89d4062a219165083a2dc4ad9a59154fe" => :el_capitan
+    cellar :any
+    sha256 "90d65b410dfcabbc5d4b586449ae92b23cbe3f9e087a7075ec66b81807c17b7b" => :catalina
+    sha256 "61d66e0c5c5d411becd8b7d1f9ba913c1a15b9d15ec70e1253ca2e7fbdb0e516" => :mojave
+    sha256 "22548c4f8f3a15ebe6cd79aa2162dc7af8abaacf3e94d32d7cc8afc8f2049318" => :high_sierra
   end
 
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
     system "./configure", "--disable-dependency-tracking",
@@ -22,7 +22,7 @@ class Stunnel < Formula
                           "--mandir=#{man}",
                           "--disable-libwrap",
                           "--disable-systemd",
-                          "--with-ssl=#{Formula["openssl"].opt_prefix}"
+                          "--with-ssl=#{Formula["openssl@1.1"].opt_prefix}"
     system "make", "install"
 
     # This programmatically recreates pem creation used in the tools Makefile
@@ -32,7 +32,7 @@ class Stunnel < Formula
                 openssl.cnf -out stunnel.pem -keyout stunnel.pem -sha256 -subj
                 /C=PL/ST=Mazovia\ Province/L=Warsaw/O=Stunnel\ Developers/OU=Provisional\ CA/CN=localhost/]
       system "dd", "if=/dev/urandom", "of=stunnel.rnd", "bs=256", "count=1"
-      system "#{Formula["openssl"].opt_bin}/openssl", *args
+      system "#{Formula["openssl@1.1"].opt_bin}/openssl", *args
       chmod 0600, "stunnel.pem"
       (etc/"stunnel").install "stunnel.pem"
     end
@@ -48,6 +48,30 @@ class Stunnel < Formula
 
       In your stunnel configuration, specify a SSL certificate with
       the "cert =" option for each service.
+
+      To use Stunnel with Homebrew services, make sure to set "foreground = yes" in
+      your Stunnel configuration.
+    EOS
+  end
+
+  plist_options :manual => "stunnel"
+
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/stunnel</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+      </dict>
+      </plist>
     EOS
   end
 

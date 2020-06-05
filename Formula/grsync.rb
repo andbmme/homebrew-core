@@ -1,18 +1,17 @@
 class Grsync < Formula
   desc "GUI for rsync"
-  homepage "http://www.opbyte.it/grsync/"
-  url "https://downloads.sourceforge.net/project/grsync/grsync-1.2.6.tar.gz"
-  sha256 "66d5acea5e6767d6ed2082e1c6e250fe809cb1e797cbbee5c8e8a2d28a895619"
+  homepage "https://www.opbyte.it/grsync/"
+  url "https://downloads.sourceforge.net/project/grsync/grsync-1.2.8.tar.gz"
+  sha256 "94ea5faca67e3df467b5283377af3cb32b2b47631b6a32d38bc7b371209306b1"
 
   bottle do
-    sha256 "1ebac759b0f920f9bbd810694bce106976d7bdfbda2d2922e73aabb05c5b19bc" => :high_sierra
-    sha256 "c35defcfcef7d9f1af5c8fd82c95733d1d0191e7c9a338f9223744e55adf32de" => :sierra
-    sha256 "d0afd0d818a8c4a72368c85d1123f76997470c16c2ab38ed78b6e1b977c7b691" => :el_capitan
-    sha256 "7046b8ffefa83d5a153ecd75d9255813b95e325595c712bec1d0a11727f70017" => :yosemite
+    sha256 "07f40176b0bfb08d3b461fceb2d4e18f249354ef60a57dd550c11c31d26fee6a" => :catalina
+    sha256 "b0bf1fe191950905e46c81953e93a72c6c6c185c146b1a79d09e388348e1c5f1" => :mojave
+    sha256 "741b7306a6373fc2d86a416a2def2a06c1fd25ab6b30585755faa8326c497c2b" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gtk+"
 

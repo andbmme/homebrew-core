@@ -1,24 +1,24 @@
 class Frugal < Formula
   desc "Cross language code generator for creating scalable microservices"
   homepage "https://github.com/Workiva/frugal"
-  url "https://github.com/Workiva/frugal/archive/2.13.0.tar.gz"
-  sha256 "a8dc3d91409c36a8efd1c0e94329f79ecf5c93c6f85edd130b0f18695ca96c7e"
+  url "https://github.com/Workiva/frugal/archive/v3.9.6.tar.gz"
+  sha256 "579aa376d6e9f8c406a8f8ade0635d8eae807337a12c6189633225763e221cea"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "99799e0250aaeb79321cf05cc458cb899daa44b7cf8c42ae7bf36ac8c690d94c" => :high_sierra
-    sha256 "ba0724451d0ee7178b7945275d8c8079b8ba460e079915b519f8c65459cac53f" => :sierra
-    sha256 "a04f458ba6d2e5d8fa99988acf4cf2e2293786a07a4f9212b264e6cf0a40f97d" => :el_capitan
+    sha256 "6e380e2ee5e23581867d98c86cf59cbec97b345a458d1db580b7c964721145c6" => :catalina
+    sha256 "5610bad316949a4874474e4f634207f2033c9bb2a7ae95bf825a80b91bb97987" => :mojave
+    sha256 "4a0bce17838c38a83a264f2decada3f673eb1f4ded42e9ebb782c70ea1780e09" => :high_sierra
   end
 
+  depends_on "glide" => :build
   depends_on "go" => :build
-  depends_on "godep" => :build
 
   def install
     ENV["GOPATH"] = buildpath
     (buildpath/"src/github.com/Workiva/frugal").install buildpath.children
-    cd buildpath/"src/github.com/Workiva/frugal" do
-      system "godep", "restore"
+    cd "src/github.com/Workiva/frugal" do
+      system "glide", "install"
       system "go", "build", "-o", bin/"frugal"
       prefix.install_metafiles
     end

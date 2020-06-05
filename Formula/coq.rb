@@ -1,47 +1,23 @@
-class Camlp5TransitionalModeRequirement < Requirement
-  fatal true
-
-  satisfy(:build_env => false) { !Tab.for_name("camlp5").with?("strict") }
-
-  def message; <<~EOS
-    camlp5 must be compiled in transitional mode (instead of --strict mode):
-      brew install camlp5
-    EOS
-  end
-end
-
 class Coq < Formula
   desc "Proof assistant for higher-order logic"
   homepage "https://coq.inria.fr/"
-  url "https://github.com/coq/coq/archive/V8.7.0.tar.gz"
-  sha256 "f376207ed051b3fd27c519f44b25eb25f8dddbce22715f68c3cedfd2e4b39297"
-  revision 1
+  url "https://github.com/coq/coq/archive/V8.11.2.tar.gz"
+  sha256 "98cb9e12ba2508a1ca59e0c638fce27bf95c37082b6f7ce355779b80b25e1bfd"
   head "https://github.com/coq/coq.git"
 
   bottle do
-    sha256 "b563698a0e0a24eb00d31c51d359c7d2cb8c98c06e4d6be8aa820e5681f22521" => :high_sierra
-    sha256 "1d6368d1adaa92623dc097e01aade459209be15d6a63914be468d26aec6fa4be" => :sierra
-    sha256 "3d0af18bc77bb482d1234b373270288cc5088d4a8e922a262dbc10bc45f9dad1" => :el_capitan
+    sha256 "d59f03425ecdc2f904fd492996559a62ae9de11b7c80095913cecd7aee4ce876" => :catalina
+    sha256 "deb0c46797b5ef1f57420938278b8f7e2626e0c3a3225f12e07383ea1e8f530d" => :mojave
+    sha256 "cb85d3d2260c1ee93a1e05cdd0a3a61ccd77ddf7048d0ff0bd3db641bdbadeb8" => :high_sierra
   end
 
-  depends_on "opam" => :build
-  depends_on Camlp5TransitionalModeRequirement
-  depends_on "camlp5"
+  depends_on "ocaml-findlib" => :build
   depends_on "ocaml"
   depends_on "ocaml-num"
 
   def install
-    ENV["OPAMYES"] = "1"
-    opamroot = buildpath/"../opamroot"
-    opamroot.mkpath
-    ENV["OPAMROOT"] = opamroot
-    system "opam", "init", "--no-setup"
-    system "opam", "install", "ocamlfind"
-
-    system "opam", "config", "exec", "--",
-           "./configure", "-prefix", prefix,
+    system "./configure", "-prefix", prefix,
                           "-mandir", man,
-                          "-emacslib", elisp,
                           "-coqdocdir", "#{pkgshare}/latex",
                           "-coqide", "no",
                           "-with-doc", "no"

@@ -1,41 +1,45 @@
 class Glade < Formula
   desc "RAD tool for the GTK+ and GNOME environment"
   homepage "https://glade.gnome.org/"
-  url "https://download.gnome.org/sources/glade/3.20/glade-3.20.1.tar.xz"
-  sha256 "8064676dd46baa7e00c38ec1cc3ddc75c4ef5e714cd9d1491309b4df3e9cb1df"
+  url "https://download.gnome.org/sources/glade/3.36/glade-3.36.0.tar.xz"
+  sha256 "19b546b527cc46213ccfc8022d49ec57e618fe2caa9aa51db2d2862233ea6f08"
 
   bottle do
-    sha256 "c4fa3ee5b36ca073b988e9419abe843ff820c2642347555eeb59be8a4f7e42af" => :high_sierra
-    sha256 "c7eeeb7a059ff24ced402aad019172f7db44ced1a4744738fde4c54cb1da77e2" => :sierra
-    sha256 "f160c989c55a7eaf3830bd8379d67e363b8495b2feb6ab6a8bc3cb5d4e2615fb" => :el_capitan
+    sha256 "864bfad92694725723aaf2f128a8d0f67052bc60737c3224a1b91581276fc467" => :catalina
+    sha256 "7a2ea170b3f09787fd59511ec656ada64ec32123fdf923e9a2e361a6c2ddc38f" => :mojave
+    sha256 "40ba1031ec89c17e255825f8040c1ad1a6b94c20fc03e3f73a552603df9ebe10" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
-  depends_on "itstool" => :build
   depends_on "docbook-xsl" => :build
-  depends_on "gettext"
-  depends_on "libxml2"
+  depends_on "gobject-introspection" => :build
+  depends_on "itstool" => :build
+  depends_on "pkg-config" => :build
   depends_on "adwaita-icon-theme"
-  depends_on "hicolor-icon-theme"
+  depends_on "gettext"
   depends_on "gtk+3"
   depends_on "gtk-mac-integration"
+  depends_on "hicolor-icon-theme"
+  depends_on "libxml2"
 
   def install
     # Find our docbook catalog
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
+
+    # Disable icon-cache update
+    ENV["DESTDIR"] = "/"
 
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--enable-gladeui",
                           "--enable-introspection"
-    # objective-c is needed for glade-registration.c. unfortunately build fails if -x objective-c is added to global CFLAGS.
-    # Bugreport Upstream: https://bugzilla.gnome.org/show_bug.cgi?id=768032
-    inreplace "src/Makefile", "-c -o glade-glade-registration.o", "-x objective-c -c -o glade-glade-registration.o"
 
     system "make" # separate steps required
     system "make", "install"
+  end
+
+  def post_install
+    system "#{Formula["gtk+3"].opt_bin}/gtk3-update-icon-cache", "-f", "-t", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
   end
 
   test do

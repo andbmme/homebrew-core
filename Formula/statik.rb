@@ -3,21 +3,26 @@ class Statik < Formula
 
   desc "Python-based, generic static web site generator aimed at developers"
   homepage "https://getstatik.com"
-  url "https://github.com/thanethomson/statik/archive/v0.18.1.tar.gz"
-  sha256 "4ff70a257cd6a0ccbcdddfd0a2dc4f954fcb371447a8494252dc1165145c126a"
+  url "https://github.com/thanethomson/statik/archive/v0.23.0.tar.gz"
+  sha256 "6159066f486811e5773da318d6e8d1b1dd4c99ac140f1a3c660ef1c1f5e7124f"
   head "https://github.com/thanethomson/statik.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9e765c6e9d659702090f47534dc1584606ba0d6d888ce6c63e4533caa33b6e1b" => :high_sierra
-    sha256 "7176159aba59db64ee1506531461af5f8b22f5fdcebc8d07e3825dfef5139b9c" => :sierra
-    sha256 "4a317114436918be9e1bf0b6758b5a61aa2188345d3fe0b2139491d6a0834f1b" => :el_capitan
+    cellar :any
+    sha256 "28905bc1096c08ebe04410557de4b7a0c1c6ef4b016d5ef636cf04a37313bc11" => :catalina
+    sha256 "88b425b5e8fdb8f42bebed953096761034d21a6da5511be73384fd11a14c6d1b" => :mojave
+    sha256 "45fa0c5eb8cc013f7637d0f319c3c2a7d19e2360572fcda47fd1873157d77b74" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "libpq"
+  depends_on "python@3.8"
+
+  uses_from_macos "libffi"
+
+  conflicts_with "go-statik", :because => "both install `statik` binaries"
 
   def install
-    venv = virtualenv_create(libexec)
+    venv = virtualenv_create(libexec, "python3")
     system libexec/"bin/pip", "install", "-v", "--no-binary", ":all:",
                               "--ignore-installed", buildpath
     system libexec/"bin/pip", "uninstall", "-y", "statik"

@@ -1,29 +1,30 @@
 class Stella < Formula
   desc "Atari 2600 VCS emulator"
   homepage "https://stella-emu.github.io/"
-  url "https://github.com/stella-emu/stella/releases/download/5.0.2/stella-5.0.2-src.tar.xz"
-  sha256 "74ee708b68340b65519a04a22c61921cdcf69a1d308600c212414b28e9e689ac"
+  url "https://github.com/stella-emu/stella/releases/download/6.1.2/stella-6.1.2-src.tar.xz"
+  sha256 "8086e57c231625f0b840ca361f493969247d20476cbb53609d778d37bda17c34"
   head "https://github.com/stella-emu/stella.git"
 
   bottle do
     cellar :any
-    sha256 "d785be494c19b1254ae8d36173e03155cfe7ddb5904811a846b6d5b36e57f8cd" => :high_sierra
-    sha256 "a5f27dadb73bac03b216c87bec7e4de593aadfdeaa6e1058d0a5c457d16a1071" => :sierra
-    sha256 "443b004f1f0cf445b66a28a253a423f2f02ca32729a828ff2fb0ccc414a914f4" => :el_capitan
-    sha256 "1f53b58fc29ced3dd2390191760481af1ecdf822653ff02b2e5a0ce5420f4ace" => :yosemite
+    sha256 "95489748fc443e42532c1ff421638ed72c6ab17313fb0ab2ebcf9273182829ef" => :catalina
+    sha256 "9816e57d6fda42554766bb020bb86e7149b82c8d3d5723a4e263f2298798318c" => :mojave
+    sha256 "448f952086ef9e6501c0153c838216e9198833bbca4c0d6d5b0b79adf2e09fcd" => :high_sierra
   end
 
   depends_on :xcode => :build
-  depends_on "sdl2"
   depends_on "libpng"
+  depends_on "sdl2"
+
+  uses_from_macos "zlib"
 
   def install
     sdl2 = Formula["sdl2"]
     libpng = Formula["libpng"]
-    cd "src/macosx" do
+    cd "src/macos" do
       inreplace "stella.xcodeproj/project.pbxproj" do |s|
-        s.gsub! %r{(\w{24} \/\* SDL2\.framework)}, '//\1'
-        s.gsub! %r{(\w{24} \/\* png)}, '//\1'
+        s.gsub! %r{(\w{24} /\* SDL2\.framework)}, '//\1'
+        s.gsub! %r{(\w{24} /\* png)}, '//\1'
         s.gsub! /(HEADER_SEARCH_PATHS) = \(/,
                 "\\1 = (#{sdl2.opt_include}/SDL2, #{libpng.opt_include},"
         s.gsub! /(LIBRARY_SEARCH_PATHS) = ("\$\(LIBRARY_SEARCH_PATHS\)");/,

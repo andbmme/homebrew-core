@@ -3,20 +3,26 @@
 # also updated by incrementing their revisions.
 #
 # Specific packages to pay attention to include:
-# - camlp4
-# - opam
+# - camlp5
+# - lablgtk
 #
 # Applications that really shouldn't break on a compiler update are:
-# - mldonkey
 # - coq
 # - coccinelle
 # - unison
 class Ocaml < Formula
   desc "General purpose programming language in the ML family"
   homepage "https://ocaml.org/"
-  url "https://caml.inria.fr/pub/distrib/ocaml-4.06/ocaml-4.06.0.tar.xz"
-  sha256 "1236b5f91e1c075086d69e2d40cfab21e048b9fe38e902f707815bebbc20c5b7"
+  url "https://caml.inria.fr/pub/distrib/ocaml-4.09/ocaml-4.09.0.tar.xz"
+  sha256 "f2fb91dfe86bae00a33fc5ba51685e95a68564274f5277f787c31931b22a7fec"
   head "https://github.com/ocaml/ocaml.git", :branch => "trunk"
+
+  bottle do
+    cellar :any
+    sha256 "d3661fa949c06ce4132df11fb82bca7f0a58b3ba555700e54fafc264b621af0b" => :catalina
+    sha256 "39551915056e6652aa10579c926e43ff2a0d744202be2ba89dd4107f1d4346cf" => :mojave
+    sha256 "4e96119913768af5be322c05efe1ddb5716d389bedfaa582fd8cb5eee1abfed1" => :high_sierra
+  end
 
   pour_bottle? do
     # The ocaml compilers embed prefix information in weird ways that the default
@@ -25,29 +31,18 @@ class Ocaml < Formula
     satisfy { HOMEBREW_PREFIX.to_s == "/usr/local" }
   end
 
-  bottle do
-    cellar :any
-    sha256 "377756d07b0253fd30eb0d5761d7a0e53d4305daa742122dbcbe70a378277f5c" => :high_sierra
-    sha256 "e62b761a4e814661d3ec110d3e3da378316ad57416d9d01bdc2dbd445d92e2b6" => :sierra
-    sha256 "0422ddaa6ee523fc6c9b30ad239118ae4de011b64bcb9687b917b586b7794595" => :el_capitan
-  end
-
-  option "with-x11", "Install with the Graphics module"
-  option "with-flambda", "Install with flambda support"
-
-  depends_on :x11 => :optional
-
   def install
     ENV.deparallelize # Builds are not parallel-safe, esp. with many cores
 
     # the ./configure in this package is NOT a GNU autoconf script!
-    args = ["-prefix", HOMEBREW_PREFIX.to_s, "-with-debug-runtime", "-mandir", man]
-    args << "-no-graph" if build.without? "x11"
-    args << "-flambda" if build.with? "flambda"
+    args = %W[
+      --prefix=#{HOMEBREW_PREFIX}
+      --enable-debug-runtime
+      --mandir=#{man}
+    ]
     system "./configure", *args
-
     system "make", "world.opt"
-    system "make", "install", "PREFIX=#{prefix}"
+    system "make", "prefix=#{prefix}", "install"
   end
 
   test do

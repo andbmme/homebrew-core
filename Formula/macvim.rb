@@ -2,95 +2,53 @@
 class Macvim < Formula
   desc "GUI for vim, made for macOS"
   homepage "https://github.com/macvim-dev/macvim"
-  url "https://github.com/macvim-dev/macvim/archive/snapshot-142.tar.gz"
-  version "8.0-142"
-  sha256 "05582fa5a2180a29676182b339123aea5e45d656f99c0cfb66fe3ffb5640a200"
+  url "https://github.com/macvim-dev/macvim/archive/snapshot-163.tar.gz"
+  version "8.2-163"
+  sha256 "3af72f22b25cf4f94b1b6e27a74d74bdefa8ed1529fe6edec59ae2756b3ca209"
+  revision 2
   head "https://github.com/macvim-dev/macvim.git"
 
   bottle do
-    sha256 "c959301de1064e05cc9714e0a84ccafeeb5db6501b4a9957fe2e7889f333687e" => :high_sierra
-    sha256 "c295bdac7d63b2f3fb5caec7d16817564ea4c1b9160bbc45c530ea6842a6ad69" => :sierra
-    sha256 "95a294534ada2e4fb6ee89e3a1b2b7c4153008ab881b8bc0755cadb95283575d" => :el_capitan
+    cellar :any
+    sha256 "316de5c66d247961309a072307784c1073f650b5fac87af32c67ca80bf62b0c1" => :catalina
+    sha256 "56c860f1dd98ebe374cf0721bac29e830dfc9665a5fe4f2dd26697d58713f9e1" => :mojave
+    sha256 "4b67795ddfcf1018ac1f260231f8a534072edbcb7b4ff060296667fd965a0abb" => :high_sierra
   end
-
-  option "with-override-system-vim", "Override system vim"
-
-  deprecated_option "override-system-vim" => "with-override-system-vim"
 
   depends_on :xcode => :build
-  depends_on "cscope" => :recommended
-  depends_on "lua" => :optional
-  depends_on "luajit" => :optional
+  depends_on "cscope"
+  depends_on "lua"
+  depends_on "python@3.8"
+  depends_on "ruby"
 
-  if MacOS.version >= :mavericks
-    option "with-custom-python", "Build with a custom Python 2 instead of the Homebrew version."
-  end
-
-  depends_on :python => :recommended
-  depends_on :python3 => :optional
+  conflicts_with "vim",
+    :because => "vim and macvim both install vi* binaries"
 
   def install
     # Avoid issues finding Ruby headers
-    if MacOS.version == :sierra || MacOS.version == :yosemite
-      ENV.delete("SDKROOT")
-    end
+    ENV.delete("SDKROOT")
 
     # MacVim doesn't have or require any Python package, so unset PYTHONPATH
     ENV.delete("PYTHONPATH")
 
-    # If building for OS X 10.7 or up, make sure that CC is set to "clang"
-    ENV.clang if MacOS.version >= :lion
+    # make sure that CC is set to "clang"
+    ENV.clang
 
-    args = %W[
-      --with-features=huge
-      --enable-multibyte
-      --with-macarchs=#{MacOS.preferred_arch}
-      --enable-perlinterp
-      --enable-rubyinterp
-      --enable-tclinterp
-      --enable-terminal
-      --with-tlib=ncurses
-      --with-compiledby=Homebrew
-      --with-local-dir=#{HOMEBREW_PREFIX}
-    ]
-
-    args << "--enable-cscope" if build.with? "cscope"
-
-    if build.with? "lua"
-      args << "--enable-luainterp"
-      args << "--with-lua-prefix=#{Formula["lua"].opt_prefix}"
-    end
-
-    if build.with? "luajit"
-      args << "--enable-luainterp"
-      args << "--with-lua-prefix=#{Formula["luajit"].opt_prefix}"
-      args << "--with-luajit"
-    end
-
-    # Allow python or python3, but not both; if the optional
-    # python3 is chosen, default to it; otherwise, use python2
-    if build.with? "python3"
-      args << "--enable-python3interp"
-    elsif build.with? "python"
-      ENV.prepend "LDFLAGS", `python-config --ldflags`.chomp
-
-      # Needed for <= OS X 10.9.2 with Xcode 5.1
-      ENV.prepend "CFLAGS", `python-config --cflags`.chomp.gsub(/-mno-fused-madd /, "")
-
-      framework_script = <<~EOS
-        import sysconfig
-        print sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX")
-      EOS
-      framework_prefix = `python -c '#{framework_script}'`.strip
-      # Non-framework builds should have PYTHONFRAMEWORKPREFIX defined as ""
-      if framework_prefix.include?("/") && framework_prefix != "/System/Library/Frameworks"
-        ENV.prepend "LDFLAGS", "-F#{framework_prefix}"
-        ENV.prepend "CFLAGS", "-F#{framework_prefix}"
-      end
-      args << "--enable-pythoninterp"
-    end
-
-    system "./configure", *args
+    system "./configure", "--with-features=huge",
+                          "--enable-multibyte",
+                          "--enable-perlinterp",
+                          "--enable-rubyinterp",
+                          "--enable-tclinterp",
+                          "--enable-terminal",
+                          "--with-tlib=ncurses",
+                          "--with-compiledby=Homebrew",
+                          "--with-local-dir=#{HOMEBREW_PREFIX}",
+                          "--enable-cscope",
+                          "--enable-luainterp",
+                          "--with-lua-prefix=#{Formula["lua"].opt_prefix}",
+                          "--enable-luainterp",
+                          "--enable-python3interp",
+                          "--disable-sparkle"
     system "make"
 
     prefix.install "src/MacVim/build/Release/MacVim.app"
@@ -98,26 +56,22 @@ class Macvim < Formula
 
     # Create MacVim vimdiff, view, ex equivalents
     executables = %w[mvimdiff mview mvimex gvim gvimdiff gview gvimex]
-    executables += %w[vi vim vimdiff view vimex] if build.with? "override-system-vim"
+    executables += %w[vi vim vimdiff view vimex]
     executables.each { |e| bin.install_symlink "mvim" => e }
   end
 
-  def caveats
-    if build.with?("python") && build.with?("python3")
-      <<~EOS
-        MacVim can no longer be brewed with dynamic support for both Python versions.
-        Only Python 3 support has been provided.
-      EOS
-    end
-  end
-
   test do
-    ENV.prepend_path "PATH", Formula["python"].opt_libexec/"bin"
-    # Simple test to check if MacVim was linked to Python version in $PATH
-    if build.with? "python"
-      system_framework_path = `python-config --exec-prefix`.chomp
-      assert_match system_framework_path, `mvim --version`
-    end
-    assert_match "+ruby", shell_output("#{bin}/mvim --version")
+    output = shell_output("#{bin}/mvim --version")
+    assert_match "+ruby", output
+
+    # Simple test to check if MacVim was linked to Homebrew's Python 3
+    py3_exec_prefix = Utils.popen_read(Formula["python@3.8"].opt_bin/"python3-config", "--exec-prefix")
+    assert_match py3_exec_prefix.chomp, output
+    (testpath/"commands.vim").write <<~EOS
+      :python3 import vim; vim.current.buffer[0] = 'hello python3'
+      :wq
+    EOS
+    system bin/"mvim", "-v", "-T", "dumb", "-s", "commands.vim", "test.txt"
+    assert_equal "hello python3", (testpath/"test.txt").read.chomp
   end
 end

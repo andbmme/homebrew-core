@@ -3,31 +3,33 @@ class Netpbm < Formula
   homepage "https://netpbm.sourceforge.io/"
   # Maintainers: Look at https://sourceforge.net/p/netpbm/code/HEAD/tree/
   # for stable versions and matching revisions.
-  if MacOS.version >= :sierra
-    url "https://svn.code.sf.net/p/netpbm/code/stable", :revision => 3094
-  else
-    url "http://svn.code.sf.net/p/netpbm/code/stable", :revision => 3094
-  end
-  version "10.73.17"
+  url "https://svn.code.sf.net/p/netpbm/code/stable", :revision => 3806
+  version "10.86.13"
   version_scheme 1
-
   head "https://svn.code.sf.net/p/netpbm/code/trunk"
 
   bottle do
     cellar :any
-    sha256 "1c99ab33a5dee99e88a0f39873821bc1b8957cd729b98dc93fca3effc0d73402" => :high_sierra
-    sha256 "c4b338e2880e744a9dabdb6956264ea96f15da55596120d3599568698d9f7018" => :sierra
-    sha256 "bbdd407034a3fa7d842477a8fd9f7bea468508842aa5e2a4474e5b54de81cf0f" => :el_capitan
+    rebuild 1
+    sha256 "9e71235d1f28b7d929f73a17711946e4424af4a65788e7b8dbf4090c6b99f87a" => :catalina
+    sha256 "ef247da24981c815fdc80b8f1efcaf7132fcbe1fcc78947a983a8a2a06b28146" => :mojave
+    sha256 "13780d3a1ab3ec9856a8da98909829a4457f514031db7844245158a649d9feea" => :high_sierra
   end
 
-  depends_on "libtiff"
   depends_on "jasper"
   depends_on "jpeg"
   depends_on "libpng"
+  depends_on "libtiff"
 
-  conflicts_with "jbigkit", :because => "both install `pbm.5` and `pgm.5` files"
+  uses_from_macos "flex" => :build
+  uses_from_macos "libxml2"
+  uses_from_macos "zlib"
 
   def install
+    # Fix file not found errors for /usr/lib/system/libsystem_symptoms.dylib and
+    # /usr/lib/system/libsystem_darwin.dylib on 10.11 and 10.12, respectively
+    ENV["SDKROOT"] = MacOS.sdk_path if MacOS.version == :sierra || MacOS.version == :el_capitan
+
     cp "config.mk.in", "config.mk"
 
     inreplace "config.mk" do |s|
@@ -56,14 +58,9 @@ class Netpbm < Formula
       end
 
       prefix.install %w[bin include lib misc]
-      # do man pages explicitly; otherwise a junk file is installed in man/web
-      man1.install Dir["man/man1/*.1"]
-      man5.install Dir["man/man5/*.5"]
-      lib.install Dir["link/*.a"], Dir["link/*.dylib"]
+      lib.install Dir["staticlink/*.a"], Dir["sharedlink/*.dylib"]
       (lib/"pkgconfig").install "pkgconfig_template" => "netpbm.pc"
     end
-
-    (bin/"doc.url").unlink
   end
 
   test do

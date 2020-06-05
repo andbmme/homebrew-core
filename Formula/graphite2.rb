@@ -1,16 +1,15 @@
 class Graphite2 < Formula
   desc "Smart font renderer for non-Roman scripts"
-  homepage "http://graphite.sil.org"
-  url "https://github.com/silnrsi/graphite/releases/download/1.3.10/graphite2-1.3.10.tgz"
-  sha256 "90fde3b2f9ea95d68ffb19278d07d9b8a7efa5ba0e413bebcea802ce05cda1ae"
+  homepage "https://graphite.sil.org/"
+  url "https://github.com/silnrsi/graphite/releases/download/1.3.14/graphite2-1.3.14.tgz"
+  sha256 "f99d1c13aa5fa296898a181dff9b82fb25f6cc0933dbaa7a475d8109bd54209d"
   head "https://github.com/silnrsi/graphite.git"
 
   bottle do
     cellar :any
-    sha256 "9113d3702e313878d0119eef3c0b0e54d83d101d9a566e37808260ad8bb80ab5" => :high_sierra
-    sha256 "8275f72e0fc1aaa42b30b46d2245565571e97d56ebbad3fa94994d235f935eea" => :sierra
-    sha256 "3bdeb624f9cc9e71ad554cfa243ff64eac4b3f948a34ed8e1a6d7f9b168b996d" => :el_capitan
-    sha256 "e26eb396511e1a327a8173653e65960b14a4499738ef5eb7c54c8d8474fdc011" => :yosemite
+    sha256 "0831f474c920b66bbeab3f93a91fa019b82bfffcdd40e369fdab76372700e980" => :catalina
+    sha256 "2f3abb971be03141e9eea54b87c6861d72865bd76fde73ae3161d64c40d51cd9" => :mojave
+    sha256 "62e39dce0ae0440ac164edaab6e1351520bc5414ad509fc0b8d5c890500785bd" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -21,7 +20,7 @@ class Graphite2 < Formula
   end
 
   def install
-    system "cmake", *std_cmake_args
+    system "cmake", ".", *std_cmake_args
     system "make", "install"
   end
 

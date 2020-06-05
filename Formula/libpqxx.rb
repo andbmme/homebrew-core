@@ -1,21 +1,25 @@
 class Libpqxx < Formula
   desc "C++ connector for PostgreSQL"
-  homepage "http://pqxx.org/development/libpqxx/"
-  url "https://github.com/jtv/libpqxx/archive/5.0.1.tar.gz"
-  sha256 "21ba7167aeeb76142c0e865127514b4834cefde45eaab2d5eb79099188e21a06"
-  revision 1
+  homepage "https://pqxx.org/development/libpqxx/"
+  url "https://github.com/jtv/libpqxx/archive/7.1.1.tar.gz"
+  sha256 "cdf1efdc77de20e65f3affa0d4d9f819891669feb159eff8893696bf7692c00d"
 
   bottle do
     cellar :any
-    sha256 "4a146fd2c38fed728cfbc51502c9976953cf15e0a278e5d0b0063006b6feedf9" => :high_sierra
-    sha256 "e09f197b4b6d84212cbe09a5c71b6ebab248a1e634c81377d6b8d7172cb251ed" => :sierra
-    sha256 "14cabe29c05d71602958b86c775681a9dc530ba269378a5a2c41737b8aa80b1f" => :el_capitan
+    sha256 "b345cab517eb13cdd870059c16d48c61a10b5bae38c086a808a705120282ecd3" => :catalina
+    sha256 "bcdb2b1bbb468ff8f2cacc8e020e07f64da6a0669e981d5c397c2d2adc284b8a" => :mojave
+    sha256 "62a1a92df805584ff9ffd9321996767d814fd2a84167b1cb0130bc7c6d0bb4a6" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on :postgresql
+  depends_on "python@3.8" => :build
+  depends_on "xmlto" => :build
+  depends_on "libpq"
 
   def install
+    ENV.prepend_path "PATH", Formula["python@3.8"].opt_libexec/"bin"
+    ENV["PG_CONFIG"] = Formula["libpq"].opt_bin/"pg_config"
+
     system "./configure", "--prefix=#{prefix}", "--enable-shared"
     system "make", "install"
   end
@@ -28,13 +32,9 @@ class Libpqxx < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "test.cpp", "-L#{lib}", "-lpqxx", "-I#{include}", "-o", "test"
+    system ENV.cxx, "-std=c++17", "test.cpp", "-L#{lib}", "-lpqxx",
+           "-I#{include}", "-o", "test"
     # Running ./test will fail because there is no runnning postgresql server
     # system "./test"
-
-    # `pg_config` uses Cellar paths not opt paths
-    postgresql_include = Formula["postgresql"].opt_include.realpath.to_s
-    assert_match postgresql_include, (lib/"pkgconfig/libpqxx.pc").read,
-                 "Please revision bump libpqxx."
   end
 end

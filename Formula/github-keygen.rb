@@ -1,8 +1,8 @@
 class GithubKeygen < Formula
   desc "Bootstrap GitHub SSH configuration"
   homepage "https://github.com/dolmen/github-keygen"
-  url "https://github.com/dolmen/github-keygen/archive/v1.302.tar.gz"
-  sha256 "cc703512ab67837a7025e7d018731e97ddc6a943f87ccd8620986d5757991a48"
+  url "https://github.com/dolmen/github-keygen/archive/v1.305.tar.gz"
+  sha256 "5a0a68ed9e3eb1c0e3b783c250e0790fffe17fc1a663cefa1348560ff040b940"
   head "https://github.com/dolmen/github-keygen.git"
 
   bottle :unneeded

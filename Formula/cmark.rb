@@ -1,24 +1,23 @@
 class Cmark < Formula
   desc "Strongly specified, highly compatible implementation of Markdown"
-  homepage "http://commonmark.org"
-  url "https://github.com/jgm/cmark/archive/0.28.3.tar.gz"
-  sha256 "acc98685d3c1b515ff787ac7c994188dadaf28a2d700c10c1221da4199bae1fc"
+  homepage "https://commonmark.org/"
+  url "https://github.com/commonmark/cmark/archive/0.29.0.tar.gz"
+  sha256 "2558ace3cbeff85610de3bda32858f722b359acdadf0c4691851865bb84924a6"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "c0999bf5cc1d453259d34c1c2332572cf6cf07ff848021257529bb4be98def00" => :high_sierra
-    sha256 "15f85443980a06a2faed8de4b3165a8e6830d15a6adb90689bd1f1faa6fb8f3c" => :sierra
-    sha256 "5b24b8685ed9a8912cdc8479ebccd12027bed33b02554980c0e6588cbccb581c" => :el_capitan
+    sha256 "3af95418f96f4b0cec4bd76abaab312f3caf4cea591f38d3b725f15068d06491" => :catalina
+    sha256 "7cbb32d00d44170f5fe426cf2f1d4b5d756738b18631a13f8c5f94524b39f73b" => :mojave
+    sha256 "fb673191d96707019c8eefc224de72045149830f445fb7340c454cc6e8510981" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on :python3 => :build
+  depends_on "python@3.8" => :build
 
   def install
     mkdir "build" do
       system "cmake", "..", "-DCMAKE_INSTALL_LIBDIR=lib", *std_cmake_args
-      system "make"
-      system "make", "test"
       system "make", "install"
     end
   end

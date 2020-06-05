@@ -1,39 +1,28 @@
 class Gwenhywfar < Formula
   desc "Utility library required by aqbanking and related software"
-  homepage "http://www.aqbanking.de/"
-  url "https://www.aquamaniac.de/sites/download/download.php?package=01&release=206&file=01&dummy=gwenhywfar-4.18.0.tar.gz"
-  sha256 "6915bba42d8b7f0213cee186a944296e5e5e97cdbde5b539a924261af03086ca"
+  homepage "https://www.aquamaniac.de/"
+  url "https://www.aquamaniac.de/rdm/attachments/download/108/gwenhywfar-4.20.2.tar.gz"
+  sha256 "0f4fd92351c8a11f053aa482fc5c459499db3dc78dd8bb469e878890ef3d3270"
 
   bottle do
-    sha256 "3a20a0d8d35bcc1fd39a1def1da4caa00a6ab57724b796cd7a45ddb5b6c9bc33" => :high_sierra
-    sha256 "7eaedffb5b5dcee09131803d95d461f6cc87220ae3aa7294bc861da92d6870bd" => :sierra
-    sha256 "e5510dc740fe9f2cf1f191c23d09ce413c7163d5ff9486b34b49d28d14f60bf0" => :el_capitan
-    sha256 "534810125470167a96b204c418c170b4313fe653902a92908e5f1b619565e47e" => :yosemite
+    sha256 "ec5063e1ac5176d5b43f03adea1cc550f98a74ad2148fd18aff41db918ebdb17" => :catalina
+    sha256 "43fbdfc140f948cac62e00c6468b310856797b3bd732e8e7db2dee4983ec2787" => :mojave
+    sha256 "b14e191f6863b0bd133367cd1e5e22a0785550edbf3637930b5d16ec2a83ecd9" => :high_sierra
+    sha256 "a006e0b29c726b480bcdcfc40192d776c7ce2e8e44196122d7aabf3884857c5f" => :sierra
   end
-
-  option "without-cocoa", "Build without cocoa support"
-  option "with-test", "Run build-time check"
-
-  deprecated_option "with-check" => "with-test"
 
   depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gnutls"
-  depends_on "openssl"
   depends_on "libgcrypt"
-  depends_on "gtk+" => :optional
+  depends_on "openssl@1.1"
 
   def install
-    guis = []
-    guis << "gtk2" if build.with? "gtk+"
-    guis << "cocoa" if build.with? "cocoa"
-
     system "autoreconf", "-fiv" if build.head?
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
-                          "--with-guis=#{guis.join(" ")}"
-    system "make", "check" if build.with? "test"
+                          "--with-guis=cocoa"
     system "make", "install"
   end
 

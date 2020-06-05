@@ -1,25 +1,23 @@
 class Quantlib < Formula
   desc "Library for quantitative finance"
-  homepage "http://quantlib.org/"
-  url "https://downloads.sourceforge.net/project/quantlib/QuantLib/1.11/QuantLib-1.11.tar.gz"
-  sha256 "ef420d584233cb83a28245315dec2a1edda5fdbdf7a655fee7afc83ba5c0dee8"
+  homepage "https://www.quantlib.org/"
+  url "https://dl.bintray.com/quantlib/releases/QuantLib-1.18.tar.gz"
+  sha256 "d5048e14f2b7ea79f0adee08b2cbcee01b57b9cc282f60225ff4fcfc614c7ebc"
 
   bottle do
     cellar :any
-    sha256 "75ef28ccc5ff154a4f388e5917bb5737f3d900f48f28939554dfc4a5c7584cf1" => :high_sierra
-    sha256 "ac4a92afba00d9385459994459ddcfedc015b20f9597ce717e7c4353f66a3bd4" => :sierra
-    sha256 "b5e589e9ed41c03a5fe65cee7d525759847ed8dda6cb5342c674574e8e91501b" => :el_capitan
+    sha256 "1e89efdb70a7a64b10a475202070d39390fffabc0801227acf8723b6194037c4" => :catalina
+    sha256 "f2bab0408cf9d6f412d6c6a9eeeab9e1ca776257eb2a6d30496bf4646eb76af3" => :mojave
+    sha256 "ff0934abb2b65d970b00c7217d8563bd6757cf9cb8a02c5e9e5cec8428ecd661" => :high_sierra
   end
 
   head do
     url "https://github.com/lballabio/quantlib.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "libtool" => :build
   end
-
-  option "with-intraday", "Enable intraday components to dates"
 
   depends_on "boost"
 
@@ -27,12 +25,10 @@ class Quantlib < Formula
     (buildpath/"QuantLib").install buildpath.children if build.stable?
     cd "QuantLib" do
       system "./autogen.sh" if build.head?
-      args = []
-      args << "--enable-intraday" if build.with? "intraday"
       system "./configure", "--disable-dependency-tracking",
                             "--prefix=#{prefix}",
                             "--with-lispdir=#{elisp}",
-                            *args
+                            "--enable-intraday"
 
       system "make", "install"
       prefix.install_metafiles

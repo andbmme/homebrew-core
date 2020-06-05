@@ -1,21 +1,20 @@
 class Flashrom < Formula
   desc "Identify, read, write, verify, and erase flash chips"
   homepage "https://flashrom.org/"
-  url "https://download.flashrom.org/releases/flashrom-0.9.9.tar.bz2"
-  sha256 "cb3156b0f63eb192024b76c0814135930297aac41f80761a5d293de769783c45"
-  head "https://code.coreboot.org/svn/flashrom/trunk", :using => :svn
+  url "https://download.flashrom.org/releases/flashrom-v1.2.tar.bz2"
+  sha256 "e1f8d95881f5a4365dfe58776ce821dfcee0f138f75d0f44f8a3cd032d9ea42b"
+  head "https://review.coreboot.org/flashrom.git"
 
   bottle do
     cellar :any
-    sha256 "8a4b99ba9d265654a48038ccf8833489cdfef64eec1ff5fff9c0b33b7da01197" => :high_sierra
-    sha256 "a94e756a9ead25454461e5e96d7ba03e174b7fb98de10daf6e766874f97b19bd" => :sierra
-    sha256 "1d5ff4b5b6b201f65007f322a92c93d8337cbdcc028d9b777eba2c3736a59361" => :el_capitan
-    sha256 "8d8114627429244e48956866024f977c06dc5ca75b871a66edcd16bde456816e" => :yosemite
+    sha256 "5770ff2e0ed9a94ee73da1ddd682405a557acc7d62dc204b6df9f996baea99dc" => :catalina
+    sha256 "50874146b4fb2d1acd735eb3cd0fdf2cfcb5ce900b6870aa4ff3d1414c53812f" => :mojave
+    sha256 "8db77cb559d51f3fae3c2cd75ecd64b51bb2d70a7d268676a5b6ad21b8b839f9" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libusb-compat"
   depends_on "libftdi0"
+  depends_on "libusb-compat"
 
   def install
     ENV["CONFIG_GFXNVIDIA"] = "0"

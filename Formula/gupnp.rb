@@ -1,33 +1,38 @@
 class Gupnp < Formula
   desc "Framework for creating UPnP devices and control points"
   homepage "https://wiki.gnome.org/Projects/GUPnP"
-  url "https://download.gnome.org/sources/gupnp/1.0/gupnp-1.0.2.tar.xz"
-  sha256 "5173fda779111c6b01cd4a5e41b594322be9d04f8c74d3361f0a0c2069c77610"
+  url "https://download.gnome.org/sources/gupnp/1.2/gupnp-1.2.2.tar.xz"
+  sha256 "9a80bd953e5c8772ad26b72f8da01cbe7241a113edd6084903f413ce751c9989"
 
   bottle do
-    sha256 "637290bee0b95267d9d900afbb081b437b89d2b4d353724fa492e52ba25627b2" => :high_sierra
-    sha256 "28afff235b826e62bfd7133394b91a4b3746c3bf591efb5eb35767978e6e5f9a" => :sierra
-    sha256 "122ab1bd5cd7864e3ba5e8242d62fc4d1a46fe3827801751c967c4877958a19d" => :el_capitan
-    sha256 "c75c47821df5392618b6ce7f438f509e5c6833fe7f60f6657b3081adf537da37" => :yosemite
+    cellar :any
+    rebuild 1
+    sha256 "6035c0c11dcbbb621d02eb5927586148d76263a2a77ffd2530b8ed5bb34a59bf" => :catalina
+    sha256 "a87a97704971d8b5a9a58ab2a05c1c347591ca0f02228601885aa18ba5235c6a" => :mojave
+    sha256 "992103509a9d4529027fe8a04a0af41e55f07a55b0f23f707c27f035765d1988" => :high_sierra
   end
 
+  depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "gettext"
   depends_on "glib"
-  depends_on "libsoup"
   depends_on "gssdp"
+  depends_on "libsoup"
+  depends_on "python@3.8"
 
   def install
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
-    system "make", "install"
+    Language::Python.rewrite_python_shebang(Formula["python@3.8"].opt_bin/"python3")
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja"
+      system "ninja", "install"
+    end
   end
 
   test do
-    system bin/"gupnp-binding-tool", "--help"
+    system bin/"gupnp-binding-tool-1.2", "--help"
     (testpath/"test.c").write <<~EOS
       #include <libgupnp/gupnp-control-point.h>
 
@@ -38,7 +43,7 @@ class Gupnp < Formula
         GUPnPContext *context;
         GUPnPControlPoint *cp;
 
-        context = gupnp_context_new (NULL, NULL, 0, NULL);
+        context = gupnp_context_new (NULL, 0, NULL);
         cp = gupnp_control_point_new
           (context, "urn:schemas-upnp-org:service:WANIPConnection:1");
 
@@ -50,14 +55,15 @@ class Gupnp < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "-I#{include}/gupnp-1.0", "-L#{lib}", "-lgupnp-1.0",
-           "-I#{Formula["gssdp"].opt_include}/gssdp-1.0",
-           "-L#{Formula["gssdp"].opt_lib}", "-lgssdp-1.0",
+    system ENV.cc, "-I#{include}/gupnp-1.2", "-L#{lib}", "-lgupnp-1.2",
+           "-I#{Formula["gssdp"].opt_include}/gssdp-1.2",
+           "-L#{Formula["gssdp"].opt_lib}", "-lgssdp-1.2",
            "-I#{Formula["glib"].opt_include}/glib-2.0",
            "-I#{Formula["glib"].opt_lib}/glib-2.0/include",
+           "-L#{Formula["glib"].opt_lib}",
            "-lglib-2.0", "-lgobject-2.0",
            "-I#{Formula["libsoup"].opt_include}/libsoup-2.4",
-           "-I/usr/include/libxml2",
+           "-I#{MacOS.sdk_path}/usr/include/libxml2",
            testpath/"test.c", "-o", testpath/"test"
     system "./test"
   end

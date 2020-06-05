@@ -1,41 +1,31 @@
 class Geos < Formula
   desc "Geometry Engine"
   homepage "https://trac.osgeo.org/geos"
-  url "http://download.osgeo.org/geos/geos-3.6.2.tar.bz2"
-  sha256 "045a13df84d605a866602f6020fc6cbf8bf4c42fb50de237a08926e1d7d7652a"
+  url "https://download.osgeo.org/geos/geos-3.8.1.tar.bz2"
+  sha256 "4258af4308deb9dbb5047379026b4cd9838513627cb943a44e16c40e42ae17f7"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "bd35ebbcc9d142b0ee4d1f1837520cd0e195e13e3ea1804c5cfd1cc99d660b9b" => :high_sierra
-    sha256 "a435dcf855256300793f56c3d0af6597f39958bde52adc29d07736f897b40c1b" => :sierra
-    sha256 "8fa4f17ee4b0f8c52bdb155f4264043f12245858e413975cfea4355d569db207" => :el_capitan
-    sha256 "5966c5ecea54189c67a3ffb5856176f4bb070ca72b3c3628ad7b76fb67e35de8" => :yosemite
+    sha256 "96668ef5d3512c74d8b9c029d36d52171e1d26e90935f4a108f51101c34df313" => :catalina
+    sha256 "32ad6e55282b63e933ca43309989943da06bd34eb151b8ca2f81ca70eb4ef146" => :mojave
+    sha256 "f17377d259393a9c0a7dd2ce41b7af6a09c2f4c137afe267ed7650adccc86c3f" => :high_sierra
   end
 
-  option :cxx11
-  option "without-python", "Do not build the Python extension"
-  option "with-ruby", "Build the ruby extension"
-
-  depends_on "swig" => :build if build.with?("python") || build.with?("ruby")
+  depends_on "swig" => :build
+  depends_on "python@3.8"
 
   def install
-    ENV.cxx11 if build.cxx11?
-
     # https://trac.osgeo.org/geos/ticket/771
     inreplace "configure" do |s|
-      s.gsub! /PYTHON_CPPFLAGS=.*/, %Q(PYTHON_CPPFLAGS="#{`python-config --includes`.strip}")
+      s.gsub! /PYTHON_CPPFLAGS=.*/, %Q(PYTHON_CPPFLAGS="#{`python3-config --includes`.strip}")
       s.gsub! /PYTHON_LDFLAGS=.*/, 'PYTHON_LDFLAGS="-Wl,-undefined,dynamic_lookup"'
     end
 
-    args = [
-      "--disable-dependency-tracking",
-      "--prefix=#{prefix}",
-    ]
-
-    args << "--enable-python" if build.with?("python")
-    args << "--enable-ruby" if build.with?("ruby")
-
-    system "./configure", *args
+    system "./configure", "--disable-dependency-tracking",
+                          "--prefix=#{prefix}",
+                          "--enable-python",
+                          "PYTHON=#{Formula["python@3.8"].opt_bin}/python3"
     system "make", "install"
   end
 

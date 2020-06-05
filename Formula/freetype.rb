@@ -1,31 +1,27 @@
 class Freetype < Formula
   desc "Software library to render fonts"
   homepage "https://www.freetype.org/"
-  url "https://downloads.sourceforge.net/project/freetype/freetype2/2.8.1/freetype-2.8.1.tar.bz2"
-  mirror "https://download.savannah.gnu.org/releases/freetype/freetype-2.8.1.tar.bz2"
-  sha256 "e5435f02e02d2b87bb8e4efdcaa14b1f78c9cf3ab1ed80f94b6382fb6acc7d78"
+  url "https://downloads.sourceforge.net/project/freetype/freetype2/2.10.1/freetype-2.10.1.tar.xz"
+  mirror "https://download.savannah.gnu.org/releases/freetype/freetype-2.10.1.tar.xz"
+  sha256 "16dbfa488a21fe827dc27eaf708f42f7aa3bb997d745d31a19781628c36ba26f"
 
   bottle do
     cellar :any
-    sha256 "603b19cb3d0e8ae6ddc040a3a148a0ab66f605958d1afcf95c3411b11be00c70" => :high_sierra
-    sha256 "ad1a02a75cc736f17f340e1bcc4aca154ac7c5505e1f54e61b1a72b0b5ef07c8" => :sierra
-    sha256 "a0949e817a31d3c8a39bca2cdaf283c5a5e538c9c6786214369848fafffb0c0f" => :el_capitan
+    sha256 "ddd686141a969caec11ea248324e3736f6db50a54673187be103dde39cb01ebf" => :catalina
+    sha256 "2f5716f987df6f45a9d66e5f9af935bbb4202fe0b9850b6b0660fd6555ba1be4" => :mojave
+    sha256 "c367032a79a287a004e29023329c74e19887b80e05c495eec44182165ecd79e0" => :high_sierra
+    sha256 "282171a01965ae9dfd2d7955459a7285ca3a85f16504133e5fa46c72f682c14f" => :sierra
   end
-
-  keg_only :provided_pre_mountain_lion
-
-  option "without-subpixel", "Disable sub-pixel rendering (a.k.a. LCD rendering, or ClearType)"
 
   depends_on "libpng"
 
-  def install
-    if build.with? "subpixel"
-      inreplace "include/freetype/config/ftoption.h",
-          "/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */",
-          "#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING"
-    end
+  uses_from_macos "bzip2"
+  uses_from_macos "zlib"
 
-    system "./configure", "--prefix=#{prefix}", "--without-harfbuzz"
+  def install
+    system "./configure", "--prefix=#{prefix}",
+                          "--enable-freetype-config",
+                          "--without-harfbuzz"
     system "make"
     system "make", "install"
 

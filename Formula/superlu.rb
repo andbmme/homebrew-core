@@ -1,43 +1,34 @@
 class Superlu < Formula
   desc "Solve large, sparse nonsymmetric systems of equations"
-  homepage "http://crd-legacy.lbl.gov/~xiaoye/SuperLU/"
-  url "http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_5.2.1.tar.gz"
+  homepage "https://crd-legacy.lbl.gov/~xiaoye/SuperLU/"
+  url "https://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_5.2.1.tar.gz"
   sha256 "28fb66d6107ee66248d5cf508c79de03d0621852a0ddeba7301801d3d859f463"
-  revision 2
+  revision 4
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e1753077d759920bdd9cf128970c7c7b6519c3f69b80b16ae819d5cf2c6dded0" => :high_sierra
-    sha256 "d447474f77bbd417d76c0fb4dfbbc9d824d344639c8ca467d9ee9c9abd3acd09" => :sierra
-    sha256 "0944f8fb532af54aa50d962807568394f1cc0339710c981546a5c827faa5304f" => :el_capitan
-    sha256 "c138cf46fd369e931fb858639c1b02109ad3c76e97e7f7873ddd324b3d5106e7" => :yosemite
+    sha256 "c8cf07d7ce9841af6f5ff93f3bab779c385e0c6f84ac1c5a49d6c16ac2275120" => :catalina
+    sha256 "d47a98b1d94b041aa93835c10e024f2e3bb4f6535f1dd5c142343e5cf395e785" => :mojave
+    sha256 "5e02b75c1053a83ae4d07e3450d1cff929b825e2296327cbae038ace4d077e3a" => :high_sierra
+    sha256 "f2038e0b4edb755631cc4f9b42dc362996d8161fa9aad306a412c7e8ff39d9f8" => :sierra
   end
 
-  option "with-openmp", "Enable OpenMP multithreading"
-
-  depends_on "openblas" => :optional
-  depends_on "veclibfort" if build.without? "openblas"
-
-  needs :openmp if build.with? "openmp"
+  depends_on "gcc"
+  depends_on "openblas"
 
   def install
     ENV.deparallelize
     cp "MAKE_INC/make.mac-x", "./make.inc"
 
-    if build.with? "openblas"
-      blas = "-L#{Formula["openblas"].opt_lib} -lopenblas"
-    else
-      blas = "-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
-    end
-
     args = ["SuperLUroot=#{buildpath}",
             "SUPERLULIB=$(SuperLUroot)/lib/libsuperlu.a",
             "CC=#{ENV.cc}",
-            "CFLAGS=-fPIC #{ENV.cflags}",
-            "BLASLIB=#{blas}"]
-    args << "LOADOPTS=-fopenmp" if build.with?("openmp")
+            "BLASLIB=-L#{Formula["openblas"].opt_lib} -lopenblas"]
 
     system "make", "lib", *args
+    cd "EXAMPLE" do
+      system "make", *args
+    end
     lib.install Dir["lib/*"]
     (include/"superlu").install Dir["SRC/*.h"]
     doc.install Dir["Doc/*"]
@@ -50,7 +41,7 @@ class Superlu < Formula
   test do
     system ENV.cc, pkgshare/"dlinsol.c", "-o", "test",
                    "-I#{include}/superlu", "-L#{lib}", "-lsuperlu",
-                   "-L#{Formula["veclibfort"].opt_lib}", "-lvecLibFort"
+                   "-L#{Formula["openblas"].opt_lib}", "-lopenblas"
     assert_match "No of nonzeros in L+U = 11886",
                  shell_output("./test < #{pkgshare}/g20.rua")
   end

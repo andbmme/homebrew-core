@@ -1,29 +1,26 @@
 class Sxiv < Formula
   desc "Simple X Image Viewer"
   homepage "https://github.com/muennich/sxiv"
-  url "https://github.com/muennich/sxiv/archive/v1.3.2.tar.gz"
-  mirror "https://mirrors.kernel.org/debian/pool/main/s/sxiv/sxiv_1.3.2.orig.tar.gz"
-  sha256 "9f5368de8f0f57e78ebe02cb531a31107a993f2769cec51bcc8d70f5c668b653"
-  revision 1
-
+  url "https://github.com/muennich/sxiv/archive/v26.tar.gz"
+  sha256 "a382ad57734243818e828ba161fc0357b48d8f3a7f8c29cac183492b46b58949"
   head "https://github.com/muennich/sxiv.git"
 
   bottle do
     cellar :any
-    sha256 "61d85801587ee6d3158407ae65cd0bece03a08b2e8f99d9e7568b7ddb3b2daee" => :high_sierra
-    sha256 "606057791d4785165f78ae964bfa990b005d5f0cc3e51f19f64438c29b2670f5" => :sierra
-    sha256 "16a9ac152429a736db62dc0a2ac34f1b4d70c11b3de10f856bece78acf20a9a1" => :el_capitan
-    sha256 "de711fb6eb1c6ac0093ad182dd820c9debdb5d08ce03430de6462fbf9568c5e3" => :yosemite
+    sha256 "76166fe7a568a675abf485137b4df514f4f0c187edc0502f298d0f482aa7ac80" => :catalina
+    sha256 "1dc370bc45941faf5aeb36014160748df67446f4b51010c73a1ecc3851aed811" => :mojave
+    sha256 "544f9660a23d0370a6cd3b5fe6ff207bf21a12dcac6aaea5dc35735b09fc258c" => :high_sierra
   end
 
-  depends_on :x11
-  depends_on "imlib2"
   depends_on "giflib"
+  depends_on "imlib2"
   depends_on "libexif"
+  depends_on :x11
 
   def install
-    system "make", "config.h"
-    system "make", "PREFIX=#{prefix}", "install"
+    system "make", "PREFIX=#{prefix}", "AUTORELOAD=nop",
+                   "CPPFLAGS=-I/opt/X11/include", "LDFLAGS=-L/opt/X11/lib",
+                   "LDLIBS=-lpthread", "install"
   end
 
   test do

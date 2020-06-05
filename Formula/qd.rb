@@ -1,24 +1,23 @@
 class Qd < Formula
   desc "C++/Fortran-90 double-double and quad-double package"
   homepage "https://crd.lbl.gov/~dhbailey/mpdist/"
-  url "https://crd.lbl.gov/~dhbailey/mpdist/qd-2.3.18.tar.gz"
-  sha256 "81096b5b33519cbeed5fc8ef58e1d47ee8f546382514849967627b972483716e"
+  url "https://crd.lbl.gov/~dhbailey/mpdist/qd-2.3.22.tar.gz"
+  sha256 "30c1ffe46b95a0e9fa91085949ee5fca85f97ff7b41cd5fe79f79bab730206d3"
 
   bottle do
     cellar :any
-    sha256 "d38cb453d92a16e57f3b070117bca8fc6f9af3bfb80f9a4e6e09755c1ac803fe" => :high_sierra
-    sha256 "473b459248304ec63dbaed62c345273e9625b64c0b654226e97c3a48b699ceaa" => :sierra
-    sha256 "5e2f24e0bf506991d3e962bcffafbd608f0c3ff812fb71214f27f18e63eb9da0" => :el_capitan
+    rebuild 1
+    sha256 "381d4980019ee68eb91b62aeea98bc75d481597ec69c05b2d3790eda84b2d979" => :catalina
+    sha256 "686b9051338bcc167bf940beb8d6fbde45a47d5a9051ae61c80567ba998f35f8" => :mojave
+    sha256 "669c57dbb78a65de4fb0001ea0ad5e6a95d506bdf3651d38880901ef691659c3" => :high_sierra
   end
 
-  depends_on :fortran => :recommended
+  depends_on "gcc" # for gfortran
 
   def install
-    args = ["--disable-dependency-tracking", "--enable-shared", "--prefix=#{prefix}"]
-    args << "--enable-fortran=no" if build.without? :fortran
-    system "./configure", *args
+    system "./configure", "--disable-dependency-tracking", "--enable-shared",
+                          "--prefix=#{prefix}"
     system "make"
-    system "make", "check"
     system "make", "install"
   end
 

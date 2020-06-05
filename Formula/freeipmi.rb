@@ -1,24 +1,25 @@
 class Freeipmi < Formula
   desc "In-band and out-of-band IPMI (v1.5/2.0) software"
   homepage "https://www.gnu.org/software/freeipmi/"
-  url "https://ftp.gnu.org/gnu/freeipmi/freeipmi-1.5.7.tar.gz"
-  mirror "https://ftpmirror.gnu.org/freeipmi/freeipmi-1.5.7.tar.gz"
-  sha256 "b46c9432e8649b87d4646bbf4da32f7e9039796fc256f4b229c94c3ac7d0bde5"
+  url "https://ftp.gnu.org/gnu/freeipmi/freeipmi-1.6.5.tar.gz"
+  mirror "https://ftpmirror.gnu.org/freeipmi/freeipmi-1.6.5.tar.gz"
+  sha256 "61f2d6bc6c68f71701e7f3c725f43121705e54cfdc0c7800565d9443900e8ed9"
 
   bottle do
-    sha256 "a510f28794572ed659d6e709b44ee45d96d5c662d730084442d99771bca9d1ff" => :high_sierra
-    sha256 "41c5cf3544953f6127dc312f09d08b8bfac2f551f298880a40e45cc260fac9bd" => :sierra
-    sha256 "e008f84b3ef595205d47a81c6abcb32cbdbc7704ede7cd462dba41be292b963e" => :el_capitan
-    sha256 "85d35f29c9f0be5849c6e7b6a8b6ef4f19c988a63edbe830240ea676f430422f" => :yosemite
+    sha256 "b9f840759c2573e79707d7010217d1814fd96737857a76bc25c68cc4a9e7aff4" => :catalina
+    sha256 "a0ca63ac6b49e9f0b09a513982e34f94f7c2aa7d7345fc1009459d9fd8dfbd5a" => :mojave
+    sha256 "65484065d4f8f4056af2dfa8c28cceb9e83b19ec5cbeec50a955af0be794a7c3" => :high_sierra
   end
 
   depends_on "argp-standalone"
   depends_on "libgcrypt"
 
   def install
+    # Hardcode CPP_FOR_BUILD to work around cpp shim issue:
+    # https://github.com/Homebrew/brew/issues/5153
     inreplace "man/Makefile.in",
-      "$(CPP) -nostdinc -w -C -P -I$(top_srcdir)/man $@.pre  $@",
-      "$(CPP) -nostdinc -w -C -P -I$(top_srcdir)/man $@.pre > $@"
+      "$(CPP_FOR_BUILD) -nostdinc -w -C -P -I$(top_srcdir)/man $@.pre $@",
+      "clang -E -nostdinc -w -C -P -I$(top_srcdir)/man $@.pre > $@"
 
     system "./configure", "--prefix=#{prefix}"
     system "make", "install"

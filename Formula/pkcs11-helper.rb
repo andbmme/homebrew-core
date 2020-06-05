@@ -1,26 +1,22 @@
 class Pkcs11Helper < Formula
   desc "Library to simplify the interaction with PKCS#11"
   homepage "https://github.com/OpenSC/OpenSC/wiki/pkcs11-helper"
-  url "https://github.com/OpenSC/pkcs11-helper/releases/download/pkcs11-helper-1.22/pkcs11-helper-1.22.tar.bz2"
-  sha256 "fbc15f5ffd5af0200ff2f756cb4388494e0fb00b4f2b186712dce6c48484a942"
+  url "https://github.com/OpenSC/pkcs11-helper/releases/download/pkcs11-helper-1.26/pkcs11-helper-1.26.0.tar.bz2"
+  sha256 "e886ec3ad17667a3694b11a71317c584839562f74b29c609d54c002973b387be"
   head "https://github.com/OpenSC/pkcs11-helper.git"
 
   bottle do
     cellar :any
-    sha256 "ca5771cd93df0806db6938324c5726948111690190a34fed5ea972f4e7a181b9" => :high_sierra
-    sha256 "5b23024c360d1bb3bd84887d4983354d1b335fc84d693f7505e5633ee23b2411" => :sierra
-    sha256 "20249bea63ab70e0daafd8d398b26638cc2941caab4773360828bf775506c0f6" => :el_capitan
-    sha256 "e37790f0d0ca3f4fe29b0ecb88fe8c2e6711a5e020c96c2ffbd73a2aae3eec31" => :yosemite
+    sha256 "dc52806291729e3481bb2a90cabb9df77f21c30351ed2cc67213caaefed8c667" => :catalina
+    sha256 "f2783434ebb595a4e9a9b570c05dcf030a7539d1008e988427e4cd36281b6917" => :mojave
+    sha256 "6796ffb18fc1f6c22b800caf32e0e4698c1f82e10529ed6535b634afabf237fe" => :high_sierra
   end
-
-  option "without-threading", "Build without threading support"
-  option "without-slotevent", "Build without slotevent support"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
   depends_on "pkg-config" => :build
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
     args = %W[
@@ -29,11 +25,24 @@ class Pkcs11Helper < Formula
       --prefix=#{prefix}
     ]
 
-    args << "--disable-threading" if build.without? "threading"
-    args << "--disable-slotevent" if build.without? "slotevent"
-
     system "autoreconf", "--verbose", "--install", "--force"
     system "./configure", *args
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.c").write <<~EOS
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <pkcs11-helper-1.0/pkcs11h-core.h>
+
+      int main() {
+        printf("Version: %08x", pkcs11h_getVersion ());
+        return 0;
+      }
+    EOS
+    system ENV.cc, testpath/"test.c", "-I#{include}", "-L#{lib}",
+                   "-lpkcs11-helper", "-o", "test"
+    system "./test"
   end
 end

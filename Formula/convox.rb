@@ -1,26 +1,27 @@
 class Convox < Formula
-  desc "Command-line interface for the Rack PaaS on AWS"
+  desc "Command-line interface for the Convox PaaS"
   homepage "https://convox.com/"
-  url "https://github.com/convox/rack/archive/20171110202042.tar.gz"
-  sha256 "87b6557d95fbf36b0739a6e83ee59d12e823e5b89270f784a9381c7f087ad93d"
+  url "https://github.com/convox/convox/archive/3.0.18.tar.gz"
+  sha256 "f09a3fb5e2f9ee892a214918361b13d4c007309410ed18f1eea4e59ca98aa04a"
+  version_scheme 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "360d5b9e7a931eb952601428d01e4110489e5bdcc4dc7d72f1b61c15b7516a48" => :high_sierra
-    sha256 "3711baf7e446a01de2fe6df35cf60acaad22a797be864ba353706224b63fe3cc" => :sierra
-    sha256 "16d801f1101cdc9e515db52f03f3a71d322cf380ac89ccbb0e47ad2b534c22df" => :el_capitan
+    sha256 "dbdcaaa7bc56644f8f4be35d22126f7e94ef882de5134ed9608570729d673d22" => :catalina
+    sha256 "8e281371df6dcb3c3a593494be2cba1c9bf3435f0ba001fd4496d5d4b074bf6b" => :mojave
+    sha256 "29b79c748512186b84e664193a2e5aa20c6cdc61a2aa67117216a6980885219c" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/convox/rack").install Dir["*"]
-    system "go", "build", "-ldflags=-X main.Version=#{version}",
-           "-o", bin/"convox", "-v", "github.com/convox/rack/cmd/convox"
+    system "go", "build", "-mod=vendor", "-ldflags=-X main.version=#{version}",
+            "-o", bin/"convox", "-v", "./cmd/convox"
+    prefix.install_metafiles
   end
 
   test do
-    system bin/"convox"
+    assert_equal "Authenticating with localhost... ERROR: invalid login\n",
+      shell_output("#{bin}/convox login -t invalid localhost 2>&1", 1)
   end
 end

@@ -1,56 +1,27 @@
 class Hub < Formula
   desc "Add GitHub support to git on the command-line"
   homepage "https://hub.github.com/"
-  url "https://github.com/github/hub/archive/v2.2.9.tar.gz"
-  sha256 "b3f949c4500288a18ed68c38755962c9571c9e10063fb77583a19d0fcca5ecdf"
-
+  url "https://github.com/github/hub/archive/v2.14.2.tar.gz"
+  sha256 "e19e0fdfd1c69c401e1c24dd2d4ecf3fd9044aa4bd3f8d6fd942ed1b2b2ad21a"
   head "https://github.com/github/hub.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "1f000de1097dfd51b978193a32793aa29d7e9e040418bf2459565cb1f3a670bb" => :high_sierra
-    sha256 "6c23abd1255f04855fc1dfb8d44706337b728b5785e5b79f2319637575be93c7" => :sierra
-    sha256 "3452a355c8e4ef25714be7105d8946e01319e7760ffe97f7df3fc9dd21c89c76" => :el_capitan
-    sha256 "3f116b4c0587ab5d2a87d9d2f013ea058407ac2f9e845461d4970f36548e6be4" => :yosemite
+    sha256 "fdf05855839a9d7ec6e7bee6796e3cb5fc473500cffc002366cf98c09a805b69" => :catalina
+    sha256 "bcbae9c683d76f3395665467ba0f0c00c60c12c84022f72faba4b8981724b563" => :mojave
+    sha256 "8800cda4532784bf764ea6116a06c81d8d90bb3d36d8ecf295e64f9dd647c4ad" => :high_sierra
   end
-
-  devel do
-    url "https://github.com/github/hub/archive/v2.3.0-pre10.tar.gz"
-    sha256 "4096b95aea46f674e91ff0d83f86d876958024a02c50ffb1e3a4aac3e0536fc5"
-  end
-
-  option "without-completions", "Disable bash/zsh completions"
-  option "without-docs", "Don't install man pages"
 
   depends_on "go" => :build
 
   def install
-    if build.stable?
-      system "script/build", "-o", "hub"
-      bin.install "hub"
-      man1.install Dir["man/*"] if build.with? "docs"
-    elsif build.with? "docs"
-      begin
-        deleted = ENV.delete "SDKROOT"
-        ENV["GEM_HOME"] = buildpath/"gem_home"
-        system "gem", "install", "bundler"
-        ENV.prepend_path "PATH", buildpath/"gem_home/bin"
-        system "make", "man-pages"
-      ensure
-        ENV["SDKROOT"] = deleted
-      end
-      system "make", "install", "prefix=#{prefix}"
-    else
-      system "script/build", "-o", "hub"
-      bin.install "hub"
-    end
+    system "make", "install", "prefix=#{prefix}"
 
-    if build.with? "completions"
-      bash_completion.install "etc/hub.bash_completion.sh"
-      zsh_completion.install "etc/hub.zsh_completion" => "_hub"
-      # TODO: Remove the conditional when hub 2.3.0 is released.
-      fish_completion.install "etc/hub.fish_completion" => "hub.fish" unless build.stable?
-    end
+    prefix.install_metafiles
+
+    bash_completion.install "etc/hub.bash_completion.sh"
+    zsh_completion.install "etc/hub.zsh_completion" => "_hub"
+    fish_completion.install "etc/hub.fish_completion" => "hub.fish"
   end
 
   test do

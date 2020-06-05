@@ -1,24 +1,31 @@
 class Dep < Formula
   desc "Go dependency management tool"
   homepage "https://github.com/golang/dep"
-  url "https://github.com/golang/dep/archive/v0.3.2.tar.gz"
-  sha256 "327124953d76293eaba6001e17bb8a31371313ab39eed1fa9eac01f8b5c1de21"
+  url "https://github.com/golang/dep.git",
+      :tag      => "v0.5.4",
+      :revision => "1f7c19e5f52f49ffb9f956f64c010be14683468b"
   head "https://github.com/golang/dep.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "7627ee12c2bbf397c1be89d172bb1992f98900f4f073801b2b3b9cf16bf2fb55" => :high_sierra
-    sha256 "98355e1caa1fe5668d3e8f1630a84b9f307611eb59119b90f94bd4734b222ada" => :sierra
-    sha256 "cb51aeeb47448fd3f90582dacb4ab36cee116546f49038870eb611e82d47fb6d" => :el_capitan
+    sha256 "326ba98bcef16dc8823dd9fe76657e6ff0088a0669c0f857a05dd51867220bb7" => :catalina
+    sha256 "33200b5422fac00416ac44c7c28ad5aa627b845cd4d9aeb7002f7d41304deab0" => :mojave
+    sha256 "29cfe5b8c29bfbb09a93087dfbd30a9894ed596d3a4219072f022a001d2975cd" => :high_sierra
+    sha256 "ef9a0a978cbf2d4e537d21c4ff7b89a75b66228697b0aa348daa2284bc7362a9" => :sierra
   end
 
   depends_on "go"
+
+  conflicts_with "deployer", :because => "both install `dep` binaries"
 
   def install
     ENV["GOPATH"] = buildpath
     (buildpath/"src/github.com/golang/dep").install buildpath.children
     cd "src/github.com/golang/dep" do
-      system "go", "build", "-o", bin/"dep", ".../cmd/dep"
+      ENV["DEP_BUILD_PLATFORMS"] = "darwin"
+      ENV["DEP_BUILD_ARCHS"] = "amd64"
+      system "hack/build-all.bash"
+      bin.install "release/dep-darwin-amd64" => "dep"
       prefix.install_metafiles
     end
   end

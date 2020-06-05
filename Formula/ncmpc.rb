@@ -1,36 +1,33 @@
 class Ncmpc < Formula
   desc "Curses Music Player Daemon (MPD) client"
   homepage "https://www.musicpd.org/clients/ncmpc/"
-  url "https://www.musicpd.org/download/ncmpc/0/ncmpc-0.29.tar.xz"
-  sha256 "ef68a9b67172383ea80ee46579015109433fa058728812d2b0ebede660d85f12"
+  url "https://www.musicpd.org/download/ncmpc/0/ncmpc-0.38.tar.xz"
+  sha256 "2bc1aa38aacd23131895cd9aa3abd9d1ca5700857034d9f35209e13e061e27a2"
 
   bottle do
-    sha256 "c3c7f8c6425c97cff94a2e4c4d243ca1a93eb290e25f9ecc0648f829b6eb2a28" => :high_sierra
-    sha256 "22f03b525346f87611fde7c3f22d02a68c133a835f27e17b5003f16a4d35da3a" => :sierra
-    sha256 "ec4647fad45693bfa29ce801da1c8801b567b3987829aca96cdb1b71db12cfa1" => :el_capitan
+    cellar :any
+    sha256 "ca880e781bb617e6fbbcfb70168ac8939b8b5a04bbc24128d68bb9450b4af498" => :catalina
+    sha256 "aacbb298f4ceb0911d117babf04e5ce7e2dc17f8999805bc40cd784c256814be" => :mojave
+    sha256 "7891f4939522591774bdeab323a49c53f3f0742f64eed19389ece06762b2beec" => :high_sierra
   end
 
+  depends_on "boost" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "gcc" if DevelopmentTools.clang_build_version <= 800
   depends_on "gettext"
-  depends_on "glib"
   depends_on "libmpdclient"
+  depends_on "pcre"
+
+  fails_with :clang do
+    build 800
+    cause "error: no matching constructor for initialization of 'value_type'"
+  end
 
   def install
-    # Fix undefined symbols _COLORS, _COLS, etc.
-    # Reported 21 Sep 2017 https://github.com/MusicPlayerDaemon/ncmpc/issues/6
-    (buildpath/"ncurses.pc").write <<~EOS
-      Name: ncurses
-      Description: ncurses
-      Version: 5.4
-      Libs: -L/usr/lib -lncurses
-      Cflags: -I#{MacOS.sdk_path}/usr/include
-    EOS
-    ENV.prepend_path "PKG_CONFIG_PATH", buildpath
-
     mkdir "build" do
-      system "meson", "--prefix=#{prefix}", ".."
+      system "meson", *std_meson_args, "-Dcolors=false", "-Dnls=disabled", ".."
       system "ninja", "install"
     end
   end

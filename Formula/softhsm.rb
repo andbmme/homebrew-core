@@ -1,17 +1,16 @@
 class Softhsm < Formula
   desc "Cryptographic store accessible through a PKCS#11 interface"
   homepage "https://www.opendnssec.org/softhsm/"
-  url "https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz"
-  sha256 "5ed604c89a3a6ef9d7d1ee92c28a2c4b3cd1f86f302c808e2d12c8f39aa2c127"
+  url "https://dist.opendnssec.org/source/softhsm-2.6.1.tar.gz"
+  sha256 "61249473054bcd1811519ef9a989a880a7bdcc36d317c9c25457fc614df475f2"
 
   bottle do
-    sha256 "2f05fba4b689174ca866f918bbf654f6e5a712c6434a8b05214c329ab0ac0306" => :high_sierra
-    sha256 "9c13086544e0a554bfe2a687cfa0b05961e84260407282f4c4198dfb8dc6bc04" => :sierra
-    sha256 "066d911caa4a4961939403d8f08c1862a947046e5bbc042edeb9ce9a37f8116e" => :el_capitan
-    sha256 "53cad8948c14774fc54d21c241225f4d9a32bc6c98dfc74b7888420a4c0290be" => :yosemite
+    sha256 "69963f95aad110c6dcadab15613ee928f1358b714d71f4e7252da9b885eac7cd" => :catalina
+    sha256 "4a17c51934b0adc317cfc49069d52b3fa2fcb9a852808a7b0dfe2de28cf4b3b3" => :mojave
+    sha256 "cd17fa2e8538ca99b5963d60074578c91839740e7f87cc292b9b8f4f67dd99d8" => :high_sierra
   end
 
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
     system "./configure", "--disable-dependency-tracking",
@@ -20,7 +19,8 @@ class Softhsm < Formula
                           "--sysconfdir=#{etc}/softhsm",
                           "--localstatedir=#{var}",
                           "--with-crypto-backend=openssl",
-                          "--with-openssl=#{Formula["openssl"].opt_prefix}"
+                          "--with-openssl=#{Formula["openssl@1.1"].opt_prefix}",
+                          "--disable-gost"
     system "make", "install"
   end
 

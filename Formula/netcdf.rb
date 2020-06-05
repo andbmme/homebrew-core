@@ -1,23 +1,27 @@
 class Netcdf < Formula
   desc "Libraries and data formats for array-oriented scientific data"
   homepage "https://www.unidata.ucar.edu/software/netcdf"
-  url "ftp://ftp.unidata.ucar.edu/pub/netcdf/netcdf-4.5.0.tar.gz"
-  mirror "https://www.gfd-dennou.org/library/netcdf/unidata-mirror/netcdf-4.5.0.tar.gz"
-  sha256 "cbe70049cf1643c4ad7453f86510811436c9580cb7a1684ada2f32b95b00ca79"
+  url "https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-c-4.7.4.tar.gz"
+  mirror "https://www.gfd-dennou.org/arch/netcdf/unidata-mirror/netcdf-c-4.7.4.tar.gz"
+  sha256 "0e476f00aeed95af8771ff2727b7a15b2de353fb7bb3074a0d340b55c2bd4ea8"
+  head "https://github.com/Unidata/netcdf-c.git"
 
   bottle do
-    sha256 "6a9d39204ae9bfbacc985bc082e9d3e6bf522ee78668b4b7adb2ef70081ac381" => :high_sierra
-    sha256 "8264e77321eacb944f6b5ac04622cab6abcd0c6a6138a738fc0d16fec3beb66d" => :sierra
-    sha256 "b1063f36db3172903dcfdb2451e49b710d62bf80174b4e013c29e61a61080d3b" => :el_capitan
+    sha256 "c7510a4fe72e43f11e642e5f08951ff136ab677579d1208c38471902df92b1cc" => :catalina
+    sha256 "3a4da525b304b8ade90ee27d476fff47ff00ed0a9c482e48f6cbc783a915c35e" => :mojave
+    sha256 "4860a333ac67dee3d27e44c1248ccf106e7e7607386c8d66033e0f16237f0c2f" => :high_sierra
   end
 
   depends_on "cmake" => :build
+  depends_on "gcc" # for gfortran
   depends_on "hdf5"
-  depends_on :fortran
+
+  uses_from_macos "curl"
 
   resource "cxx" do
-    url "https://github.com/Unidata/netcdf-cxx4/archive/v4.3.0.tar.gz"
-    sha256 "25da1c97d7a01bc4cee34121c32909872edd38404589c0427fefa1301743f18f"
+    url "https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-cxx4-4.3.1.tar.gz"
+    mirror "https://www.gfd-dennou.org/arch/netcdf/unidata-mirror/netcdf-cxx4-4.3.1.tar.gz"
+    sha256 "6a1189a181eed043b5859e15d5c080c30d0e107406fbb212c8fb9814e90f3445"
   end
 
   resource "cxx-compat" do
@@ -27,9 +31,9 @@ class Netcdf < Formula
   end
 
   resource "fortran" do
-    url "ftp://ftp.unidata.ucar.edu/pub/netcdf/netcdf-fortran-4.4.4.tar.gz"
-    mirror "https://www.gfd-dennou.org/arch/netcdf/unidata-mirror/netcdf-fortran-4.4.4.tar.gz"
-    sha256 "b2d395175f8d283e68c8be516e231a96b191ade67ad0caafaf7fa01b1e6b5d75"
+    url "https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-fortran-4.5.2.tar.gz"
+    mirror "https://www.gfd-dennou.org/arch/netcdf/unidata-mirror/netcdf-fortran-4.5.2.tar.gz"
+    sha256 "b959937d7d9045184e9d2040a915d94a7f4d0185f4a9dceb8f08c94b0c3304aa"
   end
 
   def install
@@ -39,9 +43,8 @@ class Netcdf < Formula
 
     mkdir "build" do
       args = common_args.dup
-      args << "-DENABLE_TESTS=OFF"
       args << "-DNC_EXTRA_DEPS=-lmpi" if Tab.for_name("hdf5").with? "mpi"
-      args << "-DENABLE_DAP_AUTH_TESTS=OFF" << "-DENABLE_NETCDF_4=ON" << "-DENABLE_DOXYGEN=OFF"
+      args << "-DENABLE_TESTS=OFF" << "-DENABLE_NETCDF_4=ON" << "-DENABLE_DOXYGEN=OFF"
 
       system "cmake", "..", "-DBUILD_SHARED_LIBS=ON", *args
       system "make", "install"
@@ -53,7 +56,7 @@ class Netcdf < Formula
 
     # Add newly created installation to paths so that binding libraries can
     # find the core libs.
-    args = common_args.dup << "-DNETCDF_C_LIBRARY=#{lib}"
+    args = common_args.dup << "-DNETCDF_C_LIBRARY=#{lib}/libnetcdf.dylib"
 
     cxx_args = args.dup
     cxx_args << "-DNCXX_ENABLE_TESTS=OFF"
@@ -112,10 +115,14 @@ class Netcdf < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "test.c", "-L#{lib}", "-I#{include}", "-lnetcdf", "-o", "test"
-    assert_equal `./test`, version.to_s
+    system ENV.cc, "test.c", "-L#{lib}", "-I#{include}", "-lnetcdf",
+                   "-o", "test"
+    if head?
+      assert_match /^\d+(?:\.\d+)+/, `./test`
+    else
+      assert_equal version.to_s, `./test`
+    end
 
-    ENV.fortran
     (testpath/"test.f90").write <<~EOS
       program test
         use netcdf
@@ -134,8 +141,9 @@ class Netcdf < Formula
           if (status /= nf90_noerr) call abort
         end subroutine check
       end program test
-      EOS
-    system ENV.fc, "test.f90", "-L#{lib}", "-I#{include}", "-lnetcdff", "-o", "testf"
+    EOS
+    system "gfortran", "test.f90", "-L#{lib}", "-I#{include}", "-lnetcdff",
+                       "-o", "testf"
     system "./testf"
   end
 end

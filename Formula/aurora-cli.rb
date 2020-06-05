@@ -1,19 +1,29 @@
 class AuroraCli < Formula
   desc "Apache Aurora Scheduler Client"
   homepage "https://aurora.apache.org"
-  url "https://www.apache.org/dyn/closer.cgi?path=/aurora/0.18.0/apache-aurora-0.18.0.tar.gz"
-  sha256 "8918e041369ae415e28df07fad544b0078132a4831b4c437432a1f5f28dcf648"
+  url "https://www.apache.org/dyn/closer.lua?path=aurora/0.22.0/apache-aurora-0.22.0.tar.gz"
+  mirror "https://archive.apache.org/dist/aurora/0.22.0/apache-aurora-0.22.0.tar.gz"
+  sha256 "d3c20a09dcc62cac98cb83889099e845ce48a1727ca562d80b9a9274da2cfa12"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "9ae104b5eaea19b76f661682a6c3742588ace04e72b420e35de95d843214446c" => :sierra
-    sha256 "9b7fc8a05aea5bbb7f281fbc268025c3c9bb9a673249d5dc1be781bd5496af0f" => :el_capitan
-    sha256 "62e565f0d65601f88b11d8c5f5bfad89d2f1661144072876fc705e50b4284329" => :yosemite
+    sha256 "b3b61ca0da323c10be32bfb19af28a48b7cf393729076c3ce6608c69d79bff7d" => :catalina
+    sha256 "4aec30f08b06a40ec584c4c570181e5e04909009e4bc8ce2d18f84a0e282629d" => :mojave
+    sha256 "0a1b506e5d75c9fa8d587bfc9945e78c9cb5342c17a4062d18aafb942e111eca" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python"
+
+  # Does not build on catalina anymore
+  # Has been moved to the appache attic: https://github.com/apache/attic-aurora
+  disable!
 
   def install
+    # No pants yet for Mojave, so we force High Sierra binaries there
+    ENV["PANTS_BINARIES_PATH_BY_ID"] =
+      "{('darwin','15'):('mac','10.11'),('darwin','16'):('mac','10.12'),"\
+      "('darwin','17'):('mac','10.13'),('darwin','18'):('mac','10.13')}"
+
     system "./pants", "binary", "src/main/python/apache/aurora/kerberos:kaurora"
     system "./pants", "binary", "src/main/python/apache/aurora/kerberos:kaurora_admin"
     bin.install "dist/kaurora.pex" => "aurora"

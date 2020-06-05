@@ -1,28 +1,25 @@
 class Ffmpegthumbnailer < Formula
   desc "Create thumbnails for your video files"
   homepage "https://github.com/dirkvdb/ffmpegthumbnailer"
-  url "https://github.com/dirkvdb/ffmpegthumbnailer/releases/download/2.2.0/ffmpegthumbnailer-2.2.0.tar.bz2"
-  sha256 "e5c31299d064968198cd378f7488e52cd5e738fac998eea780bc77d7f32238c2"
-  revision 1
+  url "https://github.com/dirkvdb/ffmpegthumbnailer/archive/2.2.2.tar.gz"
+  sha256 "8c4c42ab68144a9e2349710d42c0248407a87e7dc0ba4366891905322b331f92"
+  revision 2
   head "https://github.com/dirkvdb/ffmpegthumbnailer.git"
 
   bottle do
     cellar :any
-    sha256 "09715472732033ae65a2d26a3526bc5de60fcf44ad843349a9a57ba885845f86" => :high_sierra
-    sha256 "b0085442d2ba5a93c44b51870da1e5719459712366914883303bc4de2c601e3f" => :sierra
-    sha256 "84ad2c8ac398ced2d71cc0e2963e2eaf70c842ff22b4207dd4546ba3f2ff03b2" => :el_capitan
-    sha256 "be4a2d019541ca0a1d61b2eec0ed98b389c17a1d990c76d882c51590f8b32e10" => :yosemite
+    sha256 "28a278ef88da9c423a719558dfc138e8ff15d89559b04250b143e8e0840b1bcd" => :catalina
+    sha256 "66868572e40f91a49b363a8943eeeb9066eb0b8dd510a719070f3997f50b2ea8" => :mojave
+    sha256 "71cea969bdeeb648b9788736e1aea0904bba274df17ecc42ec21cd8c21b18539" => :high_sierra
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
+  depends_on "ffmpeg"
   depends_on "jpeg"
   depends_on "libpng"
-  depends_on "ffmpeg"
 
   def install
-    ENV.cxx11 if MacOS.version < :mavericks
-
     args = std_cmake_args
     args << "-DENABLE_GIO=ON"
     args << "-DENABLE_THUMBNAILER=ON"

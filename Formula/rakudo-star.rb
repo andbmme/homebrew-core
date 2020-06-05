@@ -1,23 +1,24 @@
 class RakudoStar < Formula
   desc "Perl 6 compiler"
-  homepage "http://rakudo.org/"
-  url "https://rakudo.perl6.org/downloads/star/rakudo-star-2017.10.tar.gz"
-  sha256 "d52498b8838f168d654fa669cfc3abc5f4908d04e6c6e657ce2e14e77c8823b0"
+  homepage "https://rakudo.org/"
+  url "https://rakudo.org/dl/star/rakudo-star-2020.01.tar.gz"
+  sha256 "f1696577670d4ff5b464e572b1b0b8c390e6571e1fb8471cbf369fa39712c668"
+  revision 1
 
   bottle do
-    sha256 "65370fb85df2d558595ddea8177a3ae8e9841ecd703b409779450146598e95b1" => :high_sierra
-    sha256 "9b393529595e9045fa451a7d550babb03bb0fec79a94f820d107b0989ed076c4" => :sierra
-    sha256 "0c9dd03afa5520fafdc6f9829262f2e159ff598a1fa8c7ac8c6f86225ba00bf3" => :el_capitan
+    sha256 "3a2d22c17772726872aefb5afbf216f6640c0bcb441c98a9e27aab73b0edaeff" => :catalina
+    sha256 "b53dab6ef44c73ea480ce74577a6b4f1593e124d2e5e502d3e134a6e81d7c054" => :mojave
+    sha256 "e4ecc1142965f84eb7197d8388390d8968f5e7505628bed3b8e2c41a98c324f7" => :high_sierra
   end
 
-  option "with-jvm", "Build also for jvm as an alternate backend."
-
-  depends_on "gmp" => :optional
-  depends_on "icu4c" => :optional
-  depends_on "pcre" => :optional
+  depends_on "gmp"
+  depends_on "icu4c"
   depends_on "libffi"
+  depends_on "pcre"
 
+  conflicts_with "moarvm", "nqp", :because => "rakudo-star currently ships with moarvm and nqp included"
   conflicts_with "parrot"
+  conflicts_with "rakudo"
 
   def install
     libffi = Formula["libffi"]
@@ -26,13 +27,12 @@ class RakudoStar < Formula
 
     ENV.deparallelize # An intermittent race condition causes random build failures.
 
-    backends = ["moar"]
-    generate = ["--gen-moar"]
-
-    backends << "jvm" if build.with? "jvm"
-
-    system "perl", "Configure.pl", "--prefix=#{prefix}", "--backends=" + backends.join(","), *generate
+    system "perl", "Configure.pl", "--prefix=#{prefix}",
+                   "--backends=moar", "--gen-moar"
     system "make"
+    # make install runs tests that can hang on sierra
+    # set this variable to skip those tests
+    ENV["NO_NETWORK_TESTING"] = "1"
     system "make", "install"
 
     # Panda is now in share/perl6/site/bin, so we need to symlink it too.

@@ -1,33 +1,30 @@
 class Pgcli < Formula
+  include Language::Python::Virtualenv
+
   desc "CLI for Postgres with auto-completion and syntax highlighting"
   homepage "https://pgcli.com/"
-  url "https://files.pythonhosted.org/packages/d6/22/b31b930ab33ed23db9443f082f4aced2c81be97bcf3a2e1b2ec2e091cb09/pgcli-1.8.1.tar.gz"
-  sha256 "9a29b4082987760ea336697d3d4a4ecf9c126d7d6b56001d6d897d438bd91ce7"
+  url "https://files.pythonhosted.org/packages/33/d0/646dcdd819f6313c5b534bb41e2970968a1cbccba39e5f969a65858d0bb4/pgcli-3.0.0.tar.gz"
+  sha256 "4920225838e8004ae6d2ec42f566e0a8b99c4bd42bc2c876d0de8501da0a4082"
 
   bottle do
     cellar :any
-    sha256 "ca4796a22b658f8e7a46797eb937d452b25f906ef4774c5fc785d0e13d6fc9b0" => :high_sierra
-    sha256 "0be32aadcb4d4de65908ddaf071f276ced76de0dd612a17bd994b530bffa8ad8" => :sierra
-    sha256 "2f9dd812d687aaf7b4250f1ccefd834b61046fa84209b7876abb92e1ab534057" => :el_capitan
+    sha256 "33762e29fe9be52d07d9500b3bb497afca3494ba73b7729e82047f531fe347ca" => :catalina
+    sha256 "dfc4edc73356fb8059808ae8a502fccf3df013caec1a39e18e6766b39a42ae5c" => :mojave
+    sha256 "42814524bbec67d415d06d991c17c0decd429c9a072d86c122d92bdf56affa5a" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
   depends_on "libpq"
-  depends_on "openssl"
-
-  resource "backports.csv" do
-    url "https://files.pythonhosted.org/packages/6a/0b/2071ad285e87dd26f5c02147ba13abf7ec777ff20416a60eb15ea204ca76/backports.csv-1.0.5.tar.gz"
-    sha256 "8c421385cbc6042ba90c68c871c5afc13672acaf91e1508546d6cda6725ebfc6"
-  end
+  depends_on "openssl@1.1"
+  depends_on "python@3.8"
 
   resource "cli-helpers" do
-    url "https://files.pythonhosted.org/packages/03/65/9a5b81f879131076e47fa7f0e633a2e6524cdae7d14ef66a58bb810c100e/cli_helpers-0.2.3.tar.gz"
-    sha256 "eaa887b46ef448c8864ba460cce4fa26866e45e337dc32a2b4741ccb033c42f1"
+    url "https://files.pythonhosted.org/packages/43/36/ba00975df9d393c0ccc3b1bf1610227bc4c4d611a5c69249b57be8ba6253/cli_helpers-1.2.1.tar.gz"
+    sha256 "98db22eaa86827d99ee6af9f5f3923142d04df256425204530842b032849a165"
   end
 
-  resource "click" do
-    url "https://files.pythonhosted.org/packages/95/d9/c3336b6b5711c3ab9d1d3a80f1a3e2afeb9d8c02a7166462f6cc96570897/click-6.7.tar.gz"
-    sha256 "f15516df478d5a56180fbf80e68f206010e6d160fc39fa508b65e035fd75130b"
+  resource "Click" do
+    url "https://files.pythonhosted.org/packages/4e/ab/5d6bc3b697154018ef196f5b17d958fac3854e2efbc39ea07a284d4a6a9b/click-7.1.1.tar.gz"
+    sha256 "8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc"
   end
 
   resource "configobj" do
@@ -36,28 +33,28 @@ class Pgcli < Formula
   end
 
   resource "humanize" do
-    url "https://files.pythonhosted.org/packages/8c/e0/e512e4ac6d091fc990bbe13f9e0378f34cf6eecd1c6c268c9e598dcf5bb9/humanize-0.5.1.tar.gz"
-    sha256 "a43f57115831ac7c70de098e6ac46ac13be00d69abbf60bdcac251344785bb19"
+    url "https://files.pythonhosted.org/packages/17/b7/ed02060fd1b8c0de361b929355cd26e42ed31bea1a9229d9e7d8bc3b7faa/humanize-2.3.0.tar.gz"
+    sha256 "98b7ac9d1a70ad62175c8e0dd44beebbd92418727fc4e214468dfb2baa8ebfb5"
   end
 
   resource "pgspecial" do
-    url "https://files.pythonhosted.org/packages/bd/61/b35b4622813d6659653290bf6c001b22dc0c5d0b88c0948db47d15d1c42d/pgspecial-1.8.0.tar.gz"
-    sha256 "89f524909e97554bb3eeceb186a834e86cb71e34afef3a95fe645049ead894b7"
+    url "https://files.pythonhosted.org/packages/4e/0c/47957ad5b5cfb488344032326a4a013127b005929422bc5e9ee98bdf18ec/pgspecial-1.11.9.tar.gz"
+    sha256 "77f8651450ccbde7d3036cfe93486a4eeeb5ade28d1ebc4b2ba186fea0023c56"
   end
 
-  resource "prompt_toolkit" do
-    url "https://files.pythonhosted.org/packages/8a/ad/cf6b128866e78ad6d7f1dc5b7f99885fb813393d9860778b2984582e81b5/prompt_toolkit-1.0.15.tar.gz"
-    sha256 "858588f1983ca497f1cf4ffde01d978a3ea02b01c8a26a8bbc5cd2e66d816917"
+  resource "prompt-toolkit" do
+    url "https://files.pythonhosted.org/packages/69/19/3aa4bf17e1cbbdfe934eb3d5b394ae9a0a7fb23594a2ff27e0fdaf8b4c59/prompt_toolkit-3.0.5.tar.gz"
+    sha256 "563d1a4140b63ff9dd587bda9557cffb2fe73650205ab6f4383092fb882e7dc8"
   end
 
   resource "psycopg2" do
-    url "https://files.pythonhosted.org/packages/6b/fb/15c687eda2f925f0ff59373063fdb408471b4284714a7761daaa65c01f15/psycopg2-2.7.3.1.tar.gz"
-    sha256 "9b7b16e26448b43cf167f785d8b5345007731ebf153a510e12dae826800caa65"
+    url "https://files.pythonhosted.org/packages/a8/8f/1c5690eebf148d1d1554fc00ccf9101e134636553dbb75bdfef4f85d7647/psycopg2-2.8.5.tar.gz"
+    sha256 "f7d46240f7a1ae1dd95aab38bd74f7428d46531f69219954266d669da60c0818"
   end
 
   resource "Pygments" do
-    url "https://files.pythonhosted.org/packages/71/2a/2e4e77803a8bd6408a2903340ac498cb0a2181811af7c9ec92cb70b0308a/Pygments-2.2.0.tar.gz"
-    sha256 "dbae1046def0efb574852fab9e90209b23f556367b5a320c0bcb871c77c3e8cc"
+    url "https://files.pythonhosted.org/packages/6e/4d/4d2fe93a35dfba417311a4ff627489a947b01dc0cc377a3673c00cf7e4b2/Pygments-2.6.1.tar.gz"
+    sha256 "647344a061c249a3b74e230c739f434d7ea4d8b1d5f3721bc0f3558049b38f44"
   end
 
   resource "setproctitle" do
@@ -66,13 +63,18 @@ class Pgcli < Formula
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/16/d8/bc6316cf98419719bd59c91742194c111b6f2e85abac88e496adefaf7afe/six-1.11.0.tar.gz"
-    sha256 "70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9"
+    url "https://files.pythonhosted.org/packages/21/9f/b251f7f8a76dec1d6651be194dfba8fb8d7781d10ab3987190de8391d08e/six-1.14.0.tar.gz"
+    sha256 "236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a"
   end
 
   resource "sqlparse" do
-    url "https://files.pythonhosted.org/packages/45/67/14bdaeff492e6d03a055fe80502bae10b679891c25a0dc59be2fe51002f8/sqlparse-0.2.3.tar.gz"
-    sha256 "becd7cc7cebbdf311de8ceedfcf2bd2403297024418801947f8c953025beeff8"
+    url "https://files.pythonhosted.org/packages/67/4b/253b6902c1526885af6d361ca8c6b1400292e649f0e9c95ee0d2e8ec8681/sqlparse-0.3.1.tar.gz"
+    sha256 "e162203737712307dfe78860cc56c8da8a852ab2ee33750e33aeadf38d12c548"
+  end
+
+  resource "tabulate" do
+    url "https://files.pythonhosted.org/packages/57/6f/213d075ad03c84991d44e63b6516dd7d185091df5e1d02a660874f8f7e1e/tabulate-0.8.7.tar.gz"
+    sha256 "db2723a20d04bcda8522165c73eea7c300eda74e0ce852d9022e0159d7895007"
   end
 
   resource "terminaltables" do
@@ -81,26 +83,12 @@ class Pgcli < Formula
   end
 
   resource "wcwidth" do
-    url "https://files.pythonhosted.org/packages/55/11/e4a2bb08bb450fdbd42cc709dd40de4ed2c472cf0ccb9e64af22279c5495/wcwidth-0.1.7.tar.gz"
-    sha256 "3df37372226d6e63e1b1e1eda15c594bca98a22d33a23832a90998faa96bc65e"
+    url "https://files.pythonhosted.org/packages/25/9d/0acbed6e4a4be4fc99148f275488580968f44ddb5e69b8ceb53fc9df55a0/wcwidth-0.1.9.tar.gz"
+    sha256 "ee73862862a156bf77ff92b09034fc4825dd3af9cf81bc5b360668d425f3c5f1"
   end
 
   def install
-    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python2.7/site-packages"
-    resources.each do |r|
-      r.stage do
-        system "python", *Language::Python.setup_install_args(libexec/"vendor")
-      end
-    end
-
-    # backports is a namespace package
-    touch libexec/"vendor/lib/python2.7/site-packages/backports/__init__.py"
-
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"
-    system "python", *Language::Python.setup_install_args(libexec)
-
-    bin.install Dir["#{libexec}/bin/*"]
-    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
+    virtualenv_install_with_resources
   end
 
   test do

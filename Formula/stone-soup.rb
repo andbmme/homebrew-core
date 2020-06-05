@@ -1,34 +1,35 @@
 class StoneSoup < Formula
   desc "Dungeon Crawl Stone Soup: a roguelike game"
   homepage "https://crawl.develz.org/"
-  url "https://crawl.develz.org/release/0.20/stone_soup-0.20.1.tar.xz"
-  sha256 "77d238bd859166e09bbf56127997f810d1c9794e1cf4a0d1edc0687b6f194dee"
+  url "https://crawl.develz.org/release/0.24/stone_soup-0.24.0.tar.xz"
+  sha256 "eb069ae421d4246a3332d9081fb6e08b4bfaa71c407ffc17c194c5f9170d7561"
+  revision 2
 
   bottle do
-    sha256 "f540d3696af53cdc02e139290a35bd81857f830878b0ba60fbe2546d7ee7b975" => :high_sierra
-    sha256 "5a858765714fc0241e108a99de4fd738e9cd7ea0f80a3cb06089f51120f305a3" => :sierra
-    sha256 "9c0771911aef3eff5695cd1696839029a6625c6b3e645db7728f3976658a44ac" => :el_capitan
+    sha256 "7cf945fbee6be6dff59257cab7c4d1e37154012db05eda662fce07de0030792b" => :catalina
+    sha256 "a8be120a1590ccef04dee4eca9ad603cba128ebbc84239e07c84210d9702dfd1" => :mojave
+    sha256 "8132209e7cf957ed398e8fdd70fa5bc9fea1a808d82fdc6f9dc69b137c6f29c3" => :high_sierra
   end
-
-  option "with-tiles", "Enable graphic tiles and sound"
-  option "without-lua@5.1", "Disable Lua bindings for user scripts"
 
   depends_on "pkg-config" => :build
-  depends_on "lua@5.1" => :recommended
+  depends_on "python@3.8" => :build
+  depends_on "lua@5.1"
   depends_on "pcre"
 
-  if build.with? "tiles"
-    depends_on "sdl2"
-    depends_on "sdl2_mixer"
-    depends_on "sdl2_image"
-    depends_on "libpng"
-    depends_on "freetype"
+  resource "PyYAML" do
+    url "https://files.pythonhosted.org/packages/64/c2/b80047c7ac2478f9501676c988a5411ed5572f35d1beff9cae07d321512c/PyYAML-5.3.1.tar.gz"
+    sha256 "b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d"
   end
-
-  needs :cxx11
 
   def install
     ENV.cxx11
+    ENV.prepend_path "PATH", Formula["python@3.8"].opt_libexec/"bin"
+    xy = Language::Python.major_minor_version "python3"
+    ENV.prepend_create_path "PYTHONPATH", buildpath/"vendor/lib/python#{xy}/site-packages"
+
+    resource("PyYAML").stage do
+      system "python3", *Language::Python.setup_install_args(buildpath/"vendor")
+    end
 
     cd "source" do
       args = %W[
@@ -39,23 +40,13 @@ class StoneSoup < Formula
         BUILD_SQLITE=yes
         BUILD_FREETYPE=
         BUILD_LIBPNG=
+        BUILD_LUA=y
         BUILD_SDL2=
         BUILD_SDL2MIXER=
         BUILD_SDL2IMAGE=
         BUILD_PCRE=
         USE_PCRE=y
       ]
-      if build.with? "tiles"
-        inreplace "Makefile", "contrib/install/$(ARCH)/lib/libSDL2main.a", ""
-        args << "TILES=y"
-        args << "SOUND=y"
-      end
-
-      if build.with? "lua@5.1"
-        args << "BUILD_LUA=y"
-      else
-        args << "NO_LUA_BINDINGS=y"
-      end
 
       # FSF GCC doesn't support the -rdynamic flag
       args << "NO_RDYNAMIC=y" unless ENV.compiler == :clang
@@ -67,18 +58,16 @@ class StoneSoup < Formula
       # On 10.9, stone-soup will try to use xcrun and fail due to an empty
       # DEVELOPER_DIR
       devdir = MacOS::Xcode.prefix.to_s
-      devdir += "/" if MacOS.version >= :mavericks && !MacOS::Xcode.installed?
+      devdir += "/" unless MacOS::Xcode.installed?
 
       system "make", "install",
         "DEVELOPER_DIR=#{devdir}", "SDKROOT=#{MacOS.sdk_path}",
-        # stone-soup tries to use `uname -m` to determine build -arch,
-        # which is frequently wrong on OS X
-        "SDK_VER=#{MacOS.version}", "MARCH=#{MacOS.preferred_arch}",
-        *args
+        "SDK_VER=#{MacOS.version}", *args
     end
   end
 
   test do
-    assert shell_output("#{bin}/crawl --version").start_with? "Crawl version #{version}"
+    output = shell_output("#{bin}/crawl --version")
+    assert_match "Crawl version #{version}", output
   end
 end

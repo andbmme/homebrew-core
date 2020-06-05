@@ -1,49 +1,36 @@
 class Libgit2Glib < Formula
   desc "Glib wrapper library around libgit2 git access library"
   homepage "https://github.com/GNOME/libgit2-glib"
-  url "https://download.gnome.org/sources/libgit2-glib/0.26/libgit2-glib-0.26.0.tar.xz"
-  sha256 "06b16cfcc3a53d9804858618d690e5509e9af2e2245b75f0479cadbbe39745c3"
+  url "https://download.gnome.org/sources/libgit2-glib/0.99/libgit2-glib-0.99.0.1.tar.xz"
+  sha256 "e05a75c444d9c8d5991afc4a5a64cd97d731ce21aeb7c1c651ade1a3b465b9de"
+  revision 1
+  head "https://github.com/GNOME/libgit2-glib.git"
 
   bottle do
-    sha256 "75bd2fc38577f01574ccfd85458cedb8debb755c2e6a4ba0856c8a0a2400125b" => :high_sierra
-    sha256 "90dde630fbbcbb46fb44c21cf45c711546fe880010f4fe45c4467d878db41574" => :sierra
-    sha256 "57abc504662879a7ef9267eb3a1474fa5192171367f855aef25ca1dfaefa7102" => :el_capitan
-    sha256 "d907f60a9bdd7363ae876394bf0ab9c99cbb8e51a24738d2d1a1bd2c9f598edd" => :yosemite
+    sha256 "a5297beb6c9ab0602847472ec08fbd2eddad7e91ca3c78db15f4a8175912feea" => :catalina
+    sha256 "ffff80b61a3dd453796abdd059803d887c6de603d501c65a153571a0c04be5ce" => :mojave
+    sha256 "74b08631fc92b096f3034c512ea9f62889edc92c49c6581043fbf56256306ad4" => :high_sierra
   end
 
-  head do
-    url "https://github.com/GNOME/libgit2-glib.git"
-
-    depends_on "libtool" => :build
-    depends_on "automake" => :build
-    depends_on "autoconf" => :build
-    depends_on "gnome-common" => :build
-    depends_on "gtk-doc" => :build
-  end
-
+  depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "vala" => :build
   depends_on "gettext"
-  depends_on "libgit2"
-  depends_on "gobject-introspection"
   depends_on "glib"
-  depends_on "vala" => :optional
-  depends_on :python => :optional
+  depends_on "libgit2"
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --disable-silent-rules
-      --disable-dependency-tracking
-    ]
-
-    args << "--enable-python=no" if build.without? "python"
-    args << "--enable-vala=no" if build.without? "vala"
-
-    system "./autogen.sh", *args if build.head?
-    system "./configure", *args if build.stable?
-    system "make", "install"
-
-    libexec.install "examples/.libs", "examples/clone", "examples/general", "examples/walk"
+    mkdir "build" do
+      system "meson", *std_meson_args,
+                      "-Dpython=false",
+                      "-Dvapi=true",
+                      ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+      libexec.install Dir["examples/*"]
+    end
   end
 
   test do

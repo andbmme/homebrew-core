@@ -1,107 +1,61 @@
 class Openvdb < Formula
   desc "Sparse volume processing toolkit"
-  homepage "http://www.openvdb.org/"
-  url "https://github.com/dreamworksanimation/openvdb/archive/v5.0.0.tar.gz"
-  sha256 "1d39b711949360e0dba0895af9599d0606ca590f6de2d7c3a6251211fcc00348"
-  head "https://github.com/dreamworksanimation/openvdb.git"
+  homepage "https://www.openvdb.org/"
+  url "https://github.com/AcademySoftwareFoundation/openvdb/archive/v7.0.0.tar.gz"
+  sha256 "97bc8ae35ef7ccbf49a4e25cb73e8c2eccae6b235bac86f2150707efcd1e910d"
+  revision 2
+  head "https://github.com/AcademySoftwareFoundation/openvdb.git"
 
   bottle do
-    sha256 "5c9adc74ee6dbbde072733457805650f2aa5cd50c15662e631854a3ffab015ba" => :high_sierra
-    sha256 "e50d1dfbe7266f134ebc4a4b17c84a34c92d586c2a1887bd262eabde24c2d101" => :sierra
-    sha256 "6af2812f0331f7db33dcc847272fdcd5edb530624426402c620678e6f7b15ae6" => :el_capitan
+    sha256 "a52e3f045f00380b3b3a0246d36e6f084b197df696c8b229e83772bda2ed3017" => :catalina
+    sha256 "b55dd56f20ba824ad2daa83d4ed41d656911e8b596e45f39d2ed953f04a3ac79" => :mojave
+    sha256 "a7d3e9cc992f2699b1dea70a51dbd9333b423113a1c8ca819265bbbb0df0d3ca" => :high_sierra
   end
 
-  option "with-glfw", "Installs the command-line tool to view OpenVDB files"
-  option "with-test", "Installs the unit tests for the OpenVDB library"
-  option "with-logging", "Requires log4cplus"
-  option "with-docs", "Installs documentation"
-
-  deprecated_option "with-tests" => "with-test"
-  deprecated_option "with-viewer" => "with-glfw"
-
-  depends_on "openexr"
+  depends_on "doxygen" => :build
+  depends_on "boost"
+  depends_on "c-blosc"
+  depends_on "glfw"
   depends_on "ilmbase"
+  depends_on "jemalloc"
+  depends_on "openexr"
   depends_on "tbb"
-  depends_on "jemalloc" => :recommended
-
-  if MacOS.version < :mavericks
-    depends_on "boost" => "c++11"
-  else
-    depends_on "boost"
-  end
-
-  depends_on "glfw" => :optional
-  depends_on "cppunit" if build.with? "test"
-  depends_on "doxygen" if build.with? "docs"
-  depends_on "log4cplus" if build.with? "logging"
-  needs :cxx11
 
   resource "test_file" do
-    url "http://www.openvdb.org/download/models/cube.vdb.zip"
+    url "https://artifacts.aswf.io/io/aswf/openvdb/models/cube.vdb/1.0.0/cube.vdb-1.0.0.zip"
     sha256 "05476e84e91c0214ad7593850e6e7c28f777aa4ff0a1d88d91168a7dd050f922"
   end
 
   def install
-    ENV.cxx11
     # Adjust hard coded paths in Makefile
     args = [
       "DESTDIR=#{prefix}",
+      "BLOSC_INCL_DIR=#{Formula["c-blosc"].opt_include}",
+      "BLOSC_LIB_DIR=#{Formula["c-blosc"].opt_lib}",
       "BOOST_INCL_DIR=#{Formula["boost"].opt_include}",
       "BOOST_LIB_DIR=#{Formula["boost"].opt_lib}",
       "BOOST_THREAD_LIB=-lboost_thread-mt",
-      "TBB_INCL_DIR=#{Formula["tbb"].opt_include}",
-      "TBB_LIB_DIR=#{Formula["tbb"].opt_lib}",
+      "CONCURRENT_MALLOC_LIB_DIR=#{Formula["jemalloc"].opt_lib}",
+      "CPPUNIT_INCL_DIR=", # Do not use cppunit
+      "CPPUNIT_LIB_DIR=",
+      "DOXYGEN=doxygen",
       "EXR_INCL_DIR=#{Formula["openexr"].opt_include}/OpenEXR",
       "EXR_LIB_DIR=#{Formula["openexr"].opt_lib}",
-      "BLOSC_INCL_DIR=", # Blosc is not yet supported.
-      "PYTHON_VERSION=",
+      "LOG4CPLUS_INCL_DIR=", # Do not use log4cplus
+      "LOG4CPLUS_LIB_DIR=",
       "NUMPY_INCL_DIR=",
+      "PYTHON_VERSION=",
+      "TBB_INCL_DIR=#{Formula["tbb"].opt_include}",
+      "TBB_LIB_DIR=#{Formula["tbb"].opt_lib}",
+      "GLFW_INCL_DIR=#{Formula["glfw"].opt_include}",
+      "GLFW_LIB_DIR=#{Formula["glfw"].opt_lib}",
+      "GLFW_LIB=-lglfw",
     ]
-
-    if build.with? "jemalloc"
-      args << "CONCURRENT_MALLOC_LIB_DIR=#{Formula["jemalloc"].opt_lib}"
-    else
-      args << "CONCURRENT_MALLOC_LIB="
-    end
-
-    if build.with? "glfw"
-      args << "GLFW_INCL_DIR=#{Formula["glfw"].opt_include}"
-      args << "GLFW_LIB_DIR=#{Formula["glfw"].opt_lib}"
-      args << "GLFW_LIB=-lglfw"
-    else
-      args << "GLFW_INCL_DIR="
-      args << "GLFW_LIB_DIR="
-      args << "GLFW_LIB="
-    end
-
-    if build.with? "docs"
-      args << "DOXYGEN=doxygen"
-    else
-      args << "DOXYGEN="
-    end
-
-    if build.with? "test"
-      args << "CPPUNIT_INCL_DIR=#{Formula["cppunit"].opt_include}"
-      args << "CPPUNIT_LIB_DIR=#{Formula["cppunit"].opt_lib}"
-    else
-      args << "CPPUNIT_INCL_DIR=" << "CPPUNIT_LIB_DIR="
-    end
-
-    if build.with? "logging"
-      args << "LOG4CPLUS_INCL_DIR=#{Formula["log4cplus"].opt_include}"
-      args << "LOG4CPLUS_LIB_DIR=#{Formula["log4cplus"].opt_lib}"
-    else
-      args << "LOG4CPLUS_INCL_DIR=" << "LOG4CPLUS_LIB_DIR="
-    end
 
     ENV.append_to_cflags "-I #{buildpath}"
 
     cd "openvdb" do
       system "make", "install", *args
-      if build.with? "test"
-        system "make", "vdb_test", *args
-        bin.install "vdb_test"
-      end
     end
   end
 

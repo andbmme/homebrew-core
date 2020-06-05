@@ -1,29 +1,21 @@
 class Srtp < Formula
   desc "Implementation of the Secure Real-time Transport Protocol"
   homepage "https://github.com/cisco/libsrtp"
-  url "https://github.com/cisco/libsrtp/archive/v2.1.0.tar.gz"
-  sha256 "0302442ed97d34a77abf84617b657e77674bdd8e789d649f1cac0c5f0d0cf5ee"
+  url "https://github.com/cisco/libsrtp/archive/v2.3.0.tar.gz"
+  sha256 "94093a5d04c5f4743e8d81182b76938374df6d393b45322f24960d250b0110e8"
   head "https://github.com/cisco/libsrtp.git"
 
   bottle do
     cellar :any
-    sha256 "02f8d3b4479948c7c90b670b9edabe49def32a80f49739d33fc4eef246465bda" => :high_sierra
-    sha256 "9a3afccfaec1f8bf9d96a7237837b95a971c8aeb44b889a0c35bbdb1898f7717" => :sierra
-    sha256 "581b4e442ea397d970ccc3e36397bdcf71796d94c4f2ae0fda0aad02ec762249" => :el_capitan
-    sha256 "a1b87e2333a7f32f38c41d4c458b5426a25f9750d505db6655847e3e2429b501" => :yosemite
+    sha256 "b96d4c3bb159a6f43d5bdd9cc0be0d8deecb06c95df19f2d9cc1f517ffc64ad6" => :catalina
+    sha256 "4bbad999b46dd545aa32882e968d441f5d5e709dc8549ef79e3885dd49fcb964" => :mojave
+    sha256 "5c70c41484064bbe25c31a19fc2cffc5cbea3de27e837a039b17767aeb1b57b8" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "openssl" => :optional
 
   def install
-    args = %W[
-      --disable-debug
-      --prefix=#{prefix}
-    ]
-    args << "--enable-openssl" if build.with? "openssl"
-
-    system "./configure", *args
+    system "./configure", "--disable-debug", "--prefix=#{prefix}"
     system "make", "test"
     system "make", "shared_library"
     system "make", "install" # Can't go in parallel of building the dylib

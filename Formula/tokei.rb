@@ -1,21 +1,21 @@
 class Tokei < Formula
   desc "Program that allows you to count code, quickly"
-  homepage "https://github.com/Aaronepower/tokei"
-  url "https://github.com/Aaronepower/tokei/archive/v6.1.2.tar.gz"
-  sha256 "736bab89800c397acc3be961af12b80acc2ca71dc990792fff8935018a2f0698"
+  homepage "https://github.com/XAMPPRocky/tokei"
+  url "https://github.com/XAMPPRocky/tokei/archive/v11.2.1.tar.gz"
+  sha256 "354893da88babffe59154656ed669de06d2b04c0fe318613fb29af66b50f35bc"
 
   bottle do
-    sha256 "53ccc42b89ad19fad28ce1e043d5776f10ea32d8aad6d2810198612d2ff64c69" => :high_sierra
-    sha256 "9ec430a5d41ffd3dea4001842c269193190adcc4968cb405754a65cb5bd5e955" => :sierra
-    sha256 "9e3ec9a5dd0aaf6289871c9fcdcd37139349871e95931b6febe306e5388b932e" => :el_capitan
-    sha256 "4747f489aaa9701939e7c25039b1137c2c53fcc19358e47c80c1717aa9ddde42" => :yosemite
+    cellar :any_skip_relocation
+    sha256 "0023434f2186b2e1fc29dc0ce0b0eebf90834c1db0994a3e186f8b7fab87276c" => :catalina
+    sha256 "858b572bfb3eff1e5c5f68a5a4d99bcbf1c515e1c2191c2995c58c367488c166" => :mojave
+    sha256 "19a72a404bab167c3ed801d8032b692f1d32f3baea3d5f0c1437e8eef50ac03e" => :high_sierra
   end
 
   depends_on "rust" => :build
 
   def install
-    system "cargo", "build", "--release"
-    bin.install "target/release/tokei"
+    system "cargo", "install", "--locked", "--root", prefix, "--path", ".",
+                               "--features", "all"
   end
 
   test do

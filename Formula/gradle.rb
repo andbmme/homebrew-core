@@ -1,23 +1,27 @@
 class Gradle < Formula
-  desc "Build system based on the Groovy language"
+  desc "Open-source build automation tool based on the Groovy and Kotlin DSL"
   homepage "https://www.gradle.org/"
-  url "https://services.gradle.org/distributions/gradle-4.3.1-all.zip"
-  sha256 "c5b67330a8a211539d713852c56a6a80fdea365d8902df92d1759d913d18fa2d"
+  url "https://services.gradle.org/distributions/gradle-6.5-all.zip"
+  sha256 "c9910513d0eed63cd8f5c7fec4cb4a05731144770104a0871234a4edc3ba3cef"
 
   bottle :unneeded
 
-  option "with-all", "Installs Javadoc, examples, and source in addition to the binaries"
-
-  depends_on :java => "1.7+"
+  depends_on "openjdk"
 
   def install
     rm_f Dir["bin/*.bat"]
-    libexec.install %w[bin lib]
-    libexec.install %w[docs media samples src] if build.with? "all"
-    (bin/"gradle").write_env_script libexec/"bin/gradle", Language::Java.overridable_java_home_env
+    libexec.install %w[bin docs lib src]
+    (bin/"gradle").write_env_script libexec/"bin/gradle",
+      :JAVA_HOME => "${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/gradle --version")
+
+    (testpath/"build.gradle").write <<~EOS
+      println "gradle works!"
+    EOS
+    gradle_output = shell_output("#{bin}/gradle build --no-daemon")
+    assert_includes gradle_output, "gradle works!"
   end
 end

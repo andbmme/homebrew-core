@@ -2,34 +2,27 @@ class Caf < Formula
   # Renamed from libccpa
   desc "Implementation of the Actor Model for C++"
   homepage "https://actor-framework.org/"
-  url "https://github.com/actor-framework/actor-framework/archive/0.15.5.tar.gz"
-  sha256 "2dd710366ee03f9b23f3aaea2ed4bdc0c39c5e503819b870785186f54751cf86"
+  url "https://github.com/actor-framework/actor-framework/archive/0.17.5.tar.gz"
+  sha256 "a60be1e729de9cf32e2a10335679f311228d8f04997b57d5dcbb508acfe29bed"
   head "https://github.com/actor-framework/actor-framework.git"
 
   bottle do
     cellar :any
-    sha256 "4e141fb961dd112be9eef60304dade14cdbb9ea9192da3a2edac31b5cb0cff0f" => :high_sierra
-    sha256 "1160f797a3d5cca066a790517e8ec5ee7c525c53fb8a48fe908ba6c0aecf526a" => :sierra
-    sha256 "db0aca0ef3cbf84558ca5b54956ed60857a8139a69444a266c0907a9a08829ce" => :el_capitan
+    sha256 "f7edfd696aeb6da9b5648198f012848abcbdcfef7563d33a5dcfa7fa5d00f3e7" => :catalina
+    sha256 "4e94b6afe4bf7e9c61e368c75348f667168dbdf6d0b1400163e7c9cc83ad1f68" => :mojave
+    sha256 "7e72d56ec3a0119e2a2d141e1373e1977c2315efcb18b34261af3d863be39331" => :high_sierra
   end
 
-  needs :cxx11
-
-  option "with-opencl", "build with support for OpenCL actors"
-  option "without-test", "skip unit tests (not recommended)"
-
-  deprecated_option "without-check" => "without-test"
-
   depends_on "cmake" => :build
+  depends_on "openssl@1.1"
 
   def install
-    args = %W[--prefix=#{prefix} --no-examples --build-static]
-    args << "--no-opencl" if build.without? "opencl"
-
-    system "./configure", *args
-    system "make"
-    system "make", "test" if build.with? "test"
-    system "make", "install"
+    system "./configure", "--prefix=#{prefix}",
+                          "--build-static",
+                          "--no-examples",
+                          "--no-unit-tests",
+                          "--no-opencl"
+    system "make", "--directory=build", "install"
   end
 
   test do
@@ -42,12 +35,10 @@ class Caf < Formula
         self->spawn([] {
           std::cout << "test" << std::endl;
         });
-        self->await_all_other_actors_done();
       }
       CAF_MAIN()
     EOS
-    ENV.cxx11
-    system *(ENV.cxx.split + %W[test.cpp -L#{lib} -lcaf_core -o test])
+    system ENV.cxx, "-std=c++11", "test.cpp", "-L#{lib}", "-lcaf_core", "-o", "test"
     system "./test"
   end
 end

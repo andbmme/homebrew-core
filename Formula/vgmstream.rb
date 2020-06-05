@@ -1,31 +1,31 @@
 class Vgmstream < Formula
   desc "Library for playing streamed audio formats from video games"
   homepage "https://hcs64.com/vgmstream.html"
-  url "https://github.com/kode54/vgmstream/archive/r1040.tar.gz"
-  version "r1040"
-  sha256 "0ff6534a4049b27b01caf209811b87b1bfe445f94e141a5fe601f2dae9d03c89"
+  url "https://github.com/losnoco/vgmstream/archive/r1050-2908-g14dc8566.tar.gz"
+  version "r1050-2908-g14dc8566"
+  sha256 "8d03ef4b3ff4c397c1a7b0a4132eb0813d50901c78436b09558cb2489ea6d904"
   head "https://github.com/kode54/vgmstream.git"
 
   bottle do
     cellar :any
-    rebuild 2
-    sha256 "970428e954d82c2aaef2da083320fabd21ae7ba866fd2055d5fdcdd21f2989b0" => :high_sierra
-    sha256 "b85d6942270fc9024de56e4fe08618f7ffce1499f4c9faf3f31b246310a17511" => :sierra
-    sha256 "980226be71f7ba16f71e7cd4ba53a4160c03cf9308036d014538b1feb8285d08" => :el_capitan
+    sha256 "27cb2df8b0a88d31507695a9b8711bbeca66ac9a09f8e34de399a45b7f2c216a" => :catalina
+    sha256 "8a52d5fdc81f87c709c0f41c90b02cba2788f7429402a327fcf343d331346018" => :mojave
+    sha256 "513761e04c72ecf6300222bd06d662b7ab0ae74b56f37cc586dcd514e5f2ffc3" => :high_sierra
   end
 
-  depends_on "mpg123"
+  depends_on "libao"
   depends_on "libvorbis"
+  depends_on "mpg123"
 
   def install
-    cd "test" do
-      system "make"
-      bin.install "test" => "vgmstream"
-      lib.install "../src/libvgmstream.a"
-    end
+    system "make", "vgmstream_cli"
+    system "make", "vgmstream123"
+    bin.install "cli/vgmstream-cli"
+    bin.install "cli/vgmstream123"
+    lib.install "src/libvgmstream.a"
   end
 
   test do
-    assert_match "decode", shell_output("#{bin}/vgmstream 2>&1", 1)
+    assert_match "decode", shell_output("#{bin}/vgmstream-cli 2>&1", 1)
   end
 end

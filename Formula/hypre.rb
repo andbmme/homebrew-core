@@ -1,34 +1,23 @@
 class Hypre < Formula
   desc "Library featuring parallel multigrid methods for grid problems"
   homepage "https://computation.llnl.gov/casc/hypre/software.html"
-  url "https://computation.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods/download/hypre-2.11.2.tar.gz"
-  sha256 "25b6c1226411593f71bb5cf3891431afaa8c3fd487bdfe4faeeb55c6fdfb269e"
-  revision 1
-  head "https://github.com/LLNL/hypre.git"
+  url "https://github.com/hypre-space/hypre/archive/v2.19.0.tar.gz"
+  sha256 "466b19d8a86c69989a237f6f03f20d35c0c63a818776d2cd071b0a084cffeba5"
+  head "https://github.com/hypre-space/hypre.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e0d1c37af0624bd9c7638bd1288c9cc523160ceabeecceb7534bed6bdf0248df" => :high_sierra
-    sha256 "bc90328c270fde57f6c1966ef076f095455d5297c4a996db79f44cd4e7258e11" => :sierra
-    sha256 "302d24880cb100ea35d51961c01992fb4acc151f88a760703443928c5739ea9f" => :el_capitan
+    sha256 "9bba59afd174afc5ebb884369445639d9aae27bf5894ecd65e8f113d33c4f89f" => :catalina
+    sha256 "b8e38313cbf6a6a5ca0ad3605c51f70efea2687f9d8fa299e525b927b43544be" => :mojave
+    sha256 "135e5998b03eb58b4f4a7363c01014a74362c93daad5b8720b9081b5a65caeb9" => :high_sierra
   end
 
-  depends_on "veclibfort"
-  depends_on :fortran
-  depends_on :mpi => [:cc, :cxx, :f90, :f77]
+  depends_on "gcc" # for gfortran
+  depends_on "open-mpi"
 
   def install
     cd "src" do
-      ENV["CC"] = ENV["MPICC"]
-      ENV["CXX"] = ENV["MPICXX"]
-
       system "./configure", "--prefix=#{prefix}",
-                            "--with-blas=yes",
-                            "--with-blas-libs=blas cblas",
-                            "--with-blas-lib-dirs=/usr/lib",
-                            "--with-lapack=yes",
-                            "--with-lapack-libs=lapack clapack f77lapack",
-                            "--with-lapack-lib-dirs=/usr/lib",
                             "--with-MPI",
                             "--enable-bigint"
       system "make", "install"
@@ -36,7 +25,7 @@ class Hypre < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<-EOS
+    (testpath/"test.cpp").write <<~EOS
       #include "HYPRE_struct_ls.h"
       int main(int argc, char* argv[]) {
         HYPRE_StructGrid grid;

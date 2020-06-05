@@ -1,32 +1,31 @@
 class Gmp < Formula
   desc "GNU multiple precision arithmetic library"
   homepage "https://gmplib.org/"
-  url "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz"
-  mirror "https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz"
-  sha256 "87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912"
-  revision 1
+  url "https://gmplib.org/download/gmp/gmp-6.2.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gmp/gmp-6.2.0.tar.xz"
+  sha256 "258e6cd51b3fbdfc185c716d55f82c08aff57df0c6fbd143cf6ed561267a1526"
 
   bottle do
     cellar :any
-    sha256 "eadb377c507f5d04e8d47861fa76471be6c09dc54991540e125ee1cbc04fecd6" => :high_sierra
-    sha256 "90715336080bd2deb92bd74361f50d91fe288d18e4c18a70a8253add6aa13200" => :sierra
-    sha256 "0e0c340b4c09a4f00daf45890e8f36afa03d251a8ed3bba6ae4876149914b420" => :el_capitan
+    sha256 "2e6acd6e62d1b8ef0800061e113aea30a63f56b32b99c010234c0420fd6d3ecf" => :catalina
+    sha256 "1bbea4983a4c883c8eb8b7e19df9fab52f0575be8a34b629fc7df79895f48937" => :mojave
+    sha256 "63f220c9ac4ebc386711c8c4c5e1f955cfb0a784bdc41bfd6c701dc789be7fcc" => :high_sierra
   end
 
-  option :cxx11
+  uses_from_macos "m4" => :build
 
   def install
-    ENV.cxx11 if build.cxx11?
-    args = %W[--prefix=#{prefix} --enable-cxx]
-    args << "--build=core2-apple-darwin#{`uname -r`.to_i}" if build.bottle?
-    system "./configure", "--disable-static", *args
+    # Work around macOS Catalina / Xcode 11 code generation bug
+    # (test failure t-toom53, due to wrong code in mpn/toom53_mul.o)
+    ENV.append_to_cflags "-fno-stack-check"
+
+    # Enable --with-pic to avoid linking issues with the static library
+    args = %W[--prefix=#{prefix} --enable-cxx --with-pic]
+    args << "--build=#{Hardware.oldest_cpu}-apple-darwin#{`uname -r`.to_i}"
+    system "./configure", *args
     system "make"
     system "make", "check"
     system "make", "install"
-    system "make", "clean"
-    system "./configure", "--disable-shared", "--disable-assembly", *args
-    system "make"
-    lib.install Dir[".libs/*.a"]
   end
 
   test do
@@ -44,7 +43,12 @@ class Gmp < Formula
         return 0;
       }
     EOS
+
     system ENV.cc, "test.c", "-L#{lib}", "-lgmp", "-o", "test"
+    system "./test"
+
+    # Test the static library to catch potential linking issues
+    system ENV.cc, "test.c", "#{lib}/libgmp.a", "-o", "test"
     system "./test"
   end
 end

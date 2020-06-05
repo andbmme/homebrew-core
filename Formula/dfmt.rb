@@ -2,23 +2,15 @@ class Dfmt < Formula
   desc "Formatter for D source code"
   homepage "https://github.com/dlang-community/dfmt"
   url "https://github.com/dlang-community/dfmt.git",
-      :tag => "v0.5.0",
-      :revision => "fef85e388a41add75020675ab33ed7e55c3efe85"
-
-  head "https://github.com/dlang-community/dfmt.git", :shallow => false
+      :tag      => "v0.12.0",
+      :revision => "09caf255e537ea832a87c9aeb7ec4ed38d751300"
+  head "https://github.com/dlang-community/dfmt.git", :branch => "v0.x.x", :shallow => false
 
   bottle do
-    sha256 "ccb9816bf837e999563e470b020b9d8b1305b2dcf2c9c8400276bf0ca766d94f" => :high_sierra
-    sha256 "08ce677f6ae697ea33e29d4ecff0e419cbe71b065b8a24cb13bc65a4c5834b40" => :sierra
-    sha256 "745cc85d47967fd74ad25a08dd763f028440a2c5811730c2b2c6643d7f5236b6" => :el_capitan
-    sha256 "66fe1b25802b529a08f7a46e0b043fdf06e64c9fe1a48dbc04293954187b65a1" => :yosemite
-  end
-
-  devel do
-    url "https://github.com/dlang-community/dfmt.git",
-      :tag => "v0.6.0-alpha.1",
-      :revision => "02a735cb0c10d711c5f08fc26572f98bc5fdf0ff"
-    version "0.6.0-alpha.1"
+    cellar :any_skip_relocation
+    sha256 "8a3b74f50717d236b6ef445de2608ab31e4c43ae10af01e71d9b95d590c4c8e7" => :catalina
+    sha256 "db3e4c50f54d7dd31c9b2768d7b0539d8dea62ae0d7c3ccef7c8ce955721a595" => :mojave
+    sha256 "2fa9649c94a8f624d772d76a1cd43ecc3e8b016a29711d4ea0b6e92906646f09" => :high_sierra
   end
 
   depends_on "dmd" => :build

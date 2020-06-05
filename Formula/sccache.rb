@@ -1,21 +1,27 @@
 class Sccache < Formula
   desc "Used as a compiler wrapper and avoids compilation when possible"
   homepage "https://github.com/mozilla/sccache"
-  url "https://github.com/mozilla/sccache/archive/0.2.2.tar.gz"
-  sha256 "6a741ebf41bc8cee97ded3b823f464038af65c55de474b53efb1e24b5d234c36"
+  url "https://github.com/mozilla/sccache/archive/0.2.13.tar.gz"
+  sha256 "81c973cf9a89e77f02a6b5710298531ba2e50d2555e8a931e505fbf570522e2a"
   head "https://github.com/mozilla/sccache.git"
 
   bottle do
-    sha256 "294dda365425fc050344d7dce9dbe53ce7b780e754b0cb6b87ad8d1c04860501" => :high_sierra
-    sha256 "6ca47428771877fd3ce58df83ec5dc7b245a3d0c00f50059e2eb0259cfc3fb09" => :sierra
-    sha256 "e995ed15ee3c3b6c9a54c66162e8dcba9dc4a8d401724e0c3ecba6636a9a6c65" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "a4e38444e682b90e9cea144347e5f1fc32ab309ba448d495b025bb9bb19906d4" => :catalina
+    sha256 "80f2b3cfa57125f7fd927b8b312483ca91c146dd76702d1a2e0cefdac5ae25f5" => :mojave
+    sha256 "071e45205799343d3f2be7c3779292cbcf32d1bfa1861f70af55e9cca50fe891" => :high_sierra
   end
 
   depends_on "rust" => :build
+  depends_on "openssl@1.1"
 
   def install
-    system "cargo", "build", "--release", "--features", "all"
-    bin.install "target/release/sccache"
+    # Ensure that the `openssl` crate picks up the intended library.
+    # https://crates.io/crates/openssl#manual-configuration
+    ENV["OPENSSL_DIR"] = Formula["openssl@1.1"].opt_prefix
+
+    system "cargo", "install", "--locked", "--root", prefix, "--path", ".",
+                               "--features", "all"
   end
 
   test do

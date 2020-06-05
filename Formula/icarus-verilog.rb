@@ -1,27 +1,32 @@
 class IcarusVerilog < Formula
   desc "Verilog simulation and synthesis tool"
   homepage "http://iverilog.icarus.com/"
-  url "ftp://icarus.com/pub/eda/verilog/v10/verilog-10.1.1.tar.gz"
-  sha256 "fdaa75dfe7c58cbc471fc12710ee49b3f32fd6cc055d9181b5190cbcbbd6cada"
+  url "https://github.com/steveicarus/iverilog/archive/v10_3.tar.gz"
+  mirror "https://deb.debian.org/debian/pool/main/i/iverilog/iverilog_10.3.orig.tar.gz"
+  sha256 "4b884261645a73b37467242d6ae69264fdde2e7c4c15b245d902531efaaeb234"
+  head "https://github.com/steveicarus/iverilog.git"
 
   bottle do
-    sha256 "496c7af8c0d99efd7b0c0a8c5876eb9dae4cc55026793e0a55510225e73a1d71" => :high_sierra
-    sha256 "407f39365da527c4bfe390ea77756f8e1711bc5f97bb62c39c43a70ec1ea0409" => :sierra
-    sha256 "765e2758490a45edc6b4145e2e22eb0e82c6cb43b877bcf439a2da13f9f55bcb" => :el_capitan
-    sha256 "80af17509dd602b4f9e5c6c05add05b5a84337b20e231a05889c96776386ccdb" => :yosemite
+    sha256 "bf40a384b8432dfb72276e31e87d550b9b47515dc68bdfb25f0cde9becd4ac10" => :catalina
+    sha256 "0237851e478bcb76567111f14c1e42fe79161a8cd28ca04127295fc40db14113" => :mojave
+    sha256 "96a15af23212d29f9410e073418c9388447955245fa8c38cf3b27ccf8fabd178" => :high_sierra
+    sha256 "ded40d14a1cd74f2b764d9cf667d48ee8b6c010e77d88ca47afc99188ace1255" => :sierra
   end
 
-  head do
-    url "https://github.com/steveicarus/iverilog.git"
-    depends_on "autoconf" => :build
-  end
+  depends_on "autoconf" => :build
+  # parser is subtly broken when processed with an old version of bison
+  depends_on "bison" => :build
+
+  uses_from_macos "flex" => :build
+  uses_from_macos "bzip2"
+  uses_from_macos "zlib"
 
   def install
-    system "autoconf" if build.head?
+    system "autoconf"
     system "./configure", "--prefix=#{prefix}"
     # https://github.com/steveicarus/iverilog/issues/85
     ENV.deparallelize
-    system "make", "install"
+    system "make", "install", "BISON=#{Formula["bison"].opt_bin}/bison"
   end
 
   test do
@@ -36,5 +41,10 @@ class IcarusVerilog < Formula
     EOS
     system bin/"iverilog", "-otest", "test.v"
     assert_equal "Boop", shell_output("./test").chomp
+
+    # test syntax errors do not cause segfaults
+    (testpath/"error.v").write "error;"
+    assert_equal "-:1: error: variable declarations must be contained within a module.",
+      shell_output("#{bin}/iverilog error.v 2>&1", 1).chomp
   end
 end

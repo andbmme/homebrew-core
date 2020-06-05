@@ -1,20 +1,20 @@
 class Leiningen < Formula
   desc "Build tool for Clojure"
   homepage "https://github.com/technomancy/leiningen"
-  url "https://github.com/technomancy/leiningen/archive/2.8.1.tar.gz"
-  sha256 "7c6ca968f365e0a0893781b1eb03f920695ed8982ac7dbc2803a3188fbd75242"
+  url "https://github.com/technomancy/leiningen/archive/2.9.3.tar.gz"
+  sha256 "98cc1e58ebe0d71fede73ae6c7699f1b9b944650d57a220e576bc95a3185b846"
   head "https://github.com/technomancy/leiningen.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ff380881c20232aaa4e2dbc81f1ce15ea23da26f65bb753d9571694b4bb1c6a4" => :high_sierra
-    sha256 "ff380881c20232aaa4e2dbc81f1ce15ea23da26f65bb753d9571694b4bb1c6a4" => :sierra
-    sha256 "ff380881c20232aaa4e2dbc81f1ce15ea23da26f65bb753d9571694b4bb1c6a4" => :el_capitan
+    sha256 "70a6ab2365ebf7efd3d2d84fd89d88b59c6417df9225562784f8b6184653a49b" => :catalina
+    sha256 "70a6ab2365ebf7efd3d2d84fd89d88b59c6417df9225562784f8b6184653a49b" => :mojave
+    sha256 "70a6ab2365ebf7efd3d2d84fd89d88b59c6417df9225562784f8b6184653a49b" => :high_sierra
   end
 
   resource "jar" do
-    url "https://github.com/technomancy/leiningen/releases/download/2.8.1/leiningen-2.8.1-standalone.zip", :using => :nounzip
-    sha256 "fc49bbc7ff25ef42ad9c0a8b5f3d0641702abc9a9a8e847bc845bca4c09a7c58"
+    url "https://github.com/technomancy/leiningen/releases/download/2.9.3/leiningen-2.9.3-standalone.zip", :using => :nounzip
+    sha256 "23e1df18bc97226d570f47335a8d543e1b759ea303544ea57d5309be3dedcbbb"
   end
 
   def install
@@ -33,10 +33,11 @@ class Leiningen < Formula
     zsh_completion.install "zsh_completion.zsh" => "_lein"
   end
 
-  def caveats; <<~EOS
-    Dependencies will be installed to:
-      $HOME/.m2/repository
-    To play around with Clojure run `lein repl` or `lein help`.
+  def caveats
+    <<~EOS
+      Dependencies will be installed to:
+        $HOME/.m2/repository
+      To play around with Clojure run `lein repl` or `lein help`.
     EOS
   end
 

@@ -1,29 +1,27 @@
 class Lesspipe < Formula
   desc "Input filter for the pager less"
   homepage "https://www-zeuthen.desy.de/~friebel/unix/lesspipe.html"
-  url "https://downloads.sourceforge.net/project/lesspipe/lesspipe/1.83/lesspipe-1.83.tar.gz"
-  sha256 "d616f0d51852e60fb0d0801eec9c31b10e0acc6fdfdc62ec46ef7bfd60ce675e"
+  url "https://github.com/wofr06/lesspipe/archive/1.84.tar.gz"
+  sha256 "5eb4811cc8ded108e98448bd83057e730906f643ad689ccd695828f2a46c4410"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "01c6ea7862d5b23ef49ce9c271e9cecf49c7ecd5372d9602b3ceb88b9171312b" => :high_sierra
-    sha256 "f22864d81a8eb648fc4501665af743d285fcf0fa7c81edb21fd71f2593addedd" => :sierra
-    sha256 "f22864d81a8eb648fc4501665af743d285fcf0fa7c81edb21fd71f2593addedd" => :el_capitan
-    sha256 "f22864d81a8eb648fc4501665af743d285fcf0fa7c81edb21fd71f2593addedd" => :yosemite
+    sha256 "ddefc7bc6202699c00fc69d5bf4e22c06a05cc6ad7c49dca5ff84c32b88ad190" => :catalina
+    sha256 "ddefc7bc6202699c00fc69d5bf4e22c06a05cc6ad7c49dca5ff84c32b88ad190" => :mojave
+    sha256 "ddefc7bc6202699c00fc69d5bf4e22c06a05cc6ad7c49dca5ff84c32b88ad190" => :high_sierra
   end
 
-  option "with-syntax-highlighting", "Build with syntax highlighting"
-
-  deprecated_option "syntax-highlighting" => "with-syntax-highlighting"
-
   def install
-    if build.with? "syntax-highlighting"
-      inreplace "configure", '$ifsyntax = "\L$ifsyntax";', '$ifsyntax = "\Ly";'
-    end
-
     system "./configure", "--prefix=#{prefix}", "--yes"
     man1.mkpath
     system "make", "install"
+  end
+
+  def caveats
+    <<~EOS
+      Append the following to your #{shell_profile}:
+      export LESSOPEN="|#{HOMEBREW_PREFIX}/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+    EOS
   end
 
   test do
@@ -33,12 +31,5 @@ class Lesspipe < Formula
 
     assert_predicate testpath/"homebrew.tar.gz", :exist?
     assert_match /file2.txt/, shell_output("tar tvzf homebrew.tar.gz | #{bin}/tarcolor")
-  end
-
-  def caveats
-    <<-EOS
-      Append the following to your #{shell_profile}:
-      export LESSOPEN="|#{HOMEBREW_PREFIX}/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
-    EOS
   end
 end

@@ -1,14 +1,14 @@
 class HtmlXmlUtils < Formula
   desc "Tools for manipulating HTML and XML files"
   homepage "https://www.w3.org/Tools/HTML-XML-utils/"
-  url "https://www.w3.org/Tools/HTML-XML-utils/html-xml-utils-7.3.tar.gz"
-  sha256 "945db646dd4d0b31c4b3f70638f4b8203a03b381ee0adda4a89171b219b5b969"
+  url "https://www.w3.org/Tools/HTML-XML-utils/html-xml-utils-7.8.tar.gz"
+  sha256 "9ab41c9277efc699603d062c10740c6e528fdb9ac35014db4e07f16ad8700d5d"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "80fbef5853a14f820be9936de99456001aabe014e30dc50ee6f7e42b9c514bda" => :high_sierra
-    sha256 "8a167685dbaf9e08d6e40c300326914403f8a72d76eef71c37819923c27a2c74" => :sierra
-    sha256 "a7559f75d244d994bd2934422e8309b5dc4c28bf5282207b88e80ebeece8428b" => :el_capitan
+    sha256 "28e913a33a61be2662a9aeedb18afd3e61f7ff31f533221e2382fc16845984a2" => :catalina
+    sha256 "8e290495b957bc609598e4a2e6fb26512011e0c433a5058d807d86e406a406ab" => :mojave
+    sha256 "2aa00ada9b366c012d149ff28c99d0054a7b166d2088700482e6118e16580358" => :high_sierra
   end
 
   def install

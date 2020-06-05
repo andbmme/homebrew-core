@@ -1,25 +1,14 @@
 class Acme < Formula
   desc "Crossassembler for multiple environments"
-  homepage "https://web.archive.org/web/20150520143433/https://www.esw-heim.tu-clausthal.de/~marco/smorbrod/acme/"
-  url "https://www.mirrorservice.org/sites/ftp.cs.vu.nl/pub/minix/distfiles/backup/acme091src.tar.gz"
-  mirror "http://ftp.lip6.fr/pub/minix/distfiles/backup/acme091src.tar.gz"
-  version "0.91"
-  sha256 "31ed7f9be5cd27100b13d6c3e2faec35d15285542cbe168ec5e1b5236125decb"
+  homepage "https://sourceforge.net/projects/acme-crossass/"
+  url "https://svn.code.sf.net/p/acme-crossass/code-0/trunk", :revision => "121"
+  version "0.96.5"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 2
-    sha256 "679da82eb906eb814fc69e373fccc81d0c92563d88f2e8138cfe21eedb611c1a" => :high_sierra
-    sha256 "a551c65f11021ede47269b1a29b09c601063267501134daa8213674a62c97615" => :sierra
-    sha256 "84f0ba7e45580d5a28a9a0dd9d7a25a6e67a9bdc7407c5b91cf64b8b9cf0a165" => :el_capitan
-    sha256 "1e7c7805ac21061637cd1ce964f976c6f68b9259e892ffc77ee71f2aa280f879" => :yosemite
-    sha256 "022ef1a9526002dda47023b47c2af6227ee40f33b33b0ed232ae105fcf982911" => :mavericks
-  end
-
-  devel do
-    url "https://web.archive.org/web/20150501011451/https://www.esw-heim.tu-clausthal.de/~marco/smorbrod/acme/current/acme093testing.tar.bz2"
-    sha256 "cf374869265981437181609483bdb6c43f7313f81cfe57357b0ac88578038c02"
-    version "0.93"
+    sha256 "fcf29880657324af51e378076ea9db3759aca5b443e84c77a81e91f56dc3bc78" => :catalina
+    sha256 "484c4e81c9bd8e8440cf1eac1e704985b261fe2b08007cc25b482c528afff427" => :mojave
+    sha256 "5adddcafac8c43eb3b287dc33f132e44e8c4e953a786fbb0b35343c4a9c0aa5d" => :high_sierra
   end
 
   def install
@@ -29,7 +18,7 @@ class Acme < Formula
 
   test do
     path = testpath/"a.asm"
-    path.write <<-EOS
+    path.write <<~EOS
       !to "a.out", cbm
       * = $c000
       jmp $fce2

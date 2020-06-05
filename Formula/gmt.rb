@@ -1,17 +1,17 @@
 class Gmt < Formula
-  desc "Tools for processing and displaying xy and xyz datasets"
-  homepage "https://gmt.soest.hawaii.edu/"
-  url "ftp://ftp.soest.hawaii.edu/gmt/gmt-5.4.2-src.tar.xz"
-  mirror "http://gd.tuwien.ac.at/pub/gmt/gmt-5.4.2-src.tar.xz"
-  mirror "http://ftp.iris.washington.edu/pub/gmt/gmt-5.4.2-src.tar.xz"
-  mirror "ftp://ftp.star.nesdis.noaa.gov/pub/sod/lsa/gmt/gmt-5.4.2-src.tar.xz"
-  sha256 "ddcd63094aeda5a60f541626ed7ab4a78538d52dea24ba915f168e4606e587f5"
-  revision 1
+  desc "Tools for manipulating and plotting geographic and Cartesian data"
+  homepage "https://www.generic-mapping-tools.org/"
+  url "https://github.com/GenericMappingTools/gmt/releases/download/6.0.0/gmt-6.0.0-src.tar.xz"
+  mirror "https://mirrors.ustc.edu.cn/gmt/gmt-6.0.0-src.tar.xz"
+  mirror "https://fossies.org/linux/misc/GMT/gmt-6.0.0-src.tar.xz"
+  sha256 "8b91af18775a90968cdf369b659c289ded5b6cb2719c8c58294499ba2799b650"
+  revision 5
+  head "https://github.com/GenericMappingTools/gmt.git"
 
   bottle do
-    sha256 "4b04dea31bebdcfd82673de995e037f852397258a90852622aee8a917aa3a03d" => :high_sierra
-    sha256 "fbd37a8573c3935b9404db3fea2260c654f787740755ddba3d88afde3553271c" => :sierra
-    sha256 "d05657c555e8e1f3dab2bd57de31a016dd3a5d9e6059c3b1fd123081e0d584ef" => :el_capitan
+    sha256 "f8e134ad99467310df0ff266de2f38ee85b388904c98d93a5048f94eb2bdbb27" => :catalina
+    sha256 "924ba9e120f694c66421a1ef0c07c55af2eb12e6247e93ab39e7ed61e3f486ca" => :mojave
+    sha256 "f17ad3ed1e2e38987e430376fb448faf32a80c95cf0c42bb952e6d1063f34ef2" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -21,29 +21,50 @@ class Gmt < Formula
   depends_on "pcre"
 
   resource "gshhg" do
-    url "ftp://ftp.soest.hawaii.edu/gmt/gshhg-gmt-2.3.7.tar.gz"
-    mirror "http://gd.tuwien.ac.at/pub/gmt/gshhg-gmt-2.3.7.tar.gz"
-    mirror "http://ftp.iris.washington.edu/pub/gmt/gshhg-gmt-2.3.7.tar.gz"
-    mirror "ftp://ftp.star.nesdis.noaa.gov/pub/sod/lsa/gmt/gshhg-gmt-2.3.7.tar.gz"
+    url "https://github.com/GenericMappingTools/gshhg-gmt/releases/download/2.3.7/gshhg-gmt-2.3.7.tar.gz"
+    mirror "https://mirrors.ustc.edu.cn/gmt/gshhg-gmt-2.3.7.tar.gz"
+    mirror "https://fossies.org/linux/misc/GMT/gshhg-gmt-2.3.7.tar.gz"
     sha256 "9bb1a956fca0718c083bef842e625797535a00ce81f175df08b042c2a92cfe7f"
   end
 
   resource "dcw" do
-    url "ftp://ftp.soest.hawaii.edu/gmt/dcw-gmt-1.1.2.tar.gz"
-    mirror "http://gd.tuwien.ac.at/pub/gmt/dcw-gmt-1.1.2.tar.gz"
-    mirror "http://ftp.iris.washington.edu/pub/gmt/dcw-gmt-1.1.2.tar.gz"
-    mirror "ftp://ftp.star.nesdis.noaa.gov/pub/sod/lsa/gmt/dcw-gmt-1.1.2.tar.gz"
-    sha256 "f719054f8d657e7b10b5182d4c15bc7f38ef7483ed05cdaa9f94ab1a0008bfb6"
+    url "https://github.com/GenericMappingTools/dcw-gmt/releases/download/1.1.4/dcw-gmt-1.1.4.tar.gz"
+    mirror "https://mirrors.ustc.edu.cn/gmt/dcw-gmt-1.1.4.tar.gz"
+    mirror "https://fossies.org/linux/misc/GMT/dcw-gmt-1.1.4.tar.gz"
+    sha256 "8d47402abcd7f54a0f711365cd022e4eaea7da324edac83611ca035ea443aad3"
+  end
+
+  unless build.head?
+    # The following two patches fix a problem in detecting locally installed
+    # html pages (https://github.com/GenericMappingTools/gmt/issues/1960).
+    # They must be removed when GMT 6.0.1 is released.
+    patch do
+      url "https://github.com/GenericMappingTools/gmt/commit/b65dc6eb.diff?full_index=1"
+      sha256 "459dee38eef6b0c960a3d3a992ac715e82693c4c2cd34afd99965faf07cce2f8"
+    end
+
+    patch do
+      url "https://github.com/GenericMappingTools/gmt/commit/daf64655.diff?full_index=1"
+      sha256 "f2b5b0d5c4d6f568f453365f857c09429f2e29f9e72b220ca17a81128db75d37"
+    end
+
+    # netcdf 4.7.4 compatibility
+    # Remove with GMT 6.0.1.
+    patch do
+      url "https://github.com/GenericMappingTools/gmt/commit/53800c1f8206e9988dff88a71915cda7e7bff6e3.patch?full_index=1"
+      sha256 "8f9c072a394467853f8a44aa8af436ae9b1db7c7305985cb8018bb061cd5188c"
+    end
   end
 
   def install
     (buildpath/"gshhg").install resource("gshhg")
     (buildpath/"dcw").install resource("dcw")
 
+    # GMT_DOCDIR and GMT_MANDIR must be relative paths
     args = std_cmake_args.concat %W[
       -DCMAKE_INSTALL_PREFIX=#{prefix}
-      -DGMT_DOCDIR=#{share}/doc/gmt
-      -DGMT_MANDIR=#{man}
+      -DGMT_DOCDIR=share/doc/gmt
+      -DGMT_MANDIR=share/man
       -DGSHHG_ROOT=#{buildpath}/gshhg
       -DCOPY_GSHHG:BOOL=TRUE
       -DDCW_ROOT=#{buildpath}/dcw
@@ -53,7 +74,7 @@ class Gmt < Formula
       -DNETCDF_ROOT=#{Formula["netcdf"].opt_prefix}
       -DPCRE_ROOT=#{Formula["pcre"].opt_prefix}
       -DFLOCK:BOOL=TRUE
-      -DGMT_INSTALL_MODULE_LINKS:BOOL=TRUE
+      -DGMT_INSTALL_MODULE_LINKS:BOOL=FALSE
       -DGMT_INSTALL_TRADITIONAL_FOLDERNAMES:BOOL=FALSE
       -DLICENSE_RESTRICTED:BOOL=FALSE
     ]
@@ -64,8 +85,21 @@ class Gmt < Formula
     end
   end
 
+  def caveats
+    <<~EOS
+      GMT needs Ghostscript for the 'psconvert' command to convert PostScript files
+      to other formats. To use 'psconvert', please 'brew install ghostscript'.
+
+      GMT needs FFmpeg for the 'movie' command to make movies in MP4 or WebM format.
+      If you need this feature, please 'brew install ffmpeg'.
+
+      GMT needs GraphicsMagick for the 'movie' command to make animated GIFs.
+      If you need this feature, please 'brew install graphicsmagick'.
+    EOS
+  end
+
   test do
-    system "#{bin}/pscoast -R0/360/-70/70 -Jm1.2e-2i -Ba60f30/a30f15 -Dc -G240 -W1/0 -P > test.ps"
+    system "#{bin}/gmt pscoast -R0/360/-70/70 -Jm1.2e-2i -Ba60f30/a30f15 -Dc -G240 -W1/0 -P > test.ps"
     assert_predicate testpath/"test.ps", :exist?
   end
 end

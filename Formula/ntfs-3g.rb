@@ -1,14 +1,23 @@
 class Ntfs3g < Formula
   desc "Read-write NTFS driver for FUSE"
   homepage "https://www.tuxera.com/community/open-source-ntfs-3g/"
-  url "https://tuxera.com/opensource/ntfs-3g_ntfsprogs-2017.3.23.tgz"
-  sha256 "3e5a021d7b761261836dcb305370af299793eedbded731df3d6943802e1262d5"
+  revision 2
+  stable do
+    url "https://tuxera.com/opensource/ntfs-3g_ntfsprogs-2017.3.23.tgz"
+    sha256 "3e5a021d7b761261836dcb305370af299793eedbded731df3d6943802e1262d5"
+
+    # Fails to build on Xcode 9+. Fixed upstream in a0bc659c7ff0205cfa2b2fc3429ee4d944e1bcc3
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/formula-patches/3933b61bbae505fa95a24f8d7681a9c5fa26dbc2/ntfs-3g/lowntfs-3g.c.patch"
+      sha256 "749653cfdfe128b9499f02625e893c710e2167eb93e7b117e33cfa468659f697"
+    end
+  end
 
   bottle do
-    sha256 "f5fdf264ba84f10204564e7e33bac6cb2e657052bbf141ca735682f9d7842003" => :high_sierra
-    sha256 "66662baf5f187c4784ff9c4236d9595205c01c6c7141699b8afcdb4337304a0c" => :sierra
-    sha256 "dc2dc22afe3376cccb2a7d62f3faf4455a2422ebe4c96eaebd6d9249a00e3c2d" => :el_capitan
-    sha256 "160fd2811b0fe6e072194860e17e2abbe71b18a2ac2c16db15ceb2eaf1e9918a" => :yosemite
+    cellar :any
+    sha256 "d336f9c7dbdcba28ed416704db13091db3494769f598b38b027022846aa77cdd" => :catalina
+    sha256 "67179cbc357c2d28304851f0abe3f42a0c6171200e79888a20ba732309ec84c9" => :mojave
+    sha256 "f26c2db849a54951a5daddbdecc779ca9a2ef4b066a1fe2dda134ea34436d32b" => :high_sierra
   end
 
   head do
@@ -17,22 +26,14 @@ class Ntfs3g < Formula
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
-    depends_on "libtool" => :build
     depends_on "libgcrypt" => :build
+    depends_on "libtool" => :build
   end
 
   depends_on "pkg-config" => :build
+  depends_on "coreutils" => :test
   depends_on "gettext"
   depends_on :osxfuse
-
-  # Detection of struct stat members fails Xcode 9
-  # Reported by email on 2017-09-19
-  if DevelopmentTools.clang_build_version >= 900
-    patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/e0b6faaa0d/ntfs-3g/10.13.patch"
-      sha256 "7550061c6ad7fd99e7c004d437a66af54af983acb9839e098156480106cd7a92"
-    end
-  end
 
   def install
     ENV.append "LDFLAGS", "-lintl"
@@ -81,6 +82,7 @@ class Ntfs3g < Formula
           -o uid=$USER_ID \\
           -o gid=$GROUP_ID \\
           -o allow_other \\
+          -o big_writes \\
           "$@" >> /var/log/mount-ntfs-3g.log 2>&1
 
         exit $?;
@@ -89,7 +91,13 @@ class Ntfs3g < Formula
   end
 
   test do
-    output = shell_output("#{bin}/ntfs-3g --version 2>&1")
-    assert_match version.to_s, output
+    # create a small raw image, format and check it
+    ntfs_raw = testpath/"ntfs.raw"
+    system Formula["coreutils"].libexec/"gnubin/truncate", "--size=10M", ntfs_raw
+    ntfs_label_input = "Homebrew"
+    system sbin/"mkntfs", "--force", "--fast", "--label", ntfs_label_input, ntfs_raw
+    system bin/"ntfsfix", "--no-action", ntfs_raw
+    ntfs_label_output = shell_output("#{sbin}/ntfslabel #{ntfs_raw}")
+    assert_match ntfs_label_input, ntfs_label_output
   end
 end

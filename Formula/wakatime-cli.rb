@@ -1,28 +1,30 @@
 class WakatimeCli < Formula
   desc "Command-line interface to the WakaTime api"
   homepage "https://wakatime.com/"
-  url "https://pypi.python.org/packages/8f/b7/a575a758cf33c8c1ce0ddd642a6c26d94105ca407d68a2074e6731c878b3/wakatime-8.0.3.tar.gz"
-  sha256 "bb178937a762a1250dd2e22a62ec28dc7c1ebe2dabcc9bbe05cb781afe86dd47"
+  url "https://files.pythonhosted.org/packages/0f/45/4d3bd56a3840d384ee0a24270658d139780ceb5a2f3e7aa3cb10d5e46360/wakatime-13.0.7.tar.gz"
+  sha256 "07a6d07e1227e3bd45242a2a4861d105bddc6220174a9b739c551bd2d45ce0fd"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "19816456d3eecbc4cb89dd6fc247a3b91c82d783167a050b85738a90910d9a72" => :high_sierra
-    sha256 "4968086ecffa2200407d844fc568e7675b20983fe6cf3a4ae683cb86ddcfde06" => :sierra
-    sha256 "ee933f36da072757c1c186494b2d5f2efd93b76f76784defb4b8a5a05a1ffd70" => :el_capitan
-    sha256 "ee933f36da072757c1c186494b2d5f2efd93b76f76784defb4b8a5a05a1ffd70" => :yosemite
+    sha256 "6415adc12bbcea7ae69fa5ca29848dac754e9f09cc0f21a2c246d4118e8aa90a" => :catalina
+    sha256 "6415adc12bbcea7ae69fa5ca29848dac754e9f09cc0f21a2c246d4118e8aa90a" => :mojave
+    sha256 "6415adc12bbcea7ae69fa5ca29848dac754e9f09cc0f21a2c246d4118e8aa90a" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python@3.8"
 
   def install
-    ENV["PYTHONPATH"] = libexec/"lib/python2.7/site-packages"
+    xy = Language::Python.major_minor_version "python3"
+    ENV["PYTHONPATH"] = libexec/"lib/python#{xy}/site-packages"
 
-    system "python", *Language::Python.setup_install_args(libexec)
+    system "python3", *Language::Python.setup_install_args(libexec)
     bin.install Dir[libexec/"bin/*"]
     bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
   end
 
   test do
-    system "#{bin}/wakatime", "--help"
+    assert_match "Common interface for the WakaTime api.", shell_output("#{bin}/wakatime --help 2>&1")
+
+    assert_match "error: Missing api key.", shell_output("#{bin}/wakatime --project test 2>&1", 104)
   end
 end

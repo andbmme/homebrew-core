@@ -1,16 +1,15 @@
 class Flawfinder < Formula
   desc "Examines code and reports possible security weaknesses"
   homepage "https://www.dwheeler.com/flawfinder/"
-  url "https://www.dwheeler.com/flawfinder/flawfinder-2.0.4.tar.gz"
-  sha256 "43ffe3bd19cafbc4f24c53c6d80810297ebfbf9a72b693e58e59775813ee66ec"
-
+  url "https://www.dwheeler.com/flawfinder/flawfinder-2.0.11.tar.gz"
+  sha256 "9b4929fca5c6703880d95f201e470b7f19262ff63e991b3ac4ea3257f712f5ec"
   head "https://git.code.sf.net/p/flawfinder/code.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "3ce1dbcf1966511728bb4bffd74c00391835f2b2e10f51984546ebdde6f32879" => :high_sierra
-    sha256 "3ce1dbcf1966511728bb4bffd74c00391835f2b2e10f51984546ebdde6f32879" => :sierra
-    sha256 "3ce1dbcf1966511728bb4bffd74c00391835f2b2e10f51984546ebdde6f32879" => :el_capitan
+    sha256 "a790a4d58403cf16cdba7c243621ddfc5f7b20e47d786d8aceb08598803d2264" => :catalina
+    sha256 "a790a4d58403cf16cdba7c243621ddfc5f7b20e47d786d8aceb08598803d2264" => :mojave
+    sha256 "a790a4d58403cf16cdba7c243621ddfc5f7b20e47d786d8aceb08598803d2264" => :high_sierra
   end
 
   resource "flaws" do

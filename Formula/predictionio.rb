@@ -7,17 +7,17 @@ class Predictionio < Formula
 
   bottle :unneeded
 
+  depends_on "apache-spark"
   depends_on "elasticsearch"
   depends_on "hadoop"
   depends_on "hbase"
-  depends_on "apache-spark"
-  depends_on :java => "1.7+"
+  depends_on :java => "1.8"
 
   def install
     rm_f Dir["bin/*.bat"]
 
     libexec.install Dir["*"]
-    bin.write_exec_script libexec/"bin/pio"
+    (bin/"pio").write_env_script libexec/"bin/pio", Language::Java.java_home_env("1.8")
 
     inreplace libexec/"conf/pio-env.sh" do |s|
       s.gsub! /#\s*ES_CONF_DIR=.+$/, "ES_CONF_DIR=#{Formula["elasticsearch"].opt_prefix}/config"

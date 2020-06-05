@@ -1,21 +1,21 @@
 class Libexosip < Formula
   desc "Toolkit for eXosip2"
-  homepage "https://www.antisip.com/category/osip-and-exosip-toolkit"
-  url "https://download.savannah.gnu.org/releases/exosip/libeXosip2-4.1.0.tar.gz"
-  sha256 "3c77713b783f239e3bdda0cc96816a544c41b2c96fa740a20ed322762752969d"
-  revision 1
+  homepage "https://savannah.nongnu.org/projects/exosip"
+  url "https://download.savannah.gnu.org/releases/exosip/libexosip2-5.1.1.tar.gz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/exosip/libexosip2-5.1.1.tar.gz"
+  sha256 "21420c00bf8e0895ff36161766beec12b7e6f1d371030c389dba845e271272e2"
 
   bottle do
     cellar :any
-    sha256 "fef377c553a324d70764bb94b4c94a789d6cf584ab69c592baa6c44abc082689" => :high_sierra
-    sha256 "bc49bf581921515eff4719d5e0f31c2bffb43137d06affdc6e73a947d80692e0" => :sierra
-    sha256 "4ba8b361d2fd38f861c66b470d05bbb21e80ac92236cb8ad9323f1dca6121e2d" => :el_capitan
-    sha256 "9fd63688f31b0561749756daa3f426abc58754dc5033f6068dc0d389bde043f3" => :yosemite
+    sha256 "d36a54b2dec4b1c27ff20a78a9fc3660b304741434d5e9201937da2b4e75526c" => :catalina
+    sha256 "55556d9e457e708dab5e72fc36bab281bab85ddc25d190e729d13fae1757efbf" => :mojave
+    sha256 "8e2ec203c859fff616fb073b8f644285b4adfb202331749b0f073928eb03ee2a" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
+  depends_on "c-ares"
   depends_on "libosip"
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
     # Extra linker flags are needed to build this on macOS. See:
@@ -26,5 +26,37 @@ class Libexosip < Formula
     system "./configure", "--disable-debug", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.c").write <<~EOS
+      #include <netinet/in.h>
+      #include <eXosip2/eXosip.h>
+
+      int main() {
+          struct eXosip_t *ctx;
+          int i;
+          int port = 35060;
+
+          ctx = eXosip_malloc();
+          if (ctx == NULL)
+              return -1;
+
+          i = eXosip_init(ctx);
+          if (i != 0)
+              return -1;
+
+          i = eXosip_listen_addr(ctx, IPPROTO_UDP, NULL, port, AF_INET, 0);
+          if (i != 0) {
+              eXosip_quit(ctx);
+              fprintf(stderr, "could not initialize transport layer\\n");
+              return -1;
+          }
+
+          return 0;
+      }
+    EOS
+    system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-leXosip2", "-o", "test"
+    system "./test"
   end
 end

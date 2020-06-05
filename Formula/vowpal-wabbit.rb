@@ -1,49 +1,46 @@
 class VowpalWabbit < Formula
   desc "Online learning algorithm"
-  homepage "https://github.com/JohnLangford/vowpal_wabbit"
-  url "https://github.com/JohnLangford/vowpal_wabbit/archive/8.4.0.tar.gz"
-  sha256 "8624c33fd516e8b738fbbc6fc49f62ac03f97af183dbecff298162b4bf5736d5"
-  revision 2
+  homepage "https://github.com/VowpalWabbit/vowpal_wabbit"
+  # pull from git tag to get submodules
+  url "https://github.com/VowpalWabbit/vowpal_wabbit.git",
+    :tag      => "8.8.1",
+    :revision => "5ff219ec0ff28af5d35e452f5f18e6808993e08a"
+  revision 1
+  head "https://github.com/VowpalWabbit/vowpal_wabbit.git"
 
   bottle do
     cellar :any
-    sha256 "1c75a20fd7b7c0ce685f1a56e4c9c79349bc26943b3cd4bcd906764b757017be" => :high_sierra
-    sha256 "7ef502ea64c6c0eaafe328037354ff317cd4432dff8b68d2669c85688b2dd145" => :sierra
-    sha256 "689048beda8fffbe1a7bb888bfef4cdccaf36e5f03eb6bed172efe82ebbc58e8" => :el_capitan
-    sha256 "2e7c5709faf8fe35f65c676cf994e9d6e3928b9f609d6820f78224b0276278d0" => :yosemite
+    sha256 "67b1a1ff72db3a4fb3a8feecf372999b09a9c0eb429d449fe3038aaf1c866a52" => :catalina
+    sha256 "420d53c0004628986811ad2c7e0b83fd20bad1db5bac9b8775e40daf788b0a9b" => :mojave
+    sha256 "ff5920ae1294c66d9b4752326818d4b9aa88f6ecfdffbd740691f13b99b4e6e7" => :high_sierra
   end
 
-  if MacOS.version < :mavericks
-    depends_on "boost" => "c++11"
-  else
-    depends_on "boost"
-  end
+  depends_on "cmake" => :build
+  depends_on "rapidjson" => :build
+  depends_on "boost"
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
-  needs :cxx11
-
-  # Remove for > 8.4.0
-  # Fix "error: no member named 'codecvt_utf8_utf16' in namespace 'std'"
-  # Upstream commit from 22 Jul 2017 "make codecvt a universal include"
+  # Support using brewed rapidjson
   patch do
-    url "https://github.com/JohnLangford/vowpal_wabbit/commit/c632a1e09.patch?full_index=1"
-    sha256 "d7b7b3e594ad5ed4ee8c2a664ab98ec650df271d821b93842c1763c220459fe7"
+    url "https://github.com/VowpalWabbit/vowpal_wabbit/commit/9aea63874e70eee477b9b281ef12515f70f5d1bd.patch?full_index=1"
+    sha256 "e69037901f0027dbcd21204822875efb98c676805d383818483fbe7badc3d6b4"
   end
 
   def install
     ENV.cxx11
-    ENV["AC_PATH"] = "#{HOMEBREW_PREFIX}/share"
-    system "./autogen.sh", "--prefix=#{prefix}",
-                           "--with-boost=#{Formula["boost"].opt_prefix}"
-    system "make"
-    system "make", "install"
+    # The project provides a Makefile, but it is a basic wrapper around cmake
+    # that does not accept *std_cmake_args.
+    # The following should be equivalent, while supporting Homebrew's standard args.
+    mkdir "build" do
+      system "cmake", "..", *std_cmake_args,
+                            "-DBUILD_TESTS=OFF",
+                            "-DRAPIDJSON_SYS_DEP=ON"
+      system "make", "install"
+    end
     bin.install Dir["utl/*"]
     rm bin/"active_interactor.py"
     rm bin/"new_version"
     rm bin/"vw-validate.html"
-    rm bin/"release.ps1"
+    rm bin/"clang-format"
   end
 
   test do
@@ -52,7 +49,8 @@ class VowpalWabbit < Formula
       1 2 'second_house | price:.18 sqft:.15 age:.35 1976
       0 1 0.5 'third_house | price:.53 sqft:.32 age:.87 1924
     EOS
-    system bin/"vw", "house_dataset", "-l", "10", "-c", "--passes", "25", "--holdout_off", "--audit", "-f", "house.model", "--nn", "5"
+    system bin/"vw", "house_dataset", "-l", "10", "-c", "--passes", "25", "--holdout_off",
+                     "--audit", "-f", "house.model", "--nn", "5"
     system bin/"vw", "-t", "-i", "house.model", "-d", "house_dataset", "-p", "house.predict"
 
     (testpath/"csoaa.dat").write <<~EOS

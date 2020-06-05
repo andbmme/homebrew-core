@@ -1,22 +1,20 @@
 class Bowtie2 < Formula
   desc "Fast and sensitive gapped read aligner"
-  homepage "https://bowtie-bio.sourceforge.io/"
-  url "https://github.com/BenLangmead/bowtie2/archive/v2.3.3.1.tar.gz"
-  sha256 "8b9c0b9c595ebcddcac5feaf6acb44b2294d6deb91de107596ecad242a1a58e9"
+  homepage "https://bowtie-bio.sourceforge.io/bowtie2/"
+  url "https://github.com/BenLangmead/bowtie2/archive/v2.4.1.tar.gz"
+  sha256 "9fb25513886bf294217dd9c5ca26d18dd5e02e0ae999935ac7ba5700befc492e"
 
   bottle do
-    sha256 "fa4f67c2361205d54698e9a87f2a586d95ae8c34aa50c98bb72c3d522903333f" => :high_sierra
-    sha256 "b57f2ec643d75111a7f1078d656e376e24bd871fe04ca32fa63cfb2b292bdacd" => :sierra
-    sha256 "8455b5498446476972e353ca55b31e8acbd141c696cc8562edcc16a0d4235584" => :el_capitan
+    cellar :any
+    sha256 "fd107ab602165eac36dc748124cc6688f8eccf63ff9a64ebcf82fa4db45b5788" => :catalina
+    sha256 "ca70730942c77835fc3ee267dd6c284d51351af0f59db282876ca9ada2ce4672" => :mojave
+    sha256 "61597b46c1e6bd55d74c89e107342c4bdb5014d3a7ea37628d544b6f429bef9c" => :high_sierra
   end
 
   depends_on "tbb"
 
   def install
-    tbb = Formula["tbb"]
-    system "make", "install", "WITH_TBB=1", "prefix=#{prefix}",
-           "EXTRA_FLAGS=-L #{tbb.opt_lib}", "INC=-I #{tbb.opt_include}"
-
+    system "make", "install", "PREFIX=#{prefix}"
     pkgshare.install "example", "scripts"
   end
 

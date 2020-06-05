@@ -1,30 +1,29 @@
 class KitchenSync < Formula
   desc "Fast efficiently sync database without dumping & reloading"
   homepage "https://github.com/willbryant/kitchen_sync"
-  url "https://github.com/willbryant/kitchen_sync/archive/0.99.1.tar.gz"
-  sha256 "895b710f10e9399ce8e49efe1b24ca925b4a62510d817a0e4b60e11c4cefcaf6"
+  url "https://github.com/willbryant/kitchen_sync/archive/v2.3.tar.gz"
+  sha256 "6fc6adcd7882f76f295ab9e62f83f0e2b9aa58da4364233505c76b277e4b6c22"
   head "https://github.com/willbryant/kitchen_sync.git"
 
   bottle do
     cellar :any
-    sha256 "08b95b15bfb7d4f5b6bd8afb05115fda8451945404f53491c6ac2663843b2a7f" => :high_sierra
-    sha256 "41a60924a8f3132dd1d011bc25cb2a91ac7d28cf3b0843b69b5cb60f0db068e3" => :sierra
-    sha256 "3f491f2fea093c3b1b1faa38a9803702857f41f7e65628f5e8b88134570a4fe4" => :el_capitan
+    sha256 "411cbab9d9f94257bd552b69455659a6028df775120c7bfa6180f6c65961519c" => :catalina
+    sha256 "039fbb6b0167a6927b98fd130760b03e9c2c89f376c21ad49f934e7e115c9c79" => :mojave
+    sha256 "855004adc2a2661e800bc1a998cdc595c2d9ffb7464bdc3559a16ac1dc6278ae" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "boost"
-  depends_on "yaml-cpp" => ((MacOS.version <= :mountain_lion) ? "c++11" : [])
-
-  depends_on :mysql => :recommended
-  depends_on :postgresql => :optional
-
-  needs :cxx11
+  depends_on "libpq"
+  depends_on "mysql-client"
 
   def install
-    ENV.cxx11
-    system "cmake", ".", *std_cmake_args
+    system "cmake", ".",
+                    "-DMySQL_INCLUDE_DIR=#{Formula["mysql-client"].opt_include}/mysql",
+                    "-DMySQL_LIBRARY_DIR=#{Formula["mysql-client"].opt_lib}",
+                    "-DPostgreSQL_INCLUDE_DIR=#{Formula["libpq"].opt_include}",
+                    "-DPostgreSQL_LIBRARY_DIR=#{Formula["libpq"].opt_lib}",
+                    *std_cmake_args
+
     system "make", "install"
   end
 

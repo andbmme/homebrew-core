@@ -4,27 +4,29 @@ class KibanaAT56 < Formula
   desc "Analytics and search dashboard for Elasticsearch"
   homepage "https://www.elastic.co/products/kibana"
   url "https://github.com/elastic/kibana.git",
-      :tag => "v5.6.4",
-      :revision => "efd2403e605c9f695a87929083421ba09f3ac54e"
-  head "https://github.com/elastic/kibana.git"
+      :tag      => "v5.6.16",
+      :revision => "e4c8b3e8245cbf4f81d0d31476c61125e366c2d9"
 
   bottle do
-    sha256 "69d2107515b2c050f69a7298314302a290a181d05ea97c009c45282e510f45d7" => :high_sierra
-    sha256 "a46e37480294eb0860f1ada1e32890f90916ecf0ea70176602efcfa04b907ec0" => :sierra
-    sha256 "a753db9cd0b979e49ef37ea25cd20c8695470d094c8c9a88a697e732ce9c20e2" => :el_capitan
+    cellar :any_skip_relocation
+    rebuild 1
+    sha256 "f451a8784dc52182670152d040f6533d4dc2f1b251ef3797eed6c6ff565db8af" => :catalina
+    sha256 "9e10c72574cde3b0ab08d668f6f4c3ecbe626da70648c1682bf0974196f198cb" => :mojave
+    sha256 "49b180f5e405662651596a97c603e79653852205a9002853775c21e23787bf5a" => :high_sierra
   end
 
   keg_only :versioned_formula
 
+  deprecate! :date => "March 11, 2019"
+
   resource "node" do
-    url "https://nodejs.org/dist/v6.11.1/node-v6.11.1.tar.xz"
-    sha256 "6f6655b85919aa54cb045a6d69a226849802fcc26491d0db4ce59873e41cc2b8"
+    url "https://nodejs.org/dist/v6.17.0/node-v6.17.0.tar.xz"
+    sha256 "c1dac78ea71c2e622cea6f94ba97a4be49329a1d36cd05945a1baf1ae8652748"
   end
 
   def install
     resource("node").stage do
       system "./configure", "--prefix=#{libexec}/node"
-      system "make", "test"
       system "make", "install"
     end
 
@@ -34,12 +36,18 @@ class KibanaAT56 < Formula
     # trick the build into thinking we've already downloaded the Node.js binary
     mkdir_p buildpath/".node_binaries/#{resource("node").version}/darwin-x64"
 
+    # set MACOSX_DEPLOYMENT_TARGET to compile native addons against libc++
+    inreplace libexec/"node/include/node/common.gypi", "'MACOSX_DEPLOYMENT_TARGET': '10.7',",
+                                                       "'MACOSX_DEPLOYMENT_TARGET': '#{MacOS.version}',"
+    ENV["npm_config_nodedir"] = libexec/"node"
+
     # set npm env and fix cache edge case (https://github.com/Homebrew/brew/pull/37#issuecomment-208840366)
     ENV.prepend_path "PATH", prefix/"libexec/node/bin"
     system "npm", "install", "-ddd", "--build-from-source", "--#{Language::Node.npm_cache_config}"
     system "npm", "run", "build", "--", "--release", "--skip-os-packages", "--skip-archives"
 
-    prefix.install Dir["build/kibana-#{version}-darwin-x86_64/{bin,config,node_modules,optimize,package.json,src,ui_framework,webpackShims}"]
+    prefix.install Dir["build/kibana-#{version}-darwin-x86_64/"\
+                       "{bin,config,node_modules,optimize,package.json,src,ui_framework,webpackShims}"]
 
     inreplace "#{bin}/kibana", %r{/node/bin/node}, "/libexec/node/bin/node"
     inreplace "#{bin}/kibana-plugin", %r{/node/bin/node}, "/libexec/node/bin/node"
@@ -57,31 +65,33 @@ class KibanaAT56 < Formula
     (prefix/"plugins").mkdir
   end
 
-  def caveats; <<~EOS
-    Config: #{etc}/kibana/
-    If you wish to preserve your plugins upon upgrade, make a copy of
-    #{opt_prefix}/plugins before upgrading, and copy it into the
-    new keg location after upgrading.
+  def caveats
+    <<~EOS
+      Config: #{etc}/kibana/
+      If you wish to preserve your plugins upon upgrade, make a copy of
+      #{opt_prefix}/plugins before upgrading, and copy it into the
+      new keg location after upgrading.
     EOS
   end
 
-  plist_options :manual => "kibana"
+  plist_options :manual => "#{HOMEBREW_PREFIX}/opt/kibana@5.6/bin/kibana"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>Program</key>
-        <string>#{opt_bin}/kibana</string>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-    </plist>
-  EOS
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>Program</key>
+          <string>#{opt_bin}/kibana</string>
+          <key>RunAtLoad</key>
+          <true/>
+        </dict>
+      </plist>
+    EOS
   end
 
   test do

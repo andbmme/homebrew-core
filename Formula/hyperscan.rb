@@ -1,42 +1,25 @@
 class Hyperscan < Formula
   desc "High-performance regular expression matching library"
-  homepage "https://01.org/hyperscan"
-  url "https://github.com/01org/hyperscan/archive/v4.6.0.tar.gz"
-  sha256 "0dfbfc2e5e82a6a7b2feca3d982d08fb7d4a979a4e75f667a37484cae4fda815"
-  revision 1
+  homepage "https://www.hyperscan.io/"
+  url "https://github.com/intel/hyperscan/archive/v5.3.0.tar.gz"
+  sha256 "9b50e24e6fd1e357165063580c631a828157d361f2f27975c5031fc00594825b"
 
   bottle do
     cellar :any
-    sha256 "fadbdf51c42c8f92cd01855a5d86b0e82d07a4d6d58947f75ccdfa33eda0bb9e" => :high_sierra
-    sha256 "a6f6024a82bb228fc1a4a614bcef3efc9708c57198c6a3325969743d5843b0bb" => :sierra
-    sha256 "5e2c55a40cd4db79364debd0bfbc7ec01dac5d079f11a8896aee81be3e16d3ed" => :el_capitan
+    sha256 "a56dfd1232dd769b481e1c9e0544c84f542f82bb527e23dd27d9a7451258194d" => :catalina
+    sha256 "217445aaf506df06e6759c53e38fc767c337a791a16d4073cf870027a93543f3" => :mojave
+    sha256 "49403fbbdd395e877457945ce7f00476574befcfa07238059cfb8ee40ef8e764" => :high_sierra
   end
 
-  option "with-debug", "Build with debug symbols"
-
-  depends_on :python => :build if MacOS.version <= :snow_leopard
   depends_on "boost" => :build
-  depends_on "ragel" => :build
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
+  depends_on "ragel" => :build
+  depends_on "pcre"
 
   def install
     mkdir "build" do
-      args = std_cmake_args << "-DBUILD_STATIC_AND_SHARED=on"
-
-      if build.with? "debug"
-        args -= %w[
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG
-          -DCMAKE_CXX_FLAGS_RELEASE=-DNDEBUG
-        ]
-        args += %w[
-          -DCMAKE_BUILD_TYPE=Debug
-          -DDEBUG_OUTPUT=on
-        ]
-      end
-
-      system "cmake", "..", *args
+      system "cmake", "..", *std_cmake_args, "-DBUILD_STATIC_AND_SHARED=on"
       system "make", "install"
     end
   end

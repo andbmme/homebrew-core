@@ -1,44 +1,40 @@
 class Lighttpd < Formula
   desc "Small memory footprint, flexible web-server"
   homepage "https://www.lighttpd.net/"
-  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.48.tar.xz"
-  sha256 "0f8ad5aac7529d7b948b9d7e8cd0b4a9e177309d85d6bf6516e28e6e40d74f36"
+  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.55.tar.xz"
+  sha256 "6a0b50e9c9d5cc3d9e48592315c25a2d645858f863e1ccd120507a30ce21e927"
 
   bottle do
-    sha256 "b7b7b0351d2ad65f6c71c594f4df2f865c31834007e0811d99356c339c53c3e4" => :high_sierra
-    sha256 "2eaa0285cf8e0e4616b804e5a7d4059e0d8549e90c167dfc8bea2ef269706f80" => :sierra
-    sha256 "c8aaafd41d8b8bdd4b823a09694246752b64cd3db9a8557e8c4c0d0716372785" => :el_capitan
+    sha256 "7cb7b6026dbba9a3afde8a0e2e2740499564687fb61ee6c49d5cabc29f780a2d" => :catalina
+    sha256 "432da2049539f4416d952ecdfcfefc5b5230447edaebfd63b958a92581ae57ab" => :mojave
+    sha256 "c7e9b87c219d8bf64561c185c6fcc68c2caafded7a4e980d379fd4fbbe00bd1d" => :high_sierra
   end
 
-  option "with-lua@5.1", "Include Lua scripting support for mod_magnet"
-  deprecated_option "with-lua51" => "with-lua@5.1"
-
-  depends_on "pkg-config" => :build
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
+  depends_on "openldap"
+  depends_on "openssl@1.1"
   depends_on "pcre"
-  depends_on "openssl"
-  depends_on "lua@5.1" => :optional
-  depends_on "libev" => :optional
 
   # default max. file descriptors; this option will be ignored if the server is not started as root
   MAX_FDS = 512
 
   def config_path
-    etc+"lighttpd"
+    etc/"lighttpd"
   end
 
   def log_path
-    var+"log/lighttpd"
+    var/"log/lighttpd"
   end
 
   def www_path
-    var+"www"
+    var/"www"
   end
 
   def run_path
-    var+"lighttpd"
+    var/"lighttpd"
   end
 
   def install
@@ -52,9 +48,6 @@ class Lighttpd < Formula
       --with-zlib
       --with-bzip2
     ]
-
-    args << "--with-lua" if build.with? "lua@5.1"
-    args << "--with-libev" if build.with? "libev"
 
     # autogen must be run, otherwise prebuilt configure may complain
     # about a version mismatch between included automake and Homebrew's
@@ -72,7 +65,7 @@ class Lighttpd < Formula
         s.sub!(/^var\.home_dir\s*=\s*".+"$/, "var.home_dir    = \"#{run_path}\"")
         s.sub!(/^var\.conf_dir\s*=\s*".+"$/, "var.conf_dir    = \"#{config_path}\"")
         s.sub!(/^server\.port\s*=\s*80$/, "server.port = 8080")
-        s.sub!(%r{^server\.document-root\s*=\s*server_root \+ "\/htdocs"$}, "server.document-root = server_root")
+        s.sub!(%r{^server\.document-root\s*=\s*server_root \+ "/htdocs"$}, "server.document-root = server_root")
 
         # get rid of "warning: please use server.use-ipv6 only for hostnames, not
         # without server.bind / empty address; your config will break if the kernel
@@ -95,56 +88,58 @@ class Lighttpd < Formula
     run_path.mkpath
   end
 
-  def caveats; <<~EOS
-    Docroot is: #{www_path}
+  def caveats
+    <<~EOS
+      Docroot is: #{www_path}
 
-    The default port has been set in #{config_path}/lighttpd.conf to 8080 so that
-    lighttpd can run without sudo.
+      The default port has been set in #{config_path}/lighttpd.conf to 8080 so that
+      lighttpd can run without sudo.
     EOS
   end
 
   plist_options :manual => "lighttpd -f #{HOMEBREW_PREFIX}/etc/lighttpd/lighttpd.conf"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>#{opt_bin}/lighttpd</string>
-        <string>-D</string>
-        <string>-f</string>
-        <string>#{config_path}/lighttpd.conf</string>
-      </array>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>KeepAlive</key>
-      <false/>
-      <key>WorkingDirectory</key>
-      <string>#{HOMEBREW_PREFIX}</string>
-      <key>StandardErrorPath</key>
-      <string>#{log_path}/output.log</string>
-      <key>StandardOutPath</key>
-      <string>#{log_path}/output.log</string>
-      <key>HardResourceLimits</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
       <dict>
-        <key>NumberOfFiles</key>
-        <integer>#{MAX_FDS}</integer>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/lighttpd</string>
+          <string>-D</string>
+          <string>-f</string>
+          <string>#{config_path}/lighttpd.conf</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <false/>
+        <key>WorkingDirectory</key>
+        <string>#{HOMEBREW_PREFIX}</string>
+        <key>StandardErrorPath</key>
+        <string>#{log_path}/output.log</string>
+        <key>StandardOutPath</key>
+        <string>#{log_path}/output.log</string>
+        <key>HardResourceLimits</key>
+        <dict>
+          <key>NumberOfFiles</key>
+          <integer>#{MAX_FDS}</integer>
+        </dict>
+        <key>SoftResourceLimits</key>
+        <dict>
+          <key>NumberOfFiles</key>
+          <integer>#{MAX_FDS}</integer>
+        </dict>
       </dict>
-      <key>SoftResourceLimits</key>
-      <dict>
-        <key>NumberOfFiles</key>
-        <integer>#{MAX_FDS}</integer>
-      </dict>
-    </dict>
-    </plist>
+      </plist>
     EOS
   end
 
   test do
-    system "#{bin}/lighttpd", "-t", "-f", config_path+"lighttpd.conf"
+    system "#{bin}/lighttpd", "-t", "-f", config_path/"lighttpd.conf"
   end
 end

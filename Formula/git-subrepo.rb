@@ -1,18 +1,18 @@
 class GitSubrepo < Formula
   desc "Git Submodule Alternative"
   homepage "https://github.com/ingydotnet/git-subrepo"
-  url "https://github.com/ingydotnet/git-subrepo/archive/0.3.1.tar.gz"
-  sha256 "f36fb9e6ccb82b1200ba94c2b9c1db7fb683d93d2051ac92ab69c049f2529906"
-  revision 1
+  url "https://github.com/ingydotnet/git-subrepo/archive/0.4.1.tar.gz"
+  sha256 "64cc2490c54fe1e5396bb14f6bbf0aa8378085f3b8847fd8ed171e5ddd886065"
   head "https://github.com/ingydotnet/git-subrepo.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ee31c24df2bf36697f81c0b2b4f1779f4bb4987187050ba28bb7ff6069c12383" => :high_sierra
-    sha256 "f7d319ded76484efef8f34b45853e97c5d663cc2c4e76e91ed0f6a7fae1a8edb" => :sierra
-    sha256 "f7d319ded76484efef8f34b45853e97c5d663cc2c4e76e91ed0f6a7fae1a8edb" => :el_capitan
-    sha256 "f7d319ded76484efef8f34b45853e97c5d663cc2c4e76e91ed0f6a7fae1a8edb" => :yosemite
+    sha256 "499beadca28680001847d8ee797f15595b629017a4b434e775ae4d3309277002" => :catalina
+    sha256 "499beadca28680001847d8ee797f15595b629017a4b434e775ae4d3309277002" => :mojave
+    sha256 "499beadca28680001847d8ee797f15595b629017a4b434e775ae4d3309277002" => :high_sierra
   end
+
+  depends_on "bash"
 
   def install
     libexec.mkpath

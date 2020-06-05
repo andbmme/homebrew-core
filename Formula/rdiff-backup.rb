@@ -1,45 +1,29 @@
 class RdiffBackup < Formula
-  desc "Backs up one directory to another--also works over networks"
-  homepage "http://rdiff-backup.nongnu.org/"
-  url "https://savannah.nongnu.org/download/rdiff-backup/rdiff-backup-1.2.8.tar.gz"
-  sha256 "0d91a85b40949116fa8aaf15da165c34a2d15449b3cbe01c8026391310ac95db"
-  revision 1
+  desc "Reverse differential backup tool, over a network or locally"
+  homepage "https://rdiff-backup.net/"
+  url "https://github.com/rdiff-backup/rdiff-backup/releases/download/v2.0.3/rdiff-backup-2.0.3.tar.gz"
+  sha256 "04e2d2c28588d6bb4abb0b7dc7c922e5974f3cb3e7f0671ecc5a90b438dfd5e1"
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "899687c88770af610d76f66f02da736a2a62ac4676f0f80796dbbae1d92bc47f" => :high_sierra
-    sha256 "7dcf4c878ccafc113e5742c83214f946dd3a55b472e086a944e918bcee1cf2bd" => :sierra
-    sha256 "f06f79bc1536dbaa990e6005565f18de05e9dc12deb09701a504ab6bfc8b8f11" => :el_capitan
-    sha256 "35f6a0f726a680d639f7a1c83af8e27d046d5a68a334bf19d47eaa363748767c" => :yosemite
-    sha256 "5b0eab2335afe2d298cd51737c744d052536cb0bdbee780819496e1000a3b179" => :mavericks
-  end
-
-  devel do
-    url "https://savannah.nongnu.org/download/rdiff-backup/rdiff-backup-1.3.3.tar.gz"
-    sha256 "ee030ce638df0eb1047cf72578e0de15d9a3ee9ab24da2dc0023e2978be30c06"
+    sha256 "e6a3e3f38d6a9e87f10f92bcaeb8d2fcbe09826de82bac82a464848a8930cb60" => :catalina
+    sha256 "7be7e61ddb4176234d72473d11178a9d96d16f82abe10f9e9936966c05af60a2" => :mojave
+    sha256 "3074d321311ca9f8b8a001eaf0c92941aa1293630337116f4039d3188a1bea98" => :high_sierra
   end
 
   depends_on "librsync"
-
-  # librsync 1.x support
-  patch do
-    url "https://git.archlinux.org/svntogit/community.git/plain/trunk/rdiff-backup-1.2.8-librsync-1.0.0.patch?h=packages/rdiff-backup"
-    mirror "http://pkgs.fedoraproject.org/cgit/rpms/rdiff-backup.git/plain/rdiff-backup-1.2.8-librsync-1.0.0.patch"
-    sha256 "a00d993d5ffea32d58a73078fa20c90c1c1c6daa0587690cec0e3da43877bf12"
-  end
+  depends_on "python@3.8"
 
   def install
-    # Find the arch for the Python we are building against.
-    # We remove 'ppc' support, so we can pass Intel-optimized CFLAGS.
-    archs = archs_for_command("python")
-    archs.remove_ppc!
-    archs.delete :x86_64 if Hardware::CPU.is_32_bit?
-    ENV["ARCHFLAGS"] = archs.as_arch_flags
-    system "python", "setup.py", "--librsync-dir=#{prefix}", "build"
+    ENV["ARCHFLAGS"] = "-arch x86_64"
+    system "python3", "setup.py", "build", "--librsync-dir=#{prefix}"
     libexec.install Dir["build/lib.macosx*/rdiff_backup"]
     libexec.install Dir["build/scripts-*/*"]
-    man1.install Dir["*.1"]
+    man1.install Dir["docs/*.1"]
     bin.install_symlink Dir["#{libexec}/rdiff-backup*"]
+  end
+
+  test do
+    system "#{bin}/rdiff-backup", "--version"
   end
 end

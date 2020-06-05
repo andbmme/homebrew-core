@@ -1,20 +1,16 @@
 class Opencc < Formula
   desc "Simplified-traditional Chinese conversion tool"
   homepage "https://github.com/BYVoid/OpenCC"
-  url "https://dl.bintray.com/byvoid/opencc/opencc-1.0.4.tar.gz"
-  sha256 "34e728ba9819477e8f8e12726867965e6aa55e7f3390225b2c031f9138b404cb"
+  url "https://github.com/BYVoid/OpenCC/archive/ver.1.1.1.tar.gz"
+  sha256 "2d4987dc84275f252d47bc6d8c81b452f6a6e82caa26f284c854a8153ccf5933"
 
   bottle do
-    sha256 "9a4d1024105557dbb8caad9548473bbbc384b4178e880a996d1b843eeaac5df1" => :high_sierra
-    sha256 "3c228bd803e8914ee9ca3ed00eb67fa9dfcacd8f1a99c5532962d5c4a87acb57" => :sierra
-    sha256 "9ddf2bdf0563a14a3e1bff8e5a067c605ac59b9f1611c69640035cdb7df6ddfd" => :el_capitan
-    sha256 "add47f6baf00f83d3ca00d7da59e35f18506f7858e1e6aede4f04660411f2e06" => :yosemite
-    sha256 "88192e5f330e185f4f18fbd3b6f8e7e5cac7a0f22d88059471ef3fad25a85c77" => :mavericks
+    sha256 "dddf951ae0363e1e92c34d3d0087233d8d07053682557fd1bbed457aa98c677f" => :catalina
+    sha256 "0503b49e5fcec9652ea10a3ab14d182babf48aae43644c68b243b94c2a781182" => :mojave
+    sha256 "d48b56dec1d0f6f0fe0eb2690f8ac152e8dc13971c40649fe5e6ba810efdec17" => :high_sierra
   end
 
   depends_on "cmake" => :build
-
-  needs :cxx11
 
   def install
     ENV.cxx11

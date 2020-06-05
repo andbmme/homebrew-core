@@ -1,21 +1,22 @@
 class Cpprestsdk < Formula
   desc "C++ libraries for cloud-based client-server communication"
   homepage "https://github.com/Microsoft/cpprestsdk"
-  url "https://github.com/Microsoft/cpprestsdk/archive/v2.10.0.tar.gz"
-  sha256 "de333da67f1cb3d1b30be118860531092467f18d24ca6b4d36f6623fecab0de0"
-
+  # pull from git tag to get submodules
+  url "https://github.com/Microsoft/cpprestsdk.git",
+      :tag      => "v2.10.16",
+      :revision => "18212a2a7967e12d740bfb957e500892b3463c88"
   head "https://github.com/Microsoft/cpprestsdk.git", :branch => "development"
 
   bottle do
     cellar :any
-    sha256 "cbe02f42a6c8b3804fcee855d0b80924454d04aeb2a74b90ec7f39cec2eefc1b" => :high_sierra
-    sha256 "bfd8212b40116123b8a9be9ff458bae43bb6b0f8411fb620927fcaadd529dd6c" => :sierra
-    sha256 "e225dc408d4d19714efd48243338f9fb545407cc6a3aeb6f7ddd66b2d516af43" => :el_capitan
+    sha256 "0b7d717716ebc8393007599ed02f9a4f8b36eef1f3dd3d54d11b0966751a4f87" => :catalina
+    sha256 "feeabdfce6c4a065961f37c38578d626a50f8e7a3939343a6ed037f535418a02" => :mojave
+    sha256 "f98e8ff4c5b371ffe541eb1fefc13a178b02c07e6fab906fd206e6c833827dfa" => :high_sierra
   end
 
-  depends_on "boost"
-  depends_on "openssl"
   depends_on "cmake" => :build
+  depends_on "boost"
+  depends_on "openssl@1.1"
 
   def install
     system "cmake", "-DBUILD_SAMPLES=OFF", "-DBUILD_TESTS=OFF", "Release", *std_cmake_args
@@ -33,8 +34,8 @@ class Cpprestsdk < Formula
     EOS
     flags = ["-stdlib=libc++", "-std=c++11", "-I#{include}",
              "-I#{Formula["boost"].include}",
-             "-I#{Formula["openssl"].include}", "-L#{lib}",
-             "-L#{Formula["openssl"].lib}", "-L#{Formula["boost"].lib}",
+             "-I#{Formula["openssl@1.1"].include}", "-L#{lib}",
+             "-L#{Formula["openssl@1.1"].lib}", "-L#{Formula["boost"].lib}",
              "-lssl", "-lcrypto", "-lboost_random", "-lboost_chrono",
              "-lboost_thread-mt", "-lboost_system-mt", "-lboost_regex",
              "-lboost_filesystem", "-lcpprest"] + ENV.cflags.to_s.split

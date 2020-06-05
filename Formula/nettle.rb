@@ -1,23 +1,30 @@
 class Nettle < Formula
   desc "Low-level cryptographic library"
   homepage "https://www.lysator.liu.se/~nisse/nettle/"
-  url "https://ftp.gnu.org/gnu/nettle/nettle-3.3.tar.gz"
-  mirror "https://ftpmirror.gnu.org/nettle/nettle-3.3.tar.gz"
-  sha256 "46942627d5d0ca11720fec18d81fc38f7ef837ea4197c1f630e71ce0d470b11e"
+  url "https://ftp.gnu.org/gnu/nettle/nettle-3.6.tar.gz"
+  mirror "https://ftpmirror.gnu.org/nettle/nettle-3.6.tar.gz"
+  sha256 "d24c0d0f2abffbc8f4f34dcf114b0f131ec3774895f3555922fe2f40f3d5e3f1"
 
   bottle do
     cellar :any
-    sha256 "70178e6de581d92f1f3458791687aa21676e1a3e94d86eb1733a8765569fd19f" => :high_sierra
-    sha256 "c111158ee75fde15a6b5a0417416f62358dfb0d06fcab0311b1d9d4849df5fa2" => :sierra
-    sha256 "b23a2c67db98f807d240fc581ee87b4eb4284b1eabda8d38e09b8723eb6b4b62" => :el_capitan
-    sha256 "fa2a4eb958c0f9a1ec019264e31c0c98a08c9f204f146458ca62a43e5c3029a0" => :yosemite
+    sha256 "7ac7677ba653dbef81dd83ed8cde3dfcb7b464d04442886c396179932f4f9faa" => :catalina
+    sha256 "d378b026725d8d449ca6497ce2158b93c991a0e0326921a5f914bc4847da3a92" => :mojave
+    sha256 "07c65cb4d172b05065dcceb702b41ca3408b31b6154690c7a4cfa430b2de074d" => :high_sierra
   end
 
   depends_on "gmp"
 
+  uses_from_macos "m4" => :build
+
   def install
-    # macOS doesn't use .so libs. Emailed upstream 04/02/2016.
-    inreplace "testsuite/dlopen-test.c", "libnettle.so", "libnettle.dylib"
+    # The LLVM shipped with Xcode/CLT 10+ compiles binaries/libraries with
+    # ___chkstk_darwin, which upsets nettle's expected symbol check.
+    # https://github.com/Homebrew/homebrew-core/issues/28817#issuecomment-396762855
+    # https://lists.lysator.liu.se/pipermail/nettle-bugs/2018/007300.html
+    if DevelopmentTools.clang_build_version >= 1000
+      inreplace "testsuite/symbols-test", "get_pc_thunk",
+                                          "get_pc_thunk|(_*chkstk_darwin)"
+    end
 
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",

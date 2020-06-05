@@ -1,24 +1,24 @@
 class Wallpaper < Formula
-  desc "Get or set the desktop wallpaper"
+  desc "Manage the desktop wallpaper"
   homepage "https://github.com/sindresorhus/macos-wallpaper"
-  url "https://github.com/sindresorhus/macos-wallpaper/archive/1.3.0.tar.gz"
-  sha256 "ef5098c47c84d43969ef82c7c0ce7b53abad4c8648d70589ff9426342ec23985"
+  url "https://github.com/sindresorhus/macos-wallpaper/archive/v2.1.0.tar.gz"
+  sha256 "4925247524535c0cc128dcc4d87f5538a5ce3b5d3a3c211127fd646ee00252b6"
   head "https://github.com/sindresorhus/macos-wallpaper.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "67a9fe44fc315f659759a945f4a565813b9d206d4f0371945f6f905f9064bbc8" => :high_sierra
-    sha256 "23528a4f9b7ac5486b3639ac0a9bf370f550a0c641dd2187947e78002a07896d" => :sierra
-    sha256 "c41be619bf8adaf2e3472a2c25d1631afd3fcd70b83794184273fe6f3bdbe77c" => :el_capitan
-    sha256 "7a715b58b8f4e654b409347fd8cff2bce6a3dfc83b0d345c3b83fc223eaf952a" => :yosemite
+    sha256 "ae71c073450b0e48f8213108a763c71e62fa7f7d801499cfe7eae6bc3be3d5c2" => :catalina
   end
 
+  depends_on :xcode => ["11.4", :build]
+  depends_on :macos => :sierra
+
   def install
-    system "./build"
-    bin.install "wallpaper"
+    system "swift", "build", "-c", "release", "--static-swift-stdlib", "--disable-sandbox"
+    bin.install ".build/release/wallpaper"
   end
 
   test do
-    system "#{bin}/wallpaper"
+    system "#{bin}/wallpaper", "get"
   end
 end

@@ -1,17 +1,19 @@
 class StanfordParser < Formula
   desc "Statistical NLP parser"
   homepage "https://nlp.stanford.edu/software/lex-parser.shtml"
-  url "https://nlp.stanford.edu/software/stanford-parser-full-2017-06-09.zip"
-  version "3.8.0"
-  sha256 "d03ed9a823c3001dde3069e96de25f322b7da12c4ea070b969e98ad467c4959f"
+  url "https://nlp.stanford.edu/software/stanford-parser-full-2018-10-17.zip"
+  version "3.9.2"
+  sha256 "92d852af54c0727c2367b9ce267c53bf08f1551a08ec5dd92c357b8cc7b2bcd9"
+  revision 1
 
   bottle :unneeded
 
-  depends_on :java => "1.8+"
+  depends_on "openjdk"
 
   def install
     libexec.install Dir["*"]
-    bin.write_exec_script Dir["#{libexec}/*.sh"]
+    bin.install Dir["#{libexec}/*.sh"]
+    bin.env_script_all_files libexec, :JAVA_HOME => Formula["openjdk"].opt_prefix
   end
 
   test do

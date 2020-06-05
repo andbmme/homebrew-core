@@ -1,18 +1,16 @@
 class Libmagic < Formula
   desc "Implementation of the file(1) command"
   homepage "https://www.darwinsys.com/file/"
-  url "ftp://ftp.astron.com/pub/file/file-5.32.tar.gz"
-  mirror "https://fossies.org/linux/misc/file-5.32.tar.gz"
-  sha256 "8639dc4d1b21e232285cd483604afc4a6ee810710e00e579dbe9591681722b50"
+  url "https://astron.com/pub/file/file-5.38.tar.gz"
+  sha256 "593c2ffc2ab349c5aea0f55fedfe4d681737b6b62376a9b3ad1e77b2cc19fa34"
 
   bottle do
-    sha256 "f3181a7bb80610f8e0662e03ee980a03f6388c142e5b7b15eb97ad3b9b4690c9" => :high_sierra
-    sha256 "ba06b4094577d77c2d515932e0bf0f3e1481f26dd307e655d28f8fba13fa8791" => :sierra
-    sha256 "05d95e47cfa533c37fcbd4f4b54b9c9957d985d49852f397c6d78387fbe2c254" => :el_capitan
-    sha256 "d11466ebdc722d370346cecf135a925e1f482f0d0bbbb424f821347134f52e64" => :yosemite
+    sha256 "b62d63057eeb729667d6155b5d79da97742d5656d9995359f6d945b6109ce2ef" => :catalina
+    sha256 "0b6136c04b93fbec36326c88f7443e66d9faa209dedab7346f2b6ba015cd1ffe" => :mojave
+    sha256 "8bf0dd3733907457d0102dd8e6e28ddaea304cd7eb59e5e559145f50046dd784" => :high_sierra
   end
 
-  depends_on :python => :optional
+  uses_from_macos "zlib"
 
   def install
     system "./configure", "--disable-dependency-tracking",
@@ -21,13 +19,7 @@ class Libmagic < Formula
                           "--enable-fsect-man5",
                           "--enable-static"
     system "make", "install"
-    (share+"misc/magic").install Dir["magic/Magdir/*"]
-
-    if build.with? "python"
-      cd "python" do
-        system "python", *Language::Python.setup_install_args(prefix)
-      end
-    end
+    (share/"misc/magic").install Dir["magic/Magdir/*"]
 
     # Don't dupe this system utility
     rm bin/"file"

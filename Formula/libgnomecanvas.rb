@@ -3,22 +3,22 @@ class Libgnomecanvas < Formula
   homepage "https://developer.gnome.org/libgnomecanvas/2.30/"
   url "https://download.gnome.org/sources/libgnomecanvas/2.30/libgnomecanvas-2.30.3.tar.bz2"
   sha256 "859b78e08489fce4d5c15c676fec1cd79782f115f516e8ad8bed6abcb8dedd40"
-  revision 2
+  revision 4
 
   bottle do
     cellar :any
-    sha256 "ec9faa94e457c0f731b828e17487b185cd8b78eb794896684128157ebc765b26" => :high_sierra
-    sha256 "df0745b46ef2872c5460a2a0893309d149d9365299d980fc66c395d410fc0b81" => :sierra
-    sha256 "53b98bae1958e60b6f47653aee1a75976a9b169b44bc670a34b54159ab333fe9" => :el_capitan
-    sha256 "0526ea2163ce27104da600bb45c847584f5843e6bfffe5ddc8ef24ebd9a2acd1" => :yosemite
+    sha256 "775379b446e5fd6bcb13863e5c5d3993b382d84b8e68b4f06fdf6d758921cb81" => :catalina
+    sha256 "9ccb81e0493aa409725fe76ae345d5910be9ea3c782e4d9a46c24c42b0537150" => :mojave
+    sha256 "3c4443a3944a6834a107e2752c95174b49c83c3213be2ac3df319bfd900c22e6" => :high_sierra
+    sha256 "9b2e28d2331f1c24d8b320cc6509e5da3e3c748fac44d078e1f95c6c701b7b10" => :sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
-  depends_on "libglade"
-  depends_on "libart"
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gtk+"
+  depends_on "libart"
+  depends_on "libglade"
 
   def install
     system "./configure", "--disable-dependency-tracking",

@@ -1,31 +1,31 @@
 class Miller < Formula
   desc "Like sed, awk, cut, join & sort for name-indexed data such as CSV"
   homepage "https://github.com/johnkerl/miller"
-  url "https://github.com/johnkerl/miller/releases/download/v5.2.2/mlr-5.2.2.tar.gz"
-  sha256 "481c26119e5c85a4373c94d850f92dff64a4f397b17286c14174fb211d38fb6f"
+  url "https://github.com/johnkerl/miller/releases/download/v5.7.0/mlr-5.7.0.tar.gz"
+  sha256 "3896a8be073427671e7ba84993c071891fb39769696fd566b8b77ec0abd3ea51"
+  head "https://github.com/johnkerl/miller.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "aa731e94f52f44d7d598612cc49d5d25a1d4e4cccad2b4488d453004cc0cb22d" => :high_sierra
-    sha256 "4564430fef0f7e7ab7b03b0929063acaa89167ba00ff37a0afc1aafd7296df11" => :sierra
-    sha256 "5eaa3e9acb063754e26019ec6762fd973e4fd7f7eb8d47691cea85bba2c9bfad" => :el_capitan
-    sha256 "a0ec992d0bbcbca769688bf2f6f7a1849447f92a30bd85f6429fdd6faf3f1024" => :yosemite
+    sha256 "b1e99a7173ec7eac19ac3daa5fd565016897774c9270def0c95610549634a032" => :catalina
+    sha256 "4d5d800c42bedc655093ca0ceb522782721e46af78f1c61e0ebf9fde74f0d9a4" => :mojave
+    sha256 "0485537d6ba6927d11484e5c9f3377c51aa0da38fcecbf701c7833f76812a99d" => :high_sierra
   end
 
-  head do
-    url "https://github.com/johnkerl/miller.git"
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
 
-    depends_on "automake" => :build
-    depends_on "autoconf" => :build
-    depends_on "libtool" => :build
-  end
+  uses_from_macos "flex" => :build
 
   def install
-    system "autoreconf", "-fvi" if build.head?
+    # Profiling build fails with Xcode 11, remove it
+    inreplace "c/Makefile.am", /noinst_PROGRAMS=\s*mlrg/, ""
+    system "autoreconf", "-fvi"
+
     system "./configure", "--prefix=#{prefix}", "--disable-silent-rules",
                           "--disable-dependency-tracking"
     system "make"
-    system "make", "check"
     system "make", "install"
   end
 

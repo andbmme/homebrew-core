@@ -3,26 +3,36 @@ class Libcddb < Formula
   homepage "https://libcddb.sourceforge.io/"
   url "https://downloads.sourceforge.net/libcddb/libcddb-1.3.2.tar.bz2"
   sha256 "35ce0ee1741ea38def304ddfe84a958901413aa829698357f0bee5bb8f0a223b"
-  revision 1
+  revision 4
 
   bottle do
     cellar :any
-    sha256 "b1eeef97edb1fb137bf6fe4141c738e0f8a20ca78eb8b73c4e15c9550a4a5a96" => :high_sierra
-    sha256 "472626b30f5859a0e8526e49492f04e3886b1c5acda2605ac4d3e19015085d2b" => :sierra
-    sha256 "4bcb17aa31229692c090622fb31019cee6c6cf2f4936c2ff76e6a957d260449f" => :el_capitan
-    sha256 "31bac3b617b0a046126e6f0cd905e4acf95aa5c3910d3594472bd537c9686b1a" => :yosemite
+    rebuild 1
+    sha256 "7f1c41ce153e0550edac0073eeaf3a82d430fdd6b8e1c6d766459f81905b5b1e" => :catalina
+    sha256 "4a54605d856a52362d5b3a76a20872c72df138dca4b19595ffbdd6bc44e210be" => :mojave
+    sha256 "fcb848ca3b114f197ca52850d56a63b298fad61b9ee968496ddc450d969c3078" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
   depends_on "libcdio"
 
   def install
-    if MacOS.version == :yosemite && MacOS::Xcode.installed? && MacOS::Xcode.version >= "7.0"
-      ENV.delete("SDKROOT")
-    end
+    ENV.delete("SDKROOT") if MacOS.version == :yosemite && MacOS::Xcode.version >= "7.0"
 
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.c").write <<~EOS
+      #include <cddb/cddb.h>
+      int main(void) {
+        cddb_track_t *track = cddb_track_new();
+        cddb_track_destroy(track);
+      }
+    EOS
+    system ENV.cc, "test.c", "-L#{lib}", "-lcddb", "-o", "test"
+    system "./test"
   end
 end

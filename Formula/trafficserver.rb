@@ -1,15 +1,14 @@
 class Trafficserver < Formula
   desc "HTTP/1.1 compliant caching proxy server"
   homepage "https://trafficserver.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=trafficserver/trafficserver-7.1.1.tar.bz2"
-  mirror "https://archive.apache.org/dist/trafficserver/trafficserver-7.1.1.tar.bz2"
-  sha256 "2c7ec32ef1460a76e5ee0e7caf95e9b6ca6b7c9612f135d280171bb2166ded36"
+  url "https://www.apache.org/dyn/closer.lua?path=trafficserver/trafficserver-8.0.7.tar.bz2"
+  mirror "https://archive.apache.org/dist/trafficserver/trafficserver-8.0.7.tar.bz2"
+  sha256 "1e48e9b8969b915dacc686c43bebbf5b0891f5f53adb802c2b831c89f8bf2989"
 
   bottle do
-    rebuild 1
-    sha256 "84555aa82d766a0ad65891591f308f660c25ce17ab390c32d434e3cb3b70ecb6" => :high_sierra
-    sha256 "a0bfb2d4b4ae2cbf45633290daa870c3aa67a3df301482536c7c7c1dad34043f" => :sierra
-    sha256 "9a9515884155903c8300357012cd54d0c424e5f26d1090efee079c79341d3444" => :el_capitan
+    sha256 "67dccebd2905aa65f947e31b20a206e93ff73ffb2e55da5e200fc1537c23cf53" => :catalina
+    sha256 "865680570510222fc4219ccc2cac3fa5b5121ceafd87b5903c8659288b4e1358" => :mojave
+    sha256 "296bc5028f9b083414d899ebab0dfb2e7a98b3fa88c2bc156d5ee8c8006cc387" => :high_sierra
   end
 
   head do
@@ -18,35 +17,34 @@ class Trafficserver < Formula
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool"  => :build
+
+    fails_with :clang do
+      build 800
+      cause "needs C++17"
+    end
   end
 
-  option "with-experimental-plugins", "Enable experimental plugins"
-
-  depends_on "openssl"
+  depends_on "openssl@1.1"
   depends_on "pcre"
 
-  needs :cxx11
-
   def install
-    ENV.cxx11
+    ENV.cxx11 if build.stable?
 
-    # Needed for OpenSSL headers
-    if MacOS.version <= :lion
-      ENV.append_to_cflags "-Wno-deprecated-declarations"
-    end
+    # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
+    # is not set then it's forced to 10.4, which breaks compile on Mojave.
+    ENV["MACOSX_DEPLOYMENT_TARGET"] = MacOS.version
 
     args = %W[
       --prefix=#{prefix}
       --mandir=#{man}
       --localstatedir=#{var}
       --sysconfdir=#{etc}/trafficserver
-      --with-openssl=#{Formula["openssl"].opt_prefix}
+      --with-openssl=#{Formula["openssl@1.1"].opt_prefix}
       --with-tcl=#{MacOS.sdk_path}/System/Library/Frameworks/Tcl.framework
       --with-group=admin
       --disable-silent-rules
+      --enable-experimental-plugins
     ]
-
-    args << "--enable-experimental-plugins" if build.with? "experimental-plugins"
 
     system "autoreconf", "-fvi" if build.head?
     system "./configure", *args

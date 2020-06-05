@@ -1,19 +1,19 @@
 class Neo4j < Formula
   desc "Robust (fully ACID) transactional property graph database"
   homepage "https://neo4j.com/"
-  url "https://neo4j.com/artifact.php?name=neo4j-community-3.3.0-unix.tar.gz"
-  sha256 "dbbc65683d65018c48fc14d82ee7691ca75f8f6ea79823b21291970638de5d88"
+  url "https://neo4j.com/artifact.php?name=neo4j-community-3.5.14-unix.tar.gz"
+  sha256 "fb435b11494cde475f748f057a192bcbd8580c7445b380afe9ff52311f334bfe"
 
   bottle :unneeded
 
-  depends_on :java => "1.8+"
+  # Upstream does not intend to provide Java 8+ support until 4.0
+  # and there are various issues with running against newer Javas.
+  # https://github.com/neo4j/neo4j/issues/11728#issuecomment-387038804
+  # https://github.com/neo4j/neo4j-browser/issues/671#issuecomment-346224754
+  # https://github.com/Homebrew/homebrew-core/issues/31090
+  depends_on :java => "1.8"
 
   def install
-    inreplace %w[bin/cypher-shell bin/neo4j bin/neo4j-admin bin/neo4j-import
-                 bin/neo4j-shell],
-              'JAVA_HOME="$(/usr/libexec/java_home -v 1.8)"',
-              'JAVA_HOME="$(/usr/libexec/java_home -v 1.8+)"'
-
     ENV["NEO4J_HOME"] = libexec
     # Remove windows files
     rm_f Dir["bin/*.bat"]
@@ -30,39 +30,43 @@ class Neo4j < Formula
     (libexec/"conf/neo4j.conf").append_lines <<~EOS
       wrapper.java.additional=-Djava.awt.headless=true
       wrapper.java.additional.4=-Dneo4j.ext.udc.source=homebrew
+      dbms.directories.data=#{var}/neo4j/data
+      dbms.directories.logs=#{var}/log/neo4j
     EOS
   end
 
   def post_install
-    (var/"log").mkpath
+    (var/"log/neo4j").mkpath
+    (var/"neo4j").mkpath
   end
 
   plist_options :manual => "neo4j start"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
-        <false/>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/neo4j</string>
-          <string>console</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/neo4j.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/neo4j.log</string>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <false/>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/neo4j</string>
+            <string>console</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/neo4j.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/neo4j.log</string>
+        </dict>
+      </plist>
     EOS
   end
 

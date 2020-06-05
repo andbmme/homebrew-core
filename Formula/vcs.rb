@@ -3,21 +3,19 @@ class Vcs < Formula
   homepage "https://p.outlyer.net/vcs/"
   url "https://p.outlyer.net/vcs/files/vcs-1.13.2.tar.gz"
   sha256 "fc2a2b3994d5ffb5d87fb3dceaa5f6855aca7a89c58533b12fd11b8fb5b623af"
+  revision 2
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "b50a29774c1653b6f0cf23cf70b425212062138db17634916a46f9e5269fe5d6" => :high_sierra
-    sha256 "d9b65057f5f6746e32f075af250611956e3fecf6aae5300ce517fe0edfb155cc" => :sierra
-    sha256 "93bf052fe5378df11b4dfa929d6c2aea6a5a623a198a8a765374332ca662dfaf" => :el_capitan
-    sha256 "93bf052fe5378df11b4dfa929d6c2aea6a5a623a198a8a765374332ca662dfaf" => :yosemite
+    sha256 "6408fd9b359ac2b01060196beb429d872d5edd1d56c6029fd540704413057c3a" => :catalina
+    sha256 "6408fd9b359ac2b01060196beb429d872d5edd1d56c6029fd540704413057c3a" => :mojave
+    sha256 "282eb2546d59180b1e1a7cf9540f28c34c2fa83001a7073d2063816302e8b16e" => :high_sierra
   end
 
   depends_on "ffmpeg"
-  depends_on "gnu-getopt"
   depends_on "ghostscript"
+  depends_on "gnu-getopt"
   depends_on "imagemagick"
-  depends_on "mplayer" => :optional
 
   def install
     inreplace "vcs", "declare GETOPT=getopt", "declare GETOPT=#{Formula["gnu-getopt"].opt_bin}/getopt"

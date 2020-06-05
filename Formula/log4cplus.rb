@@ -1,24 +1,45 @@
 class Log4cplus < Formula
   desc "Logging Framework for C++"
   homepage "https://sourceforge.net/p/log4cplus/wiki/Home/"
-  url "https://downloads.sourceforge.net/project/log4cplus/log4cplus-stable/1.2.0/log4cplus-1.2.0.tar.xz"
-  sha256 "93aa5b26425f0b1596c5e5b3d58916988fdd83b359a02ca59878eb5c7c2ec6c2"
+  url "https://downloads.sourceforge.net/project/log4cplus/log4cplus-stable/2.0.5/log4cplus-2.0.5.tar.xz"
+  sha256 "6046f0867ce4734f298418c7b7db0d35c27403090bb751d98e6e76aa4935f1af"
 
   bottle do
     cellar :any
-    sha256 "e41ba73cf7b64b87432a2669e2aa724f751bd36262d18b56a29e1ddd557b3f2b" => :high_sierra
-    sha256 "7e842fafbdeacd4cad0c7b806e151d521607fe953e5c674eee0e8dfb9fd31165" => :sierra
-    sha256 "d051d31f4d76a18a70f21d10b3037e3fdad202d18acedbb158874f26a57ec104" => :el_capitan
-    sha256 "47cbed5a69741494a419d04bebfe8755172f98d8cb66cc228174529630321373" => :yosemite
-    sha256 "c60007704e699c4baeabad262b9600e5d0b8d8e217588c6e69f429b5f60d876d" => :mavericks
+    sha256 "1559e20cf8d6a6cbf66545ef391ab2979bbebd2cafdf4b71ab547d8daa472e01" => :catalina
+    sha256 "1b671e5605cdee4defa7f6e5693ddf1e6d902710e8fecdd541429a8444df5e15" => :mojave
+    sha256 "aaa4f419cf19b836d767066d505a7b4ca9addaa6392231b8f3dfd5ea2b103517" => :high_sierra
   end
 
-  option :cxx11
-
   def install
-    ENV.cxx11 if build.cxx11?
+    ENV.cxx11
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make", "install"
+  end
+
+  test do
+    # https://github.com/log4cplus/log4cplus/blob/65e4c3/docs/examples.md
+    (testpath/"test.cpp").write <<~EOS
+      #include <log4cplus/logger.h>
+      #include <log4cplus/loggingmacros.h>
+      #include <log4cplus/configurator.h>
+      #include <log4cplus/initializer.h>
+
+      int main()
+      {
+        log4cplus::Initializer initializer;
+        log4cplus::BasicConfigurator config;
+        config.configure();
+
+        log4cplus::Logger logger = log4cplus::Logger::getInstance(
+          LOG4CPLUS_TEXT("main"));
+        LOG4CPLUS_WARN(logger, LOG4CPLUS_TEXT("Hello, World!"));
+        return 0;
+      }
+    EOS
+    system ENV.cxx, "-std=c++11", "-I#{include}", "-L#{lib}",
+                    "-llog4cplus", "test.cpp", "-o", "test"
+    assert_match "Hello, World!", shell_output("./test")
   end
 end

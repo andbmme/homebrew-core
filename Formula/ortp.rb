@@ -1,13 +1,14 @@
 class Ortp < Formula
   desc "Real-time transport protocol (RTP, RFC3550) library"
-  homepage "https://www.linphone.org/technical-corner/ortp/overview"
-  url "http://nongnu.askapache.com/linphone/ortp/sources/ortp-0.27.0.tar.gz"
-  sha256 "eb61a833ab3ad80978d7007411240f46e9b2d1034373b9d9dfaac88c1b6ec0af"
+  homepage "https://www.linphone.org/technical-corner/ortp"
+  url "https://gitlab.linphone.org/BC/public/ortp/-/archive/4.3.2/ortp-4.3.2.tar.bz2"
+  sha256 "1796a7faaaced1278fae55657686e7b9fee66ca4d9dabd8f1c83f21957fc002b"
+  head "https://gitlab.linphone.org/BC/public/ortp.git"
 
   bottle do
-    sha256 "9413df03ab533dfd11891b57515dc70b2c7810f3fcc50b4df93c4e0e5c987412" => :high_sierra
-    sha256 "092e0d027dd6e1df83426ae5855aa6754122d845110fd4af868536996ca34fd8" => :sierra
-    sha256 "bc26e3f79e6d290f30631c84dff5bdeb4582d834c2a9bd9f0f6160a0730348dd" => :el_capitan
+    sha256 "942d93781ca52a133ae19952fb044a6b02060cff30177a8525ab2a5e4a0991d4" => :catalina
+    sha256 "231dc8ca885b103e360e347498277f41c2fc0d446420b8c1324e00e301a8eedd" => :mojave
+    sha256 "ea6fc0e9626908e8a62b22cc86a2f87d513716c2091cfa52bac39c5c9c7a5d79" => :high_sierra
   end
 
   depends_on "cmake" => :build
@@ -15,8 +16,8 @@ class Ortp < Formula
   depends_on "mbedtls"
 
   resource "bctoolbox" do
-    url "https://github.com/BelledonneCommunications/bctoolbox/archive/0.6.0.tar.gz"
-    sha256 "299dedcf8f1edea79964314504f0d24e97cdf24a289896fc09bc69c38eb9f9be"
+    url "https://gitlab.linphone.org/BC/public/bctoolbox/-/archive/4.3.1/bctoolbox-4.3.1.tar.bz2"
+    sha256 "1b7ec1a7fa2af2a6741ebda7602c82996752aa46fb17d6c9ddb2ed0846872384"
   end
 
   def install
@@ -29,15 +30,17 @@ class Ortp < Formula
       system "make", "install"
     end
 
-    libbctoolbox = (libexec/"lib/libbctoolbox.dylib").readlink
-    MachO::Tools.change_dylib_id("#{libexec}/lib/libbctoolbox.dylib",
-                                 "#{libexec}/lib/#{libbctoolbox}")
-
     ENV.prepend_path "PKG_CONFIG_PATH", libexec/"lib/pkgconfig"
 
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
-    system "make", "install"
+    args = std_cmake_args + %W[
+      -DCMAKE_PREFIX_PATH=#{libexec}
+      -DCMAKE_C_FLAGS=-I#{libexec}/include
+      -DENABLE_DOC=NO
+    ]
+    mkdir "build" do
+      system "cmake", "..", *args
+      system "make", "install"
+    end
   end
 
   test do
@@ -51,7 +54,7 @@ class Ortp < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "-I#{include}", "-L#{lib}", "-lortp",
+    system ENV.cc, "-I#{include}", "-I#{libexec}/include", "-L#{lib}", "-lortp",
            testpath/"test.c", "-o", "test"
     system "./test"
   end

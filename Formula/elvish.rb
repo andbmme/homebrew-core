@@ -1,29 +1,27 @@
 class Elvish < Formula
-  desc "Novel UNIX shell written in Go"
+  desc "Friendly and expressive shell"
   homepage "https://github.com/elves/elvish"
-  url "https://github.com/elves/elvish/archive/0.10.1.tar.gz"
-  sha256 "a1ba39076cc45b24a8763174978805fa93c8713641d0e1715e9ada7d1122ab49"
+  url "https://github.com/elves/elvish/archive/v0.13.1.tar.gz"
+  sha256 "83275a4c36f66b831ba4864d1f5ffdc823616ed0a8e41b2a9a3e9fcba9279e27"
   head "https://github.com/elves/elvish.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a99318970d2004834f9bb991a3a76ed1b29aefc58422b654f8ae447d18906e7a" => :high_sierra
-    sha256 "c651330cab6b79ab5c0168a8e82b583940e8d75b19aa48f472be4ab1067e2d88" => :sierra
-    sha256 "dc6cbed0466aa0acc45ee8467d073c4238574f425c7047f27ebc5b6b63f4b244" => :el_capitan
+    rebuild 1
+    sha256 "95d0ba1cd11926f557c3fd4c1469bee75f0fd57d50f112d653a9e38bddf5acde" => :catalina
+    sha256 "924589665ab16270187a6bb836b685df927db24d4f770557ad9413e6c6f01c23" => :mojave
+    sha256 "0eda28eadf0e9e4bf6161ccb199eea49267e3085e6180b8b607827cdeca2bcda" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/elves/elvish").install buildpath.children
-    cd "src/github.com/elves/elvish" do
-      system "go", "build", "-ldflags", "-X main.Version=#{version}", "-o", bin/"elvish"
-      prefix.install_metafiles
-    end
+    system "go", "build", *std_go_args, "-ldflags",
+           "-X github.com/elves/elvish/pkg/buildinfo.Version=#{version}"
   end
 
   test do
+    assert_equal version.to_s, shell_output("#{bin}/elvish -version").chomp
     assert_match "hello", shell_output("#{bin}/elvish -c 'echo hello'")
   end
 end

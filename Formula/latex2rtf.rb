@@ -1,18 +1,18 @@
 class Latex2rtf < Formula
   desc "Translate LaTeX to RTF"
   homepage "https://latex2rtf.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/latex2rtf/latex2rtf-unix/2.3.16/latex2rtf-2.3.16.tar.gz"
-  sha256 "e1538fe0dcadec28afae087cf8a6ee073e6368ca7a75728360068c6f3914b35b"
+  url "https://downloads.sourceforge.net/project/latex2rtf/latex2rtf-unix/2.3.18/latex2rtf-2.3.18.tar.gz"
+  sha256 "c0b6a9f5877b3b24b1571c5f2c42afd22f0db5448448d4de7379e67d284ca0b1"
 
   bottle do
-    sha256 "79aea66544c01015f1ccbeef789129303eb8536c3ea05dec3c6949274e9cabb1" => :high_sierra
-    sha256 "f93ad353b24f12c312f2a325dfc1fc20d948a1a02e3fa928b7ec19c7fc216d22" => :sierra
-    sha256 "33d85c22d7076259782b67188a33feb4b1daa11dd0fcc15d06c934745115e32e" => :el_capitan
-    sha256 "801e93dac4cc038e07226c949ab72daa661211303d7a33b7b8c6a86d52501ca6" => :yosemite
+    sha256 "be21a155b6d80c651312135de1348e1847ac57b1b1d612bf820e92fe663e9b10" => :catalina
+    sha256 "7c933531921ef07cc2471938266c91380d2364761b01fad8680bc70648812b19" => :mojave
+    sha256 "cf6c89983b5c8593a74f62e86825f4a9e7cc7f31fb83639c8247c51fa4d3975a" => :high_sierra
   end
 
   def install
-    inreplace "Makefile", "cp -p doc/latex2rtf.html $(DESTDIR)$(SUPPORTDIR)", "cp -p doc/web/* $(DESTDIR)$(SUPPORTDIR)"
+    inreplace "Makefile", "cp -p doc/latex2rtf.html $(DESTDIR)$(SUPPORTDIR)",
+                          "cp -p doc/web/* $(DESTDIR)$(SUPPORTDIR)"
     system "make", "DESTDIR=",
                    "BINDIR=#{bin}",
                    "MANDIR=#{man1}",
@@ -20,5 +20,18 @@ class Latex2rtf < Formula
                    "SUPPORTDIR=#{pkgshare}",
                    "CFGDIR=#{pkgshare}/cfg",
                    "install"
+  end
+
+  test do
+    (testpath/"test.tex").write <<~EOS
+      \\documentclass{article}
+      \\title{LaTeX to RTF}
+      \\begin{document}
+      \\maketitle
+      \\end{document}
+    EOS
+    system bin/"latex2rtf", "test.tex"
+    assert_predicate testpath/"test.rtf", :exist?
+    assert_match "LaTeX to RTF", File.read(testpath/"test.rtf")
   end
 end

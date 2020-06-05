@@ -1,33 +1,35 @@
 class Ghex < Formula
   desc "GNOME hex editor"
   homepage "https://wiki.gnome.org/Apps/Ghex"
-  url "https://download.gnome.org/sources/ghex/3.18/ghex-3.18.3.tar.xz"
-  sha256 "c67450f86f9c09c20768f1af36c11a66faf460ea00fbba628a9089a6804808d3"
+  url "https://download.gnome.org/sources/ghex/3.18/ghex-3.18.4.tar.xz"
+  sha256 "c2d9c191ff5bce836618779865bee4059db81a3a0dff38bda3cc7a9e729637c0"
+  revision 2
 
   bottle do
-    rebuild 1
-    sha256 "18abbf00cd515f2346c10393ff9e5adef3d477c7478578489398efd1fa3337fd" => :high_sierra
-    sha256 "02c744417d58dc442de342f0277ca4d320dde285365d5c88d002932cad2538de" => :sierra
-    sha256 "8123441a65bd5d45a1baf9a227911a1edeb514240d8c81fa563de5cc756b3fc8" => :el_capitan
-    sha256 "378e85b6e1f712c2415430f426a6381e03c692f8e8f72b93a77f94c2e205fe5a" => :yosemite
+    sha256 "d19110bde790ffb5c9c07b7d4f836a40bde24524103ad0630e0e15041058e6c9" => :catalina
+    sha256 "6fee2b13fdf3c3f9eafbf92d6cd1cae208f5a1444e02b9c438e31e1333a02497" => :mojave
+    sha256 "429217a3f63b5c6a04e468390442a3ffb304d54c58c356191d93984ba097a0b8" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "itstool" => :build
-  depends_on "libxml2" => :build
-  depends_on :python => :build if MacOS.version <= :snow_leopard
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
   depends_on "gtk+3"
   depends_on "hicolor-icon-theme"
 
+  # submitted upstream as https://gitlab.gnome.org/GNOME/ghex/merge_requests/8
+  patch :DATA
+
   def install
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--disable-schemas-compile",
-                          "--prefix=#{prefix}"
-    ENV.append_path "PYTHONPATH", "#{Formula["libxml2"].opt_lib}/python2.7/site-packages"
-    system "make", "install"
+    # ensure that we don't run the meson post install script
+    ENV["DESTDIR"] = "/"
+
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   def post_install
@@ -39,3 +41,29 @@ class Ghex < Formula
     system "#{bin}/ghex", "--help"
   end
 end
+
+__END__
+diff --git a/src/meson.build b/src/meson.build
+index fdcdcc2..ac45c93 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -23,9 +23,9 @@ libghex_c_args = [
+   '-DG_LOG_DOMAIN="libgtkhex-3"'
+ ]
+
+-libghex_link_args = [
++libghex_link_args = cc.get_supported_link_arguments([
+   '-Wl,--no-undefined'
+-]
++])
+
+ install_headers(
+   libghex_headers,
+@@ -36,6 +36,7 @@ libghex = library(
+   'gtkhex-@0@'.format(libghex_version_major),
+   libghex_sources + libghex_headers,
+   version: '0.0.0',
++  darwin_versions: ['1', '1.0'],
+   include_directories: ghex_root_dir,
+   dependencies: libghex_deps,
+   c_args: libghex_c_args,

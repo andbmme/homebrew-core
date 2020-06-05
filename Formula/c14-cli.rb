@@ -1,16 +1,17 @@
 class C14Cli < Formula
   desc "Manage your Online C14 archives from the command-line"
-  homepage "https://github.com/online-net/c14-cli"
-  url "https://github.com/online-net/c14-cli/archive/0.1.tar.gz"
-  sha256 "27f02f3146c2d239c44fe0cf3eb1a161d8bdb420145f13b8485c85d3892fd8f9"
-  head "https://github.com/online-net/c14-cli.git"
+  homepage "https://github.com/scaleway/c14-cli"
+  url "https://github.com/scaleway/c14-cli/archive/0.3.tar.gz"
+  sha256 "d4a2e839394cb5f169bfb3be0102569a310dd7315aba3cdb1dfcd9d9c6e43543"
+  head "https://github.com/scaleway/c14-cli.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "2da7668ade8257bf730b6d0a8c1da37469694779651289c198e8eac913cfebcf" => :high_sierra
-    sha256 "5f933f312db20563688f11a278981c87e6771f16f7c3f3bccb29301b12e46bb6" => :sierra
-    sha256 "94aa82618c853ee2f011e265e2131bce73e3cda2fcc2abacb4c64e2ebb325996" => :el_capitan
-    sha256 "010ccda715de1b29406ee14d7439c33b17fc5741aa5c96439d01f2ce30f2431a" => :yosemite
+    rebuild 1
+    sha256 "16fc8110913a233923aa9a5e5fae8e28a300e1639a2bc8862785c34d61623229" => :catalina
+    sha256 "9547e5c45d10d48de2ff95aabef2cb6d446fbd6f3b706df90d72adf2a363d96b" => :mojave
+    sha256 "43107ba495420cf65ab7b3a4f04c1a62de77594ed318e06aba3101213191e694" => :high_sierra
+    sha256 "6129daf1900d717da72f13909af71af2bf0d29325f798c02bcf4a68b1bd8edb3" => :sierra
   end
 
   depends_on "go" => :build
@@ -18,11 +19,12 @@ class C14Cli < Formula
   def install
     ENV["GOPATH"] = buildpath
     ENV["GOBIN"] = buildpath
-    (buildpath/"src/github.com/online-net/c14-cli").install Dir["*"]
+    (buildpath/"src/github.com/online-net/c14-cli").install buildpath.children
 
-    system "go", "build", "-ldflags",
-           "-X  github.com/online-net/c14-cli/pkg/version.GITCOMMIT=homebrew",
-           "-o", bin/"c14", "github.com/online-net/c14-cli/cmd/c14/"
+    system "go", "build",
+           "-ldflags", "-X github.com/online-net/c14-cli/pkg/version.GITCOMMIT=homebrew",
+           "-o", bin/"c14",
+           "github.com/online-net/c14-cli/cmd/c14/"
   end
 
   test do

@@ -1,54 +1,35 @@
 class Postgis < Formula
   desc "Adds support for geographic objects to PostgreSQL"
   homepage "https://postgis.net/"
-  url "http://download.osgeo.org/postgis/source/postgis-2.4.2.tar.gz"
-  sha256 "23625bc99ed440d53a20225721095a3f5c653b62421c4d597c8038f0d7a321d9"
+  url "https://download.osgeo.org/postgis/source/postgis-3.0.1.tar.gz"
+  sha256 "5a5432f95150d9bae9215c6d1c7bb354e060482a7c379daa9b8384e1d03e6353"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "ea619da901dc5b6099d7fbf369c0262c10a001af51cb7e6fbc4694c2663bad99" => :high_sierra
-    sha256 "d363aee5b298882742157ed8fdb54de0b1e1e16bbc81af0880f8d531345ee07f" => :sierra
-    sha256 "e641bc06077b0a4be50ad954ef6cb7cbed12327afeca8191b92b20cf61a87745" => :el_capitan
+    sha256 "11c8c9774b309e7f6e05757fbfc725d8737ee65283b494e36e8ce27eae2813a5" => :catalina
+    sha256 "e5874c9d0410e21884d4eac22ff0339324a86614e1c556026c2d513895682799" => :mojave
+    sha256 "582878554a168453ab842d9cdccaebf2cd728fea901695709724459227574956" => :high_sierra
   end
 
   head do
-    url "https://svn.osgeo.org/postgis/trunk/"
+    url "https://git.osgeo.org/gitea/postgis/postgis.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
-  option "with-gui", "Build shp2pgsql-gui in addition to command line tools"
-  option "without-gdal", "Disable postgis raster support"
-  option "with-html-docs", "Generate multi-file HTML documentation"
-  option "with-api-docs", "Generate developer API documentation (long process)"
-
-  depends_on "pkg-config" => :build
   depends_on "gpp" => :build
+  depends_on "pkg-config" => :build
+  depends_on "gdal" # for GeoJSON and raster handling
+  depends_on "geos"
+  depends_on "json-c" # for GeoJSON and raster handling
+  depends_on "pcre"
   depends_on "postgresql"
   depends_on "proj"
-  depends_on "geos"
-
-  depends_on "gtk+" if build.with? "gui"
-
-  # For GeoJSON and raster handling
-  depends_on "json-c"
-  depends_on "gdal" => :recommended
-  depends_on "pcre" if build.with? "gdal"
-
-  # For advanced 2D/3D functions
-  depends_on "sfcgal" => :recommended
-
-  if build.with? "html-docs"
-    depends_on "imagemagick"
-    depends_on "docbook-xsl"
-  end
-
-  if build.with? "api-docs"
-    depends_on "graphviz"
-    depends_on "doxygen"
-  end
+  depends_on "protobuf-c" # for MVT (map vector tiles) support
+  depends_on "sfcgal" # for advanced 2D/3D functions
 
   def install
     ENV.deparallelize
@@ -57,6 +38,7 @@ class Postgis < Formula
       "--with-projdir=#{Formula["proj"].opt_prefix}",
       "--with-jsondir=#{Formula["json-c"].opt_prefix}",
       "--with-pgconfig=#{Formula["postgresql"].opt_bin}/pg_config",
+      "--with-protobufdir=#{Formula["protobuf-c"].opt_bin}",
       # Unfortunately, NLS support causes all kinds of headaches because
       # PostGIS gets all of its compiler flags from the PGXS makefiles. This
       # makes it nigh impossible to tell the buildsystem where our keg-only
@@ -64,28 +46,9 @@ class Postgis < Formula
       "--disable-nls",
     ]
 
-    args << "--with-gui" if build.with? "gui"
-    args << "--without-raster" if build.without? "gdal"
-    args << "--with-xsldir=#{Formula["docbook-xsl"].opt_prefix}/docbook-xsl" if build.with? "html-docs"
-
     system "./autogen.sh" if build.head?
     system "./configure", *args
     system "make"
-
-    if build.with? "html-docs"
-      cd "doc" do
-        ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
-        system "make", "chunked-html"
-        doc.install "html"
-      end
-    end
-
-    if build.with? "api-docs"
-      cd "doc" do
-        system "make", "doxygen"
-        doc.install "doxygen/html" => "api"
-      end
-    end
 
     mkdir "stage"
     system "make", "install", "DESTDIR=#{buildpath}/stage"
@@ -111,24 +74,6 @@ class Postgis < Formula
     ]
 
     man1.install Dir["doc/**/*.1"]
-  end
-
-  def caveats
-    <<~EOS
-      To create a spatially-enabled database, see the documentation:
-        https://postgis.net/docs/manual-2.4/postgis_installation.html#create_new_db_extensions
-      If you are currently using PostGIS 2.0+, you can go the soft upgrade path:
-        ALTER EXTENSION postgis UPDATE TO "#{version}";
-      Users of 1.5 and below will need to go the hard-upgrade path, see here:
-        https://postgis.net/docs/manual-2.4/postgis_installation.html#upgrading
-
-      PostGIS SQL scripts installed to:
-        #{opt_pkgshare}
-      PostGIS plugin libraries installed to:
-        #{HOMEBREW_PREFIX}/lib
-      PostGIS extension modules installed to:
-        #{HOMEBREW_PREFIX}/share/postgresql/extension
-      EOS
   end
 
   test do
@@ -165,7 +110,7 @@ class Postgis < Formula
       igAAABI=
     EOS
     result = shell_output("#{bin}/shp2pgsql #{testpath}/brew.shp")
-    assert_match /Point/, result
-    assert_match /AddGeometryColumn/, result
+    assert_match(/Point/, result)
+    assert_match(/AddGeometryColumn/, result)
   end
 end

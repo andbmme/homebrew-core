@@ -1,22 +1,25 @@
 class GitReview < Formula
+  include Language::Python::Virtualenv
+
   desc "Submit git branches to gerrit for review"
-  homepage "https://git.openstack.org/cgit/openstack-infra/git-review"
-  url "https://files.pythonhosted.org/packages/70/c5/e2930e1017516a9cbe777581767785650b7e8ee89580ba00cabdf992e058/git-review-1.26.0.tar.gz"
-  sha256 "487c3c1d7cc81d02b303a1245e432579f683695c827ad454685b3953f70f0b94"
-  head "https://git.openstack.org/openstack-infra/git-review.git"
+  homepage "https://opendev.org/opendev/git-review"
+  url "https://files.pythonhosted.org/packages/2c/e6/e4f1b999af2493a5cc5e050f0869b29f30914f94016abf48c77c6307745b/git-review-1.28.0.tar.gz"
+  sha256 "8e3aabb7b9484063e49c2504d137609401e32ad5128ff2a5cf43e98d5d3dc15a"
+  revision 2
+  head "https://opendev.org/opendev/git-review.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "5187b16328f105d195c58b4a978f8232b98b47e9cb91557f15ce4ca439a50385" => :high_sierra
-    sha256 "5187b16328f105d195c58b4a978f8232b98b47e9cb91557f15ce4ca439a50385" => :sierra
-    sha256 "661bd93e96795bb2ef4a0260fc441fd6eb437bb109e9f4353a577db638617c58" => :el_capitan
+    sha256 "8bb267cb74c37af45200381f60f84dc49af52a0d2eed65c23db6e582d0d407b9" => :catalina
+    sha256 "acd209ffed9affc75582b7ef94e3232abc0f2ab6490b634fc9abcb53a2e0f08d" => :mojave
+    sha256 "cb9721c5b767816de394884dbb83a7274b43fcb495015d445253d3820ac07b32" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python@3.8"
 
   resource "certifi" do
-    url "https://files.pythonhosted.org/packages/23/3f/8be01c50ed24a4bd6b8da799839066ce0288f66f5e11f0367323467f0cbc/certifi-2017.11.5.tar.gz"
-    sha256 "5ec74291ca1136b40f0379e1128ff80e866597e4e2c1e755739a913bbc3613c0"
+    url "https://files.pythonhosted.org/packages/41/bf/9d214a5af07debc6acf7f3f257265618f1db242a3f8e49a9b516f24523a6/certifi-2019.11.28.tar.gz"
+    sha256 "25b64c7da4cd7479594d035c08c2d809eb4aab3a26e5a990ea98cc450c320f1f"
   end
 
   resource "chardet" do
@@ -25,39 +28,34 @@ class GitReview < Formula
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/f4/bd/0467d62790828c23c47fc1dfa1b1f052b24efdf5290f071c7a91d0d82fd3/idna-2.6.tar.gz"
-    sha256 "2c6a5de3089009e3da7c5dde64a141dbc8551d5b7f6cf4ed7c2568d0cc520a8f"
+    url "https://files.pythonhosted.org/packages/ad/13/eb56951b6f7950cadb579ca166e448ba77f9d24efc03edd7e55fa57d04b7/idna-2.8.tar.gz"
+    sha256 "c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407"
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/b0/e1/eab4fc3752e3d240468a8c0b284607899d2fbfb236a56b7377a329aa8d09/requests-2.18.4.tar.gz"
-    sha256 "9c443e7324ba5b85070c4a818ade28bfabedf16ea10206da1132edaa6dda237e"
+    url "https://files.pythonhosted.org/packages/01/62/ddcf76d1d19885e8579acb1b1df26a852b03472c0e46d2b959a714c90608/requests-2.22.0.tar.gz"
+    sha256 "11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4"
+  end
+
+  resource "six" do
+    url "https://files.pythonhosted.org/packages/94/3e/edcf6fef41d89187df7e38e868b2dd2182677922b600e880baad7749c865/six-1.13.0.tar.gz"
+    sha256 "30f610279e8b2578cab6db20741130331735c781b56053c59c4076da27f06b66"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/ee/11/7c59620aceedcc1ef65e156cc5ce5a24ef87be4107c2b74458464e437a5d/urllib3-1.22.tar.gz"
-    sha256 "cc44da8e1145637334317feebd728bd869a35285b93cbb4cca2577da7e62db4f"
+    url "https://files.pythonhosted.org/packages/ad/fc/54d62fa4fc6e675678f9519e677dfc29b8964278d75333cf142892caf015/urllib3-1.25.7.tar.gz"
+    sha256 "f3c5fd51747d450d4dcf6f923c81f78f811aab8205fda64b0aba34a4e48b0745"
   end
 
   def install
-    ENV.prepend_create_path "PYTHONPATH", "#{libexec}/vendor/lib/python2.7/site-packages"
-    resources.each do |r|
-      r.stage do
-        system "python", *Language::Python.setup_install_args(libexec/"vendor")
-      end
-    end
-
-    ENV.prepend_create_path "PYTHONPATH", "#{libexec}/lib/python2.7/site-packages"
-    system "python", *Language::Python.setup_install_args(libexec)
-
+    virtualenv_install_with_resources
     man1.install gzip("git-review.1")
-
-    bin.install Dir[libexec/"bin/*"]
-    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
   end
 
   test do
     system "git", "init"
+    system "git", "config", "user.name", "BrewTestBot"
+    system "git", "config", "user.email", "BrewTestBot@test.com"
     system "git", "remote", "add", "gerrit", "https://github.com/Homebrew/homebrew.github.io"
     (testpath/".git/hooks/commit-msg").write "# empty - make git-review happy"
     (testpath/"foo").write "test file"

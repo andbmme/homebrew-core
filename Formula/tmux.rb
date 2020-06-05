@@ -1,13 +1,14 @@
 class Tmux < Formula
   desc "Terminal multiplexer"
   homepage "https://tmux.github.io/"
-  url "https://github.com/tmux/tmux/releases/download/2.6/tmux-2.6.tar.gz"
-  sha256 "b17cd170a94d7b58c0698752e1f4f263ab6dc47425230df7e53a6435cc7cd7e8"
+  url "https://github.com/tmux/tmux/releases/download/3.1b/tmux-3.1b.tar.gz"
+  sha256 "d93f351d50af05a75fe6681085670c786d9504a5da2608e481c47cf5e1486db9"
 
   bottle do
-    sha256 "0ca2e76822980dcc009fde38379f7546b6568975d9dc4f2a6a312e32fce186f8" => :high_sierra
-    sha256 "d2b71640c44c4fc1e953a6eb1ca14b8c91ee4a19a91f2f699546c5cd6ed5b302" => :sierra
-    sha256 "cda9003fa113251c024210750d529be80379288436cf66a67a3896d2d14b6766" => :el_capitan
+    cellar :any
+    sha256 "f26bd0c3f5696350dcaf229d0fadaf6ab677c0ebbb550fc499ca0a37da59ab55" => :catalina
+    sha256 "e9995ca765078be9cfdef4f1b6a628bcded0e96e36649e084a7f5480d165547a" => :mojave
+    sha256 "7a04ece8143c0647be18bb14c160a984a5a9f855fa2ee888d21fc19374790ee5" => :high_sierra
   end
 
   head do
@@ -20,7 +21,8 @@ class Tmux < Formula
 
   depends_on "pkg-config" => :build
   depends_on "libevent"
-  depends_on "utf8proc" => :optional
+  depends_on "ncurses"
+  depends_on "utf8proc"
 
   resource "completion" do
     url "https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/homebrew_1.0.0/completions/tmux"
@@ -31,12 +33,11 @@ class Tmux < Formula
     system "sh", "autogen.sh" if build.head?
 
     args = %W[
-      --disable-Dependency-tracking
+      --enable-utf8proc
+      --disable-dependency-tracking
       --prefix=#{prefix}
       --sysconfdir=#{etc}
     ]
-
-    args << "--enable-utf8proc" if build.with?("utf8proc")
 
     ENV.append "LDFLAGS", "-lresolv"
     system "./configure", *args
@@ -47,9 +48,10 @@ class Tmux < Formula
     bash_completion.install resource("completion")
   end
 
-  def caveats; <<~EOS
-    Example configuration has been installed to:
-      #{opt_pkgshare}
+  def caveats
+    <<~EOS
+      Example configuration has been installed to:
+        #{opt_pkgshare}
     EOS
   end
 

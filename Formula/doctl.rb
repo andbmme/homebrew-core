@@ -1,25 +1,20 @@
 class Doctl < Formula
   desc "Command-line tool for DigitalOcean"
   homepage "https://github.com/digitalocean/doctl"
-  url "https://github.com/digitalocean/doctl/archive/v1.7.1.tar.gz"
-  sha256 "6c47b5ce9c4739499732be96b914cecbad9135088504351601b75a9608d19d64"
+  url "https://github.com/digitalocean/doctl/archive/v1.45.0.tar.gz"
+  sha256 "eaafdec52ad3de0f3f4b923a91cc944e87c3442c869bce673b5b4ef33047d4af"
   head "https://github.com/digitalocean/doctl.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "324531ba538d2960e1580595a6fe16903902eadb04b339c85f156f935a60cce9" => :high_sierra
-    sha256 "8e6647bddaf162ac190de923f9eb0321e90e3022b017cf5c18f235e155a6e38f" => :sierra
-    sha256 "610df50fff53be73902d687e7ab052549d235c6410d48c9b8ffcaa4bb90d96e7" => :el_capitan
+    sha256 "4c2b715030e9a18fb7dbc474ba596d701746b61d011efd535b12a626cc6abab6" => :catalina
+    sha256 "ad2fa8106866560f13dde179347107d2928b69b3808e6d4d0475239c25514139" => :mojave
+    sha256 "bf85715bbfd2ee66ed53575374de287492853ddd12a872cf7bfd1d6cf803dfcb" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-
-    mkdir_p buildpath/"src/github.com/digitalocean/"
-    ln_sf buildpath, buildpath/"src/github.com/digitalocean/doctl"
-
     doctl_version = version.to_s.split(/\./)
     base_flag = "-X github.com/digitalocean/doctl"
     ldflags = %W[
@@ -28,11 +23,12 @@ class Doctl < Formula
       #{base_flag}.Patch=#{doctl_version[2]}
       #{base_flag}.Label=release
     ].join(" ")
-    system "go", "build", "-ldflags", ldflags, "github.com/digitalocean/doctl/cmd/doctl"
-    bin.install "doctl"
+
+    system "go", "build", "-ldflags", ldflags, *std_go_args, "github.com/digitalocean/doctl/cmd/doctl"
 
     (bash_completion/"doctl").write `#{bin}/doctl completion bash`
-    (zsh_completion/"doctl").write `#{bin}/doctl completion zsh`
+    (zsh_completion/"_doctl").write `#{bin}/doctl completion zsh`
+    (fish_completion/"doctl.fish").write `#{bin}/doctl completion fish`
   end
 
   test do

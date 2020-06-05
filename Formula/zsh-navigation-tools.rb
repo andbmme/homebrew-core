@@ -6,6 +6,8 @@ class ZshNavigationTools < Formula
 
   bottle do
     cellar :any_skip_relocation
+    sha256 "2ca507bf832d34b63b9bf4f60b76158ad0e8980622f78de8fd8e3f771d4df5d2" => :catalina
+    sha256 "292a200717412253b03f654162da7ce1c0994455c07fdf65fa348189a18217b5" => :mojave
     sha256 "5122287e2fb30bde73acb7174e1310ea41ef049d201203bc559edf02555a2e33" => :high_sierra
     sha256 "fca68610ba67c19d8516719d03ed5074a5611ba01941dcb135c87d6d561f3cb1" => :sierra
     sha256 "fca68610ba67c19d8516719d03ed5074a5611ba01941dcb135c87d6d561f3cb1" => :el_capitan
@@ -16,12 +18,13 @@ class ZshNavigationTools < Formula
     system "make", "install", "PREFIX=#{prefix}"
   end
 
-  def caveats; <<~EOS
-    To run zsh-navigation-tools, add the following at the end of your .zshrc:
-      source #{HOMEBREW_PREFIX}/share/zsh-navigation-tools/zsh-navigation-tools.plugin.zsh
+  def caveats
+    <<~EOS
+      To run zsh-navigation-tools, add the following at the end of your .zshrc:
+        source #{HOMEBREW_PREFIX}/share/zsh-navigation-tools/zsh-navigation-tools.plugin.zsh
 
-    You will also need to force reload of your .zshrc:
-      source ~/.zshrc
+      You will also need to force reload of your .zshrc:
+        source ~/.zshrc
     EOS
   end
 

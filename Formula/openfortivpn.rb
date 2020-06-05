@@ -1,25 +1,27 @@
 class Openfortivpn < Formula
   desc "Open Fortinet client for PPP+SSL VPN tunnel services"
   homepage "https://github.com/adrienverge/openfortivpn"
-  url "https://github.com/adrienverge/openfortivpn/archive/v1.6.0.tar.gz"
-  sha256 "205ab5ac512cbeee3c7a6f693518420ae66d6414c1d27247d002167e1906d6d3"
+  url "https://github.com/adrienverge/openfortivpn/archive/v1.14.1.tar.gz"
+  sha256 "bc62fc6ecaaa6c6f8f2510e14a067a0cb9762158d9460c04555990bba44b50ca"
+  revision 1
 
   bottle do
-    sha256 "eb6bc8c1171c8ee45e50a221b8cfa8acd88677fcfe19a0bba55d93944d605e8b" => :high_sierra
-    sha256 "0a1db39a365e60a33c4547a4b2eb67c0560e7085fb53ce277af005f344be2389" => :sierra
-    sha256 "6946070150aa1e82d880eec5aebb88abffb689436f95b1209adc8c44c5312760" => :el_capitan
+    sha256 "0c04566ef63f3cc1cb5062c3a18b78f6fed368dd6d449670e3a2fedf2d6f3806" => :catalina
+    sha256 "d35fe4166d8371cf285e6b54fe3b92d380bb8932b9f307f3ba1d6f51650013d0" => :mojave
+    sha256 "7bb4c80c9b516bc18ab034ef0d928d254212aec7d4ee34d43e3f94fe16115044" => :high_sierra
   end
 
-  depends_on "automake" => :build
   depends_on "autoconf" => :build
+  depends_on "automake" => :build
   depends_on "pkg-config" => :build
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
     system "./autogen.sh"
     system "./configure", "--disable-dependency-tracking",
                           "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+                          "--prefix=#{prefix}",
+                          "--sysconfdir=#{etc}/openfortivpn"
     system "make", "install"
   end
   test do

@@ -1,18 +1,15 @@
 class Blastem < Formula
   desc "Fast and accurate Genesis emulator"
   homepage "https://www.retrodev.com/blastem/"
-  url "https://www.retrodev.com/repos/blastem/archive/1ffa7891b4ec.tar.gz"
-  version "0.4.1"
-  sha256 "f9a15d2e381c7eb6f55f12b0d00f3d2779b0b29bea99b422484d6ada250655ba"
-  revision 1
+  url "https://www.retrodev.com/repos/blastem/archive/v0.6.2.tar.gz"
+  sha256 "d460632eff7e2753a0048f6bd18e97b9d7c415580c358365ff35ac64af30a452"
   head "https://www.retrodev.com/repos/blastem", :using => :hg
 
   bottle do
     cellar :any
-    sha256 "86142831b5e0f7ec52b7c99d14eb224c53e5a554b415f1792f0c005eb607e1ae" => :high_sierra
-    sha256 "2e048cbac4f4acb8b98580376552778c3381b4b76244bffcd63f8d750433bfd1" => :sierra
-    sha256 "d3a42007ab6a2cf184c4b0f9309c352a828b0baee8394d92622121dcd9f663a6" => :el_capitan
-    sha256 "80fdc3f0a77c9f0e23c676f3ee42d632e81641649390604ae726b42c3d88b249" => :yosemite
+    sha256 "6de87547192f1037defe587f9ee30ff32b2b5686067e330276163c700e1668ca" => :catalina
+    sha256 "14193d951f4f115e618acbc95cb20e625c6fcc74ccb241f1f960c12f0655484c" => :mojave
+    sha256 "841dc46c59d53256aeb619279b4bd8e4997810dc2832ee86fed9a41e056196b5" => :high_sierra
   end
 
   depends_on "freetype" => :build
@@ -20,16 +17,17 @@ class Blastem < Formula
   depends_on "libpng" => :build # for xcftools
   depends_on "pkg-config" => :build
   depends_on "glew"
+  depends_on :macos # Due to Python 2
   depends_on "sdl2"
 
   resource "Pillow" do
-    url "https://files.pythonhosted.org/packages/8d/80/eca7a2d1a3c2dafb960f32f844d570de988e609f5fd17de92e1cf6a01b0a/Pillow-4.0.0.tar.gz"
-    sha256 "ee26d2d7e7e300f76ba7b796014c04011394d0c4a5ed9a288264a3e443abca50"
+    url "https://files.pythonhosted.org/packages/5b/bb/cdc8086db1f15d0664dd22a62c69613cdc00f1dd430b5b19df1bea83f2a3/Pillow-6.2.1.tar.gz"
+    sha256 "bf4e972a88f8841d8fdc6db1a75e0f8d763e66e3754b03006cbc3854d89f1cb1"
   end
 
   resource "vasm" do
-    url "http://server.owl.de/~frank/tags/vasm1_7e.tar.gz"
-    sha256 "2878c9c62bd7b33379111a66649f6de7f9267568946c097ffb7c08f0acd0df92"
+    url "https://server.owl.de/~frank/tags/vasm1_8f.tar.gz"
+    sha256 "9a97952951912b070a1b9118a466a3cd8024775be45266ede3f78b2f99ecc1f2"
   end
 
   resource "xcftools" do
@@ -40,23 +38,28 @@ class Blastem < Formula
   def install
     ENV.prepend_create_path "PYTHONPATH", buildpath/"vendor/lib/python2.7/site-packages"
 
-    unless MacOS::CLT.installed?
+    if MacOS.sdk_path_if_needed
       ENV.append "CPPFLAGS", "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
       ENV.append "CPPFLAGS", "-I#{MacOS.sdk_path}/usr/include/ffi" # libffi
     end
 
     resource("Pillow").stage do
       inreplace "setup.py" do |s|
-        sdkprefix = MacOS::CLT.installed? ? "" : MacOS.sdk_path
-        s.gsub! "ZLIB_ROOT = None", "ZLIB_ROOT = ('#{sdkprefix}/usr/lib', '#{sdkprefix}/usr/include')"
-        s.gsub! "JPEG_ROOT = None", "JPEG_ROOT = ('#{Formula["jpeg"].opt_prefix}/lib', '#{Formula["jpeg"].opt_prefix}/include')"
-        s.gsub! "FREETYPE_ROOT = None", "FREETYPE_ROOT = ('#{Formula["freetype"].opt_prefix}/lib', '#{Formula["freetype"].opt_prefix}/include')"
+        sdkprefix = MacOS.sdk_path_if_needed ? MacOS.sdk_path : ""
+        s.gsub! "ZLIB_ROOT = None",
+          "ZLIB_ROOT = ('#{sdkprefix}/usr/lib', '#{sdkprefix}/usr/include')"
+        s.gsub! "JPEG_ROOT = None",
+          "JPEG_ROOT = ('#{Formula["jpeg"].opt_prefix}/lib', '#{Formula["jpeg"].opt_prefix}/include')"
+        s.gsub! "FREETYPE_ROOT = None",
+          "FREETYPE_ROOT = ('#{Formula["freetype"].opt_prefix}/lib', '#{Formula["freetype"].opt_prefix}/include')"
       end
 
       begin
         # avoid triggering "helpful" distutils code that doesn't recognize Xcode 7 .tbd stubs
         saved_sdkroot = ENV.delete "SDKROOT"
-        ENV.append "CFLAGS", "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers" unless MacOS::CLT.installed?
+        unless MacOS::CLT.installed?
+          ENV.append "CFLAGS", "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
+        end
         system "python", *Language::Python.setup_install_args(buildpath/"vendor")
       ensure
         ENV["SDKROOT"] = saved_sdkroot

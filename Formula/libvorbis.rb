@@ -1,20 +1,19 @@
 class Libvorbis < Formula
   desc "Vorbis General Audio Compression Codec"
-  homepage "http://vorbis.com/"
-  url "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.xz"
-  sha256 "54f94a9527ff0a88477be0a71c0bab09a4c3febe0ed878b24824906cd4b0e1d1"
-  revision 1
+  homepage "https://xiph.org/vorbis/"
+  url "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.6.tar.xz"
+  sha256 "af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415"
 
   bottle do
     cellar :any
-    sha256 "df0263fb6082aeeb082de5f2f10282087925b4dc3d0ca2433813c683f1b1aec1" => :high_sierra
-    sha256 "bb0732d6af0d2a9cdf1004ebbf48da1758cfac1fbb65cfbb91d0bbf936d7d596" => :sierra
-    sha256 "8a0b39934d086a5be7d7daede5807bd99baf0d9f5ce5dc860abcec3427c32a44" => :el_capitan
-    sha256 "e3892e6523bc1411f5b164b7c64f392897c7735894aa654688cd904d4cfaa3b2" => :yosemite
+    rebuild 1
+    sha256 "78dd589f9c2110c204e8762d3ee2899b209cded2bd372603be0fc8c748f52cd4" => :catalina
+    sha256 "2fdfb811a94b56091aa3175708e92f7371c59a961a798fe8dfb2a82d0241406e" => :mojave
+    sha256 "434729ebb5c161e3240dde60f752af6bbec324af3b7df87f802d48134db92afb" => :high_sierra
   end
 
   head do
-    url "https://git.xiph.org/vorbis.git"
+    url "https://gitlab.xiph.org/xiph/vorbis.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build

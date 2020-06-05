@@ -1,29 +1,25 @@
 class Micro < Formula
   desc "Modern and intuitive terminal-based text editor"
   homepage "https://github.com/zyedidia/micro"
-  url "https://github.com/zyedidia/micro/releases/download/v1.3.3/micro-1.3.3-src.tar.gz"
-  sha256 "142f1fcddb4fa5851a9144fb8d0fc3b53545a33b9710ed160c1dbd65c82e8f59"
-  head "https://github.com/zyedidia/micro.git", :shallow => false
+  url "https://github.com/zyedidia/micro.git",
+      :tag      => "v2.0.4",
+      :revision => "c5b0c2d41f67048ba859cbf7d7aba6a3b547e1ef"
+  head "https://github.com/zyedidia/micro.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a3b143db5d98ce39cefa8033898061a3373024e94a067a14cb6ae7721fd9a4b9" => :high_sierra
-    sha256 "542e4d8547b8c254641a36e1f36e62bbe21a95be88bbc57b90a1331bbdfd9e3d" => :sierra
-    sha256 "200e3a70ca69c2b00becf4719e4834b5a73a5ba98c58bbcda33a6a27e814432d" => :el_capitan
+    sha256 "457988d799943a31341895d183f5addf88bde337fed82957bf0f68eaf935923a" => :catalina
+    sha256 "23f3bab4f14b2e98780bca7704930bcf9f5edee89de4f8d8fe9894facc5ae21e" => :mojave
+    sha256 "29911e12399264c7ebb7241b52718a69f6788a813e7ec1a940c3aca8a1896726" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-
-    (buildpath/"src/github.com/zyedidia/micro").install buildpath.children
-
-    cd "src/github.com/zyedidia/micro" do
-      system "make", "build-quick"
-      bin.install "micro"
-      prefix.install_metafiles
-    end
+    system "make", "build"
+    bin.install "micro"
+    man1.install "assets/packaging/micro.1"
+    prefix.install_metafiles
   end
 
   test do

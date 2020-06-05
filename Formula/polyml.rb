@@ -1,15 +1,22 @@
 class Polyml < Formula
   desc "Standard ML implementation"
-  homepage "http://www.polyml.org"
-  url "https://github.com/polyml/polyml/archive/v5.7.tar.gz"
-  sha256 "19340d8e9cea15c3fd786dde27028cd2947608955a376d1317a20268c8a19279"
+  homepage "https://www.polyml.org/"
+  url "https://github.com/polyml/polyml/archive/v5.8.tar.gz"
+  sha256 "6bcc2c5af91f361ef9e0bb28f39ce20171b0beae73b4db3674df6fc793cec8bf"
   head "https://github.com/polyml/polyml.git"
 
   bottle do
-    sha256 "e533dc791e3583ad45f55c15a3895664569a02f90675326cae5008fddd731f73" => :high_sierra
-    sha256 "59ee15e0f1281b4b95dfa0a7e37ba1d88f05d29811312ec4f3fd67d47289868d" => :sierra
-    sha256 "9e5d445fd251ff33ade65fa821aa7275ff1fb54b37295c4da9b3f93400ab58cc" => :el_capitan
-    sha256 "d3a5221871918026176725fe056fac0d99668667e640f6b9418be4d8a3d18667" => :yosemite
+    rebuild 1
+    sha256 "1439f4258d7fa8adfab0b037ae43c5effaffd9b1c7793c05f73a0f130b65d403" => :catalina
+    sha256 "356373c5c6483a552164e3aa815076688f37e41d74f8350a52321205f5d4547d" => :mojave
+    sha256 "d69da52fe77cd77d079de8ba2b389ced34800cebf55202d023c6800d584a5212" => :high_sierra
+  end
+
+  # Patch for Xcode 11
+  # https://github.com/polyml/polyml/pull/119
+  patch do
+    url "https://github.com/polyml/polyml/commit/44efa473.diff?full_index=1"
+    sha256 "0835165da3f0b540c13e06d79dfdc4bcbcc4cde17207ea2e02978582552ee4d0"
   end
 
   def install

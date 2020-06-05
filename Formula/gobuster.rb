@@ -1,41 +1,35 @@
-require "language/go"
-
 class Gobuster < Formula
   desc "Directory/file & DNS busting tool written in Go"
   homepage "https://github.com/OJ/gobuster"
-  url "https://github.com/OJ/gobuster/archive/v1.3.tar.gz"
-  sha256 "606a8b760bc498f9605423b4ef3b093fbb07fead5877a0da81b1c92d8af3ebbb"
-  head "https://github.com/OJ/gobuster.git"
+  url "https://github.com/OJ/gobuster.git",
+      :tag      => "v3.0.1",
+      :revision => "9ef3642d170d71fd79093c0aa0c23b6f2a4c1c64"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d1270beae977e7d29193fa09e684188a1122cc1ccea46419a2035c53ebd0d8ee" => :high_sierra
-    sha256 "7da053cb4f0a73f55dc0cfaeea6628422e214e29c76a3f82c6ebe58faa2fe659" => :sierra
-    sha256 "2499eb9e86e59b87640cc93fe8270be64cb1b5ce2a7e5a8d5a0bdcf69e68f054" => :el_capitan
-    sha256 "4d781dd4d6bf9b3217d5d197b987583392ba8b6a4abc539720360041779889aa" => :yosemite
+    rebuild 1
+    sha256 "d6616ba0e64ee406559414e2c6325f46b0ddc16fc20dde42cad3e3fc7d3df223" => :catalina
+    sha256 "068251847cb8be7e495f093d86468eec1d6459f9a4daa0ba6b7936b49cc14735" => :mojave
+    sha256 "98d0266e847077f64dbff9bac8db93e0d3044425efc4992374be23ddb94d7d3d" => :high_sierra
   end
 
   depends_on "go" => :build
 
-  go_resource "github.com/satori/go.uuid" do
-    url "https://github.com/satori/go.uuid.git",
-        :revision => "b061729afc07e77a8aa4fad0a2fd840958f1942a"
-  end
-
-  go_resource "golang.org/x/crypto" do
-    url "https://go.googlesource.com/crypto.git",
-        :revision => "40541ccb1c6e64c947ed6f606b8a6cb4b67d7436"
-  end
-
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/OJ").mkpath
-    ln_sf buildpath, buildpath/"src/github.com/OJ/gobuster"
-    Language::Go.stage_deps resources, buildpath/"src"
-    system "go", "build", "-o", bin/"gobuster"
+    system "go", "build", "-ldflags", "-s -w", "-trimpath", "-o", bin/"gobuster"
+    prefix.install_metafiles
   end
 
   test do
-    assert_match(/\[!\] WordList \(-w\): Must be specified/, shell_output("#{bin}/gobuster -q"))
+    (testpath/"words.txt").write <<~EOS
+      dog
+      cat
+      horse
+      snake
+      ape
+    EOS
+
+    output = shell_output("#{bin}/gobuster dir -u https://buffered.io -w words.txt 2>&1")
+    assert_match "Finished", output
   end
 end

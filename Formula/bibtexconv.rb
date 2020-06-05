@@ -1,36 +1,27 @@
 class Bibtexconv < Formula
   desc "BibTeX file converter"
   homepage "https://www.uni-due.de/~be0001/bibtexconv/"
-  url "https://www.uni-due.de/~be0001/bibtexconv/download/bibtexconv-1.1.11.tar.gz"
-  sha256 "1240c3011718d9ba95c165dbf908eab871153530b70bca0ef74dc2b9664e83f1"
+  url "https://github.com/dreibh/bibtexconv/archive/bibtexconv-1.1.20.tar.gz"
+  sha256 "5fbc14d0181ec7eeb024a628af070ce7286f2cb92147c3ffa8504201cfcc3f8b"
+  head "https://github.com/dreibh/bibtexconv.git"
 
   bottle do
     cellar :any
-    sha256 "2b44b8dd4bf60b443c9318e056fdcffaed9218e75d7d907dd6ae5c4679a135e9" => :high_sierra
-    sha256 "81c4daa41ddb6837d40b66a883aceeb3470ca03148fcc6fd19386ff623776dd8" => :sierra
-    sha256 "397edcb9360918833774139e8cf9d11bcb53fc7c763e487a7bec325861b73cd6" => :el_capitan
+    sha256 "bd1a809b90e1092407e7a81fe30aca8f8df52791fa701afc7b65c4dc74f6f5d0" => :catalina
+    sha256 "b8f6412efed90b19aff5945ab58113ae7849f338527a801e48f531a31e289bc5" => :mojave
+    sha256 "294bfcaa004f25eee6806d01d80dce51a3e88e172034b2696247aa2c8776196b" => :high_sierra
   end
 
-  head do
-    url "https://github.com/dreibh/bibtexconv.git"
+  depends_on "cmake" => :build
+  depends_on "openssl@1.1"
 
-    depends_on "automake" => :build
-    depends_on "autoconf" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "openssl"
+  uses_from_macos "bison" => :build
+  uses_from_macos "flex" => :build
+  uses_from_macos "curl"
 
   def install
-    if build.head?
-      inreplace "bootstrap", "/usr/bin/glibtoolize", Formula["libtool"].bin/"glibtoolize"
-      system "./bootstrap"
-    end
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
-    system "make"
-    ENV.deparallelize # serialize folder creation
+    system "cmake", *std_cmake_args,
+                    "-DCRYPTO_LIBRARY=#{Formula["openssl@1.1"].opt_lib}/libcrypto.dylib"
     system "make", "install"
   end
 

@@ -1,34 +1,24 @@
 class Rethinkdb < Formula
   desc "The open-source database for the realtime web"
   homepage "https://www.rethinkdb.com/"
-  url "https://download.rethinkdb.com/dist/rethinkdb-2.3.6.tgz"
-  sha256 "c42159666910ad01be295a57caf8839ec3a89227d8919be5418e3aa1f0a3dc28"
+  url "https://download.rethinkdb.com/dist/rethinkdb-2.4.0.tgz"
+  sha256 "bfb0708710595c6762f42e25613adec692cf568201cd61da74c254f49fa9ee4c"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "eaa4700adc14905f388602c44008cbefcd2ac5c22a4a23e6871058a5f1a2a7ca" => :high_sierra
-    sha256 "1f936e43b0cb7b321d9a14a2f2de994154162ca5bb656c8583506ca253eadf6b" => :sierra
-    sha256 "d090123ea89626f60caa5517b1416b669d3cacfd51fcedfdcd6f58020e941190" => :el_capitan
-    sha256 "a17c6864cef6dfc7f1e8ab7da2fcd640d85a504991c0d61175e2f6c78e1ba6ee" => :yosemite
+    sha256 "ce3f886f880a43649c486fcc6c467e3ca44f526f06c4abeb7509e949b43b600e" => :catalina
+    sha256 "7ecafe14d01b8289df21dae7cc8f6d6313bd2adb0e690be386d3bb09cf0efae8" => :mojave
+    sha256 "fcec71e74c936790031c212773b91aea4c62fb80c0e25207c1162c3a486bf2da" => :high_sierra
   end
 
-  depends_on :macos => :lion
   depends_on "boost" => :build
-  depends_on "openssl"
+  depends_on :macos # Due to Python 2 (v8 and gyp fail to build)
+  # https://github.com/Homebrew/linuxbrew-core/pull/19614
+  # https://github.com/rethinkdb/rethinkdb/pull/6401
+  depends_on "openssl@1.1"
 
-  fails_with :gcc do
-    build 5666 # GCC 4.2.1
-    cause "RethinkDB uses C++0x"
-  end
-
-  # Fix error with Xcode 9, patch merged upstream:
-  # https://github.com/rethinkdb/rethinkdb/pull/6450
-  if DevelopmentTools.clang_build_version >= 900
-    patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/fb00ee376a/rethinkdb/xcode9.patch"
-      sha256 "abd50d91a247ee7de988020dd9d405a3d4cd93edb2875b7d5822ba0f513f85a0"
-    end
-  end
+  uses_from_macos "curl"
 
   def install
     args = ["--prefix=#{prefix}"]
@@ -50,31 +40,32 @@ class Rethinkdb < Formula
 
   plist_options :manual => "rethinkdb"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-          <string>#{opt_bin}/rethinkdb</string>
-          <string>--config-file</string>
-          <string>#{etc}/rethinkdb.conf</string>
-      </array>
-      <key>WorkingDirectory</key>
-      <string>#{HOMEBREW_PREFIX}</string>
-      <key>StandardOutPath</key>
-      <string>#{var}/log/rethinkdb/rethinkdb.log</string>
-      <key>StandardErrorPath</key>
-      <string>#{var}/log/rethinkdb/rethinkdb.log</string>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>KeepAlive</key>
-      <true/>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>#{opt_bin}/rethinkdb</string>
+            <string>--config-file</string>
+            <string>#{etc}/rethinkdb.conf</string>
+        </array>
+        <key>WorkingDirectory</key>
+        <string>#{HOMEBREW_PREFIX}</string>
+        <key>StandardOutPath</key>
+        <string>#{var}/log/rethinkdb/rethinkdb.log</string>
+        <key>StandardErrorPath</key>
+        <string>#{var}/log/rethinkdb/rethinkdb.log</string>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <true/>
+      </dict>
+      </plist>
     EOS
   end
 

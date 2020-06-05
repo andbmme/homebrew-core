@@ -1,24 +1,20 @@
 class Pangomm < Formula
   desc "C++ interface to Pango"
-  homepage "http://www.pango.org/"
-  url "https://download.gnome.org/sources/pangomm/2.40/pangomm-2.40.1.tar.xz"
-  sha256 "9762ee2a2d5781be6797448d4dd2383ce14907159b30bc12bf6b08e7227be3af"
+  homepage "https://www.pango.org/"
+  url "https://download.gnome.org/sources/pangomm/2.42/pangomm-2.42.1.tar.xz"
+  sha256 "14bf04939930870d5cfa96860ed953ad2ce07c3fd8713add4a1bfe585589f40f"
 
   bottle do
     cellar :any
-    sha256 "f1270ae7605b8f1a679770b37c63daeb7d8d14cdb5d1af09c6d67e83484256c2" => :high_sierra
-    sha256 "0f5fe35f77d9ab084cdb0ecba758a61771ec33650de30e3c57ddf56af240cabf" => :sierra
-    sha256 "7565443483138210e191d3fe044c04d55755057b4c3d53187baf2857c966f0a5" => :el_capitan
-    sha256 "09d9b38d15273c02968cb4330159c8cfa0b9e06701f69b7495c12f64f7f370b8" => :yosemite
-    sha256 "1d2a6f8d96059a189be9d39e6d20fd5a8a7a14293cc64c71eab506522ff5c1e5" => :mavericks
+    sha256 "52e1c201a3967f61e5b3867c172f98cc44f169e60b03af47e00e487a67a53690" => :catalina
+    sha256 "45d67e560dffb346b957011717b33873b53fca560da86648d4f90a40a8b6df98" => :mojave
+    sha256 "a2097268ad9f93093aa809ba243edbe515b00e6e378c1c6b4dac01b32c24fb20" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "glibmm"
   depends_on "cairomm"
+  depends_on "glibmm"
   depends_on "pango"
-
-  needs :cxx11
 
   def install
     ENV.cxx11
@@ -43,7 +39,7 @@ class Pangomm < Formula
     glibmm = Formula["glibmm"]
     harfbuzz = Formula["harfbuzz"]
     libpng = Formula["libpng"]
-    libsigcxx = Formula["libsigc++"]
+    libsigcxx = Formula["libsigc++@2"]
     pango = Formula["pango"]
     pixman = Formula["pixman"]
     flags = %W[

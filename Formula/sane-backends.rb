@@ -1,40 +1,50 @@
 class SaneBackends < Formula
   desc "Backends for scanner access"
   homepage "http://www.sane-project.org/"
-  url "https://alioth.debian.org/frs/download.php/file/4224/sane-backends-1.0.27.tar.gz"
-  mirror "https://mirrors.kernel.org/debian/pool/main/s/sane-backends/sane-backends_1.0.27.orig.tar.gz"
-  mirror "https://fossies.org/linux/misc/sane-backends-1.0.27.tar.gz"
-  sha256 "293747bf37275c424ebb2c833f8588601a60b2f9653945d5a3194875355e36c9"
-  revision 3
-  head "https://anonscm.debian.org/cgit/sane/sane-backends.git"
+  head "https://gitlab.com/sane-project/backends.git"
 
-  bottle do
-    sha256 "ac27058e0edd6bc0af11af3de0703169ce4508ba9840a598155bc1fcdccd00b5" => :high_sierra
-    sha256 "2fce948374f59735fc55c2ef4803f44fba0ac9979943dadc30d11f9a262c6fd2" => :sierra
-    sha256 "2faeb4b16e4e2ea851c1cfc100d8deedea3bb042ba3b21b66ba2865812500479" => :el_capitan
-    sha256 "68242fa7feb502d1b5001df7db05837268085f6f97e58768323566e671ac59f9" => :yosemite
+  stable do
+    url "https://gitlab.com/sane-project/backends/uploads/c3dd60c9e054b5dee1e7b01a7edc98b0/sane-backends-1.0.30.tar.gz"
+    sha256 "3f5d96a9c47f6124a46bb577c776bbc4896dd17b9203d8bfbc7fe8cbbcf279a3"
+
+    # Fixes build error "error: use of undeclared identifier 'HOST_NAME_MAX'"
+    # Commit is already included upstream in versions > 1.0.30
+    patch do
+      url "https://gitlab.com/sane-project/backends/-/commit/011d0f9bacab126fb2ae09d29abdd6eb88f1333d.diff"
+      sha256 "2fb2366d8e53397237f4beda1f51000b0ae5beb2683387fb2a779d3a43ef1c9d"
+    end
   end
 
+  bottle do
+    sha256 "4d9b0e82a282fc75379e56de828da1601a63bdc49afe7be8a0e685a1ec5f2f6a" => :catalina
+    sha256 "52405560cb01a2b2cc6afdcc813d2ef57386b09790f36df3126a0764ece0005b" => :mojave
+    sha256 "9911d3ac5aebaa5c7313d2076ddb355b4f9d4475fb94b774373445ef97313297" => :high_sierra
+  end
+
+  depends_on "pkg-config" => :build
   depends_on "jpeg"
+  depends_on "libpng"
   depends_on "libtiff"
   depends_on "libusb"
-  depends_on "openssl"
   depends_on "net-snmp"
-  depends_on "pkg-config" => :build
+  depends_on "openssl@1.1"
+
+  if build.head?
+    depends_on "autoconf" => :build
+    depends_on "autoconf-archive" => :build
+    depends_on "automake" => :build
+    depends_on "gettext" => :build
+    depends_on "libtool" => :build
+  end
 
   def install
+    system "./autogen.sh" if build.head?
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--localstatedir=#{var}",
                           "--without-gphoto2",
                           "--enable-local-backends",
                           "--with-usb=yes"
-
-    # Remove for > 1.0.27
-    # Workaround for bug in Makefile.am described here:
-    # https://lists.alioth.debian.org/pipermail/sane-devel/2017-August/035576.html
-    # It's already fixed in commit 519ff57.
-    system "make"
     system "make", "install"
   end
 

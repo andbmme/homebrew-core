@@ -1,15 +1,15 @@
 class Dbus < Formula
-  # releases: even (1.10.x) = stable, odd (1.11.x) = development
+  # releases: even (1.12.x) = stable, odd (1.13.x) = development
   desc "Message bus system, providing inter-application communication"
   homepage "https://wiki.freedesktop.org/www/Software/dbus"
-  url "https://dbus.freedesktop.org/releases/dbus/dbus-1.12.2.tar.gz"
-  mirror "https://mirrors.ocf.berkeley.edu/debian/pool/main/d/dbus/dbus_1.12.2.orig.tar.gz"
-  sha256 "272bb5091770b047c8188b926d5e6038fa4fe6745488b2add96b23e2d9a83d88"
+  url "https://dbus.freedesktop.org/releases/dbus/dbus-1.12.18.tar.gz"
+  mirror "https://deb.debian.org/debian/pool/main/d/dbus/dbus_1.12.18.orig.tar.gz"
+  sha256 "64cf4d70840230e5e9bc784d153880775ab3db19d656ead8a0cb9c0ab5a95306"
 
   bottle do
-    sha256 "0e119f7daf329cb528d1df2c7d3729c5e3bd1ce182304a6f528a3089f1cedfa0" => :high_sierra
-    sha256 "36a437a12147e6e8f9ac21ad8a989823c8d3cb0d6e4825634fd0c5c95692853b" => :sierra
-    sha256 "edc027d1a14a0a282510c0bad27b0d37642d39a408a71176c7f429827f204b9d" => :el_capitan
+    sha256 "db3b485e8763fb2a9be8876eaf71f73101964c2a62950faafe46b53ddeb0e9a9" => :catalina
+    sha256 "603c1f498659a45af2d0267c7e42926136cb0997d8462886b50f37cb3bc1ffcf" => :mojave
+    sha256 "14db248f05b8f20db085cfd60f4ac9132403c9c16898b236a9c2f7b61017ae0a" => :high_sierra
   end
 
   head do
@@ -52,6 +52,10 @@ class Dbus < Formula
                           "--without-x",
                           "--disable-tests"
     system "make", "install"
+  end
+
+  def plist_name
+    "org.freedesktop.dbus-session"
   end
 
   def post_install

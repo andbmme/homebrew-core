@@ -1,18 +1,20 @@
 class Exempi < Formula
   desc "Library to parse XMP metadata"
   homepage "https://wiki.freedesktop.org/libopenraw/Exempi/"
-  url "https://libopenraw.freedesktop.org/download/exempi-2.4.3.tar.bz2"
-  sha256 "bfd1d8ebffe07918a5bfc7a5130ff82486d35575827cae8d131b9fa1c0c29c6e"
+  url "https://libopenraw.freedesktop.org/download/exempi-2.5.1.tar.bz2"
+  sha256 "100b3d5b1b3370bc2e31c0978991716c4a4478246a2ac2df6382054a0ae89bc8"
 
   bottle do
     cellar :any
-    sha256 "42c65cca6ebea9898aa74438d0221d57928b8ac9e0d905fa084a1b7f9b9b9d1e" => :high_sierra
-    sha256 "fe7d28fde8e93803a7761660948481b4482890eef979e9b770ca515853fedede" => :sierra
-    sha256 "810d605db2db422fd2b919d7eba26baf9e602ddb5da179a6477ed4e7c2e840a6" => :el_capitan
-    sha256 "08d3671e3cd4e338196e2137419400069384fc30fa4813ae3cd10e0ce85dc604" => :yosemite
+    sha256 "56a9fb56625cb579bac0bd809b934c8147e081dd90fe474669ba650dfc489d8f" => :catalina
+    sha256 "7ae283f3e160cf837544567cd015c8c2e7d68499584405bc1509916639f72c21" => :mojave
+    sha256 "b7f6fc2e81ca747e6ed8c899bc8353cbba0006959834bf7bd495eb482fd75658" => :high_sierra
+    sha256 "0b9773e6206ec4be656de18f2cb8e13e32dc892745867f048f9524d87381efab" => :sierra
   end
 
   depends_on "boost"
+
+  uses_from_macos "expat"
 
   def install
     system "./configure", "--disable-dependency-tracking",

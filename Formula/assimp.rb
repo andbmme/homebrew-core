@@ -1,22 +1,29 @@
 class Assimp < Formula
   desc "Portable library for importing many well-known 3D model formats"
-  homepage "http://www.assimp.org"
-  url "https://github.com/assimp/assimp/archive/v4.0.1.tar.gz"
-  sha256 "60080d8ab4daaab309f65b3cffd99f19eb1af8d05623fff469b9b652818e286e"
+  homepage "https://www.assimp.org/"
+  url "https://github.com/assimp/assimp/archive/v5.0.1.tar.gz"
+  sha256 "11310ec1f2ad2cd46b95ba88faca8f7aaa1efe9aa12605c55e3de2b977b3dbfc"
   head "https://github.com/assimp/assimp.git"
 
   bottle do
     cellar :any
-    sha256 "b0294e10f4fc379675306800c3c638d35a7a749ee4474952a1982312c42690b9" => :high_sierra
-    sha256 "d604ce94fedd5b30a5ae53d22e1573ba01b9295ddf6b52b008bd33c0a7f3b105" => :sierra
-    sha256 "aa26fee8bb1be4488b5f16d29c78fbfb7a74fb5b69895ce62baf6184d11c38d9" => :el_capitan
-    sha256 "68cf888a4c7119388707022099a16daac509a791b52c1617cca53509049812a1" => :yosemite
+    sha256 "f049baf0e3bc3941e8449dbfbc997d0448b0a1722bfdceadb69b2eacc48e3464" => :catalina
+    sha256 "620f5f399783c487ae78077da65b65f6a0c81dce23768ae56eb1edd383a57daa" => :mojave
+    sha256 "6dffc67ca984f5870bdc09a1c0adbb3c0d2209c7fb8169e2204c4c2d2d44aebe" => :high_sierra
   end
 
-  option "without-boost", "Compile without thread safe logging or multithreaded computation if boost isn't installed"
-
   depends_on "cmake" => :build
-  depends_on "boost" => [:recommended, :build]
+
+  uses_from_macos "zlib"
+
+  # Fix "unzip.c:150:11: error: unknown type name 'z_crc_t'"
+  # Upstream PR from 12 Dec 2017 "unzip: fix build with older zlib"
+  if MacOS.version <= :el_capitan
+    patch do
+      url "https://github.com/assimp/assimp/pull/1634.patch?full_index=1"
+      sha256 "79b93f785ee141dc2f56d557b2b8ee290eed0afc7dd373ad84715c6c9aa23460"
+    end
+  end
 
   def install
     args = std_cmake_args
@@ -34,7 +41,7 @@ class Assimp < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "test.cpp", "-L#{lib}", "-lassimp", "-o", "test"
+    system ENV.cc, "-std=c++11", "test.cpp", "-L#{lib}", "-lassimp", "-o", "test"
     system "./test"
 
     # Application test.

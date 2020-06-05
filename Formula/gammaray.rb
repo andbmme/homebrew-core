@@ -1,34 +1,28 @@
 class Gammaray < Formula
   desc "Examine and manipulate Qt application internals at runtime"
-  homepage "https://www.kdab.com/kdab-products/gammaray/"
-  url "https://github.com/KDAB/GammaRay/releases/download/v2.8.1/gammaray-2.8.1.tar.gz"
-  sha256 "b01533a524d6f66e4e15d94b7528c7c4d6d8dfc104621849be6155df6b52fc3f"
+  homepage "https://www.kdab.com/gammaray"
+  url "https://github.com/KDAB/GammaRay/releases/download/v2.11.1/gammaray-2.11.1.tar.gz"
+  sha256 "87a1d72ad1ad6d1a0156c54a85b0976ab38c6a64136458ca7c4ee491566d25d0"
   head "https://github.com/KDAB/GammaRay.git"
 
   bottle do
-    sha256 "9b33e7e9c865866c4d3a9525e28f2b8c7f0e2a21d80a014d05394c129b9168c8" => :high_sierra
-    sha256 "edaf5e2f136cae40a09d16165e3f4b178251fa938603e3f26132458c84ceeba5" => :sierra
-    sha256 "4ff4974627728b9289ddc31394c1e5bb612bfc28a40dacf365ee4c31d7e33b24" => :el_capitan
-    sha256 "12ad2449434c9c7752a2b8a4b40c537008ba29efbc03a1840714b7ef7f51a23b" => :yosemite
+    cellar :any
+    sha256 "d43f04f5d9d8f0f26ff7ec8164b8a6a6397174e56476a60abf7f592a5e8ef2d8" => :catalina
+    sha256 "daaad613868d4159d40b7c954dfca613ac68a6cbd75e1471d35e04958ff5ae16" => :mojave
+    sha256 "652ed0574b07f8e0bffa9b7927c718295cbc4d1e5b69148101923d8edebcf406" => :high_sierra
   end
 
-  option "with-vtk", "Build with VTK-with-Qt support, for object 3D visualizer"
-
-  needs :cxx11
-
   depends_on "cmake" => :build
+  depends_on "graphviz"
   depends_on "qt"
-  depends_on "graphviz" => :recommended
 
   def install
     # For Mountain Lion
     ENV.libcxx
 
-    args = std_cmake_args
-    args << "-DCMAKE_DISABLE_FIND_PACKAGE_VTK=" + (build.without?("vtk") ? "ON" : "OFF")
-    args << "-DCMAKE_DISABLE_FIND_PACKAGE_Graphviz=" + (build.without?("graphviz") ? "ON" : "OFF")
-
-    system "cmake", *args
+    system "cmake", *std_cmake_args,
+                    "-DCMAKE_DISABLE_FIND_PACKAGE_Graphviz=ON",
+                    "-DCMAKE_DISABLE_FIND_PACKAGE_VTK=OFF"
     system "make", "install"
   end
 

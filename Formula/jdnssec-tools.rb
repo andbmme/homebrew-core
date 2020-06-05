@@ -1,24 +1,24 @@
 class JdnssecTools < Formula
   desc "Java command-line tools for DNSSEC"
-  homepage "https://www.verisignlabs.com/jdnssec-tools/"
-  url "https://www.verisignlabs.com/dnssec-tools/packages/jdnssec-tools-0.13.tar.gz"
-  sha256 "95b1feb4d21c8bef08bf3e591c734bb066a0878b22a1de7c3c110cf2ee52352d"
-
+  homepage "https://github.com/dblacka/jdnssec-tools"
+  url "https://github.com/dblacka/jdnssec-tools/releases/download/v0.15/jdnssec-tools-0.15.tar.gz"
+  sha256 "1d4905652639b8b23084366eb2e2b33d5f534bf29fbf9b4becbf9e29f9b39fdf"
+  revision 1
   head "https://github.com/dblacka/jdnssec-tools.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "410115bfea6c2107754902e990fcc5a365a9330fe72035627843ccc12426d559" => :high_sierra
-    sha256 "4a39d75830447d4399772906dac12fb9444c8ddaef618874dbb8db06bf7aa288" => :sierra
-    sha256 "0b48a68553a1d76d38efe6557d7bc52662a3b361f5f07a44c128d5e15be4622c" => :el_capitan
-    sha256 "0b48a68553a1d76d38efe6557d7bc52662a3b361f5f07a44c128d5e15be4622c" => :yosemite
+    sha256 "c12eafadb12264e88ef14fe4e93cdb41f0afccbb24b8cff892e8747d8ad2d73b" => :catalina
+    sha256 "c12eafadb12264e88ef14fe4e93cdb41f0afccbb24b8cff892e8747d8ad2d73b" => :mojave
+    sha256 "c12eafadb12264e88ef14fe4e93cdb41f0afccbb24b8cff892e8747d8ad2d73b" => :high_sierra
   end
 
-  depends_on :java
+  depends_on "openjdk"
 
   def install
     inreplace Dir["bin/*"], /basedir=.*/, "basedir=#{libexec}"
     bin.install Dir["bin/*"]
+    bin.env_script_all_files libexec/"bin", :JAVA_HOME => Formula["openjdk"].opt_prefix
     (libexec/"lib").install Dir["lib/*"]
   end
 

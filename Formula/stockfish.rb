@@ -1,24 +1,22 @@
 class Stockfish < Formula
   desc "Strong open-source chess engine"
   homepage "https://stockfishchess.org/"
-  url "https://stockfish.s3.amazonaws.com/stockfish-8-src.zip"
-  sha256 "7bad36f21f649ab24f6d7786bbb1b74b3e4037f165f32e3d42d1ae19c8874ce9"
+  url "https://github.com/official-stockfish/Stockfish/archive/sf_11.tar.gz"
+  sha256 "802261cc601b67bed00c0ef7d21e2125959630f0852a06db9fc9bd74f440b199"
   head "https://github.com/official-stockfish/Stockfish.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "fb32a58f2fb8bf00e83c4ffc955d758ad4df9f7b03222ae7bf896680252b1817" => :high_sierra
-    sha256 "5db21467b27838a4ed54910d457690a34c011b9a0e51208aace1064f8bb33dba" => :sierra
-    sha256 "5db21467b27838a4ed54910d457690a34c011b9a0e51208aace1064f8bb33dba" => :el_capitan
-    sha256 "eabc1553a23ca9305ffc523afa9432772f144b48dcd6315a2f196ae512825279" => :yosemite
+    sha256 "f6bcd62e239cdd9779771367e32137045772d90b6ab3dae858a85bfbe104a95e" => :catalina
+    sha256 "f6bcd62e239cdd9779771367e32137045772d90b6ab3dae858a85bfbe104a95e" => :mojave
+    sha256 "5debb14a1764281072d0ad4c350a1ce4014904a9956dfa5046347965486573c2" => :high_sierra
   end
 
   def install
-    if Hardware::CPU.features.include? :popcnt
-      arch = "x86-64-modern"
+    arch = if MacOS.version.requires_popcnt?
+      "x86-64-modern"
     else
-      arch = Hardware::CPU.ppc? ? "ppc" : "x86"
-      arch += "-" + (MacOS.prefer_64_bit? ? "64" : "32")
+      "x86-64"
     end
 
     system "make", "-C", "src", "build", "ARCH=#{arch}"

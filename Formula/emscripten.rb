@@ -1,57 +1,51 @@
+require "language/node"
+
 class Emscripten < Formula
   desc "LLVM bytecode to JavaScript compiler"
-  homepage "https://kripken.github.io/emscripten-site/"
+  homepage "https://emscripten.org/"
 
   stable do
-    url "https://github.com/kripken/emscripten/archive/1.37.22.tar.gz"
-    sha256 "433dedb63ba423cf04bbc9802b49fa842bd479bad31a339db9506614e92334c7"
+    url "https://github.com/emscripten-core/emscripten/archive/1.39.16.tar.gz"
+    sha256 "60e4841c06f33d0506e2df18caa00a7fd38ae2d9a197ce200611920646426af2"
 
     resource "fastcomp" do
-      url "https://github.com/kripken/emscripten-fastcomp/archive/1.37.22.tar.gz"
-      sha256 "e333c68bcd0f5ecabee464a785d10a7b1ce000b866b5769bfe1603b7b277f1cb"
+      url "https://github.com/emscripten-core/emscripten-fastcomp/archive/1.39.16.tar.gz"
+      sha256 "7f386d46b7c14aa891fc41939e9e6249e21f7e1a2750e53e8f38a2f3d9f86942"
     end
 
     resource "fastcomp-clang" do
-      url "https://github.com/kripken/emscripten-fastcomp-clang/archive/1.37.22.tar.gz"
-      sha256 "6306f32150f2cc643205a1a4fd54946e63a5203d6186f783c2365607932fda25"
+      url "https://github.com/emscripten-core/emscripten-fastcomp-clang/archive/1.39.16.tar.gz"
+      sha256 "2da40a75b9efa9603bbd2f1ae776ea59d32e0360b9d52050acbb667bda33840d"
     end
   end
 
   bottle do
     cellar :any
-    sha256 "c6fd922bfcfa87a310840f36186e4c1e59e200d5546edf3b54bab3cd7bb7747f" => :high_sierra
-    sha256 "bbcb224c88295ce67f98309926977bca3f11871d75a4337be5bbe50cb93e1137" => :sierra
-    sha256 "e2b040d09d52789f7fc75d9fe743752546b9bc9db5128b1287327e28ef19fcc1" => :el_capitan
+    sha256 "3ed4382d0ec5651d2a513dcb0f210586928ffb2a774faa12bd9e9fa34b2a002f" => :catalina
+    sha256 "2c25e4e651b80afab14cc322bd42cc0ea081f1a94f940ab54d0f2837c6af0711" => :mojave
+    sha256 "fe3cb7d8b50cad519e1897a66c602fd1e9b20f53e08d81a5ec0c5fb13de13dc4" => :high_sierra
   end
 
   head do
-    url "https://github.com/kripken/emscripten.git", :branch => "master"
+    url "https://github.com/emscripten-core/emscripten.git", :branch => "incoming"
 
     resource "fastcomp" do
-      url "https://github.com/kripken/emscripten-fastcomp.git", :branch => "master"
+      url "https://github.com/emscripten-core/emscripten-fastcomp.git", :branch => "incoming"
     end
 
     resource "fastcomp-clang" do
-      url "https://github.com/kripken/emscripten-fastcomp-clang.git", :branch => "master"
+      url "https://github.com/emscripten-core/emscripten-fastcomp-clang.git", :branch => "incoming"
     end
   end
 
-  needs :cxx11
-
-  depends_on :python if MacOS.version <= :snow_leopard
   depends_on "cmake" => :build
+  depends_on "binaryen"
   depends_on "node"
-  depends_on "closure-compiler" => :optional
+  depends_on "python@3.8"
   depends_on "yuicompressor"
 
   def install
     ENV.cxx11
-    # OSX doesn't provide a "python2" binary so use "python" instead.
-    python2_shebangs = `grep --recursive --files-with-matches ^#!/usr/bin/.*python2$ #{buildpath}`
-    python2_shebang_files = python2_shebangs.lines.sort.uniq
-    python2_shebang_files.map! { |f| Pathname(f.chomp) }
-    python2_shebang_files.reject! &:symlink?
-    inreplace python2_shebang_files, %r{^(#!/usr/bin/.*python)2$}, "\\1"
 
     # All files from the repository are required as emscripten is a collection
     # of scripts which need to be installed in the same layout as in the Git
@@ -79,17 +73,24 @@ class Emscripten < Formula
       system "make", "install"
     end
 
+    cd libexec do
+      system "npm", "install", *Language::Node.local_npm_install_args
+      rm_f "node_modules/ws/builderror.log" # Avoid references to Homebrew shims
+    end
+
     %w[em++ em-config emar emcc emcmake emconfigure emlink.py emmake
        emranlib emrun emscons].each do |emscript|
-      bin.install_symlink libexec/emscript
+      (bin/emscript).write_env_script libexec/emscript, :PYTHON => Formula["python@3.8"].opt_bin/"python3"
     end
   end
 
-  def caveats; <<~EOS
-    Manually set LLVM_ROOT to
-      #{opt_libexec}/llvm/bin
-    and comment out BINARYEN_ROOT
-    in ~/.emscripten after running `emcc` for the first time.
+  def caveats
+    <<~EOS
+      Manually set LLVM_ROOT to
+        #{opt_libexec}/llvm/bin
+      and BINARYEN_ROOT to
+        #{Formula["binaryen"].opt_prefix}
+      in ~/.emscripten after running `emcc` for the first time.
     EOS
   end
 

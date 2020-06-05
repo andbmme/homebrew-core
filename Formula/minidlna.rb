@@ -3,31 +3,31 @@ class Minidlna < Formula
   homepage "https://sourceforge.net/projects/minidlna/"
   url "https://downloads.sourceforge.net/project/minidlna/minidlna/1.2.1/minidlna-1.2.1.tar.gz"
   sha256 "67388ba23ab0c7033557a32084804f796aa2a796db7bb2b770fb76ac2a742eec"
+  revision 3
 
   bottle do
     cellar :any
-    sha256 "b3b2df008e89d3240444e24ef086b7859a1a95254d41136af7c2643a94ee26bf" => :high_sierra
-    sha256 "7fff1741b01f5d7e6a913171c70326cb4dbbb57d1cdcb5266056b91493af69ba" => :sierra
-    sha256 "36e2d23c670f5e53e8ee9ea3f8bfca58d7d827e1318cf148cd116483a48a8443" => :el_capitan
-    sha256 "66f2fddccaa8740ef90e770419a807db46e874008625694ec881e266780dba1d" => :yosemite
+    sha256 "200ede8d7a76a0ddf22978ec19f464e7716ae1e33c0c01b17877de7fcf0a0ea9" => :catalina
+    sha256 "c8b56b111f9625c1baaf66e9f06f6e7df6b039e1ebb188995edb16c2e264830c" => :mojave
+    sha256 "09e2127980deb0e8ed824e72bfa575f110b737ed4fa653ef0edb629faa815369" => :high_sierra
   end
 
   head do
     url "https://git.code.sf.net/p/minidlna/git.git"
     depends_on "autoconf" => :build
     depends_on "automake" => :build
-    depends_on "libtool" => :build
     depends_on "gettext" => :build
+    depends_on "libtool" => :build
   end
 
-  depends_on "libexif"
-  depends_on "jpeg"
-  depends_on "libid3tag"
+  depends_on "ffmpeg"
   depends_on "flac"
+  depends_on "jpeg"
+  depends_on "libexif"
+  depends_on "libid3tag"
   depends_on "libogg"
   depends_on "libvorbis"
   depends_on "sqlite"
-  depends_on "ffmpeg"
 
   def install
     system "./autogen.sh" if build.head?
@@ -57,37 +57,38 @@ class Minidlna < Formula
 
   plist_options :manual => "minidlna"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_sbin}/minidlnad</string>
-          <string>-d</string>
-          <string>-f</string>
-          <string>#{ENV["HOME"]}/.config/minidlna/minidlna.conf</string>
-          <string>-P</string>
-          <string>#{ENV["HOME"]}/.config/minidlna/minidlna.pid</string>
-        </array>
-        <key>KeepAlive</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>Crashed</key>
-          <true/>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_sbin}/minidlnad</string>
+            <string>-d</string>
+            <string>-f</string>
+            <string>#{ENV["HOME"]}/.config/minidlna/minidlna.conf</string>
+            <string>-P</string>
+            <string>#{ENV["HOME"]}/.config/minidlna/minidlna.pid</string>
+          </array>
+          <key>KeepAlive</key>
+          <dict>
+            <key>Crashed</key>
+            <true/>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>ProcessType</key>
+          <string>Background</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/minidlnad.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/minidlnad.log</string>
         </dict>
-        <key>ProcessType</key>
-        <string>Background</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/minidlnad.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/minidlnad.log</string>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 

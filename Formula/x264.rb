@@ -1,37 +1,45 @@
 class X264 < Formula
   desc "H.264/AVC encoder"
   homepage "https://www.videolan.org/developers/x264.html"
-  # the latest commit on the stable branch
-  url "https://git.videolan.org/git/x264.git",
-      :revision => "aaa9aa83a111ed6f1db253d5afa91c5fc844583f"
-  version "r2795"
-  head "https://git.videolan.org/git/x264.git"
+  head "https://code.videolan.org/videolan/x264.git"
+
+  stable do
+    # the latest commit on the stable branch
+    url "https://code.videolan.org/videolan/x264.git",
+        :revision => "296494a4011f58f32adc54304a2654627558c59a"
+    version "r2999"
+  end
 
   bottle do
     cellar :any
-    sha256 "1f75c3a57ca3e1b7b528c04725c7d5c32dc1f4b222a289702dd7c057db8e34a2" => :high_sierra
-    sha256 "815cd74498e36ce6df804d22561d99e1ef0d4b5706f28e2850b2ea3f6c6df406" => :sierra
-    sha256 "be983033e47329fe52c1a32b1fcdfac071c495b24f4662584ad6165a0d126f30" => :el_capitan
-    sha256 "1a7be693b06e4219ef7721586fce481065433759d0dc9ee3b6caab2e776317c4" => :yosemite
+    sha256 "3471d2725e761ac6dbf3882b95c933e51ab70ca457975652d737f689a4ec529f" => :catalina
+    sha256 "8fbd7a7f33e32af373555483d12a19658d5b0e712e95d7b874e40ca386aa06f9" => :mojave
+    sha256 "d06faa65365f712fcaee10dd672280388a0219159f8175b31a226043a9a45cc8" => :high_sierra
   end
 
-  option "with-10-bit", "Build a 10-bit x264 (default: 8-bit)"
-  option "with-l-smash", "Build CLI with l-smash mp4 output"
+  depends_on "nasm" => :build
 
-  depends_on "yasm" => :build
-  depends_on "l-smash" => :optional
-
-  deprecated_option "10-bit" => "with-10-bit"
+  if MacOS.version <= :high_sierra
+    # Stack realignment requires newer Clang
+    # https://code.videolan.org/videolan/x264/-/commit/b5bc5d69c580429ff716bafcd43655e855c31b02
+    depends_on "gcc"
+    fails_with :clang
+  end
 
   def install
+    # Work around Xcode 11 clang bug
+    # https://bitbucket.org/multicoreware/x265/issues/514/wrong-code-generated-on-macos-1015
+    ENV.append_to_cflags "-fno-stack-check" if DevelopmentTools.clang_build_version >= 1010
+
     args = %W[
       --prefix=#{prefix}
+      --disable-lsmash
+      --disable-swscale
+      --disable-ffms
       --enable-shared
       --enable-static
       --enable-strip
     ]
-    args << "--disable-lsmash" if build.without? "l-smash"
-    args << "--bit-depth=10" if build.with? "10-bit"
 
     system "./configure", *args
     system "make", "install"

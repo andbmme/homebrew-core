@@ -1,31 +1,30 @@
 class Dasm < Formula
   desc "Macro assembler with support for several 8-bit microprocessors"
-  homepage "https://dasm-dillon.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/dasm-dillon/dasm-dillon/2.20.11/dasm-2.20.11-2014.03.04-source.tar.gz"
-  sha256 "a9330adae534aeffbfdb8b3ba838322b92e1e0bb24f24f05b0ffb0a656312f36"
-  head "https://svn.code.sf.net/p/dasm-dillon/code/trunk"
+  homepage "https://dasm-assembler.github.io/"
+  url "https://github.com/dasm-assembler/dasm/archive/2.20.13.tar.gz"
+  sha256 "48be84858d578dd7e1ac702fb2dca713a2e0be930137cbb3d6ecbeac1944ff5c"
+  revision 1
+  version_scheme 1
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "8df31a4bcc48b92ee2569994dda6a5bd55335a0e92e1e19903a2c98377b440d1" => :high_sierra
-    sha256 "7425679bdb695c12ca174ca4f17e187a9a9aa5a92e7fe72bf8a561dd83aff4a7" => :sierra
-    sha256 "854a19f232cffdeabb1cb2afef4a5713e55b545519beea8f666f2cc4882d42e6" => :el_capitan
-    sha256 "1897ee7e4d76eeb74bd6aa3c94d73f14f55c44054dd296bbd724addb3ca3b00a" => :yosemite
-    sha256 "3383c91ce64d715a05595e49d38d16ea134e139dc7b87541d8c81bf5a9aeaf15" => :mavericks
+    sha256 "a55169cf45fc0d3d61dc77f69c0817fed7b28b66206a93e2c8f7715f867199ac" => :catalina
+    sha256 "45e8803c881a3ca3a3c7c1c45a5fd55185ba804765b0512971d798c04b1626fd" => :mojave
+    sha256 "b6c8d3f75172985f0f60172e654785fee331070fdd4c0fa58c4247db8c0ac192" => :high_sierra
   end
 
   def install
     system "make"
-    prefix.install "bin", "doc"
+    prefix.install "bin", "doc", "machines"
   end
 
   test do
     path = testpath/"a.asm"
-    path.write <<-EOS
-      processor 6502
-      org $c000
-      jmp $fce2
+    path.write <<~EOS
+      ; Instructions must be preceded by whitespace
+        processor 6502
+        org $c000
+        jmp $fce2
     EOS
 
     system bin/"dasm", path

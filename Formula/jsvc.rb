@@ -1,64 +1,34 @@
 class Jsvc < Formula
   desc "Wrapper to launch Java applications as daemons"
   homepage "https://commons.apache.org/daemon/jsvc.html"
-  url "https://archive.apache.org/dist/commons/daemon/source/commons-daemon-1.0.15-native-src.tar.gz"
-  sha256 "e98d96c7c71e02d1a05ce1c417eedb588678ccecc55ba2e9ae2969e4ea910a90"
+  url "https://www.apache.org/dyn/closer.lua?path=commons/daemon/source/commons-daemon-1.2.2-src.tar.gz"
+  mirror "https://archive.apache.org/dist/commons/daemon/source/commons-daemon-1.2.2-src.tar.gz"
+  sha256 "ebd9d50989ee2009cc83f501e6793ad5978672ecea97be5198135a081a8aac71"
+  revision 2
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "fdaf73729ab305e94286ed4497f44de9c701bfd0ef9d954e597c460613a3ee57" => :high_sierra
-    sha256 "5e570fb6500eff4bc3c9dd89bee0afe085d87c16d8038dcbb19d19fbeddb656c" => :sierra
-    sha256 "f42f7315d5015da70971e6771fd3fe1b8aebeb6852c48d8a921d37ad5753ed05" => :el_capitan
-    sha256 "ee2cdf6d939f8cbde26edbde512d6afa3c57a144c83f3a11699fe998b3d71815" => :yosemite
-    sha256 "b97d2c0458b7280e197c420af87edd7f798b8ca6d3e0520a458750eaab5fbf68" => :mavericks
+    sha256 "d394dda87f296a36c2e39b8954db0f8496285dfdf94cd07bf236fec7df1edf3d" => :catalina
+    sha256 "bea286d1d134d91bc5e7a8596cbf015f29c09e6ba4bef9f356e51dfa8777fb9d" => :mojave
+    sha256 "73b144be1f0b0dabfabb254515d250ce310405ca8c975e072109c75e5f6debd5" => :high_sierra
   end
 
-  # Enable Java 7 JVMs: https://issues.apache.org/jira/browse/DAEMON-281
-  patch :DATA
-
-  depends_on :java
+  depends_on "openjdk"
 
   def install
-    ENV.append "CFLAGS", "-arch #{MacOS.preferred_arch}"
-    ENV.append "LDFLAGS", "-arch #{MacOS.preferred_arch}"
-    ENV.append "CPPFLAGS", "-I/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers"
-
     prefix.install %w[NOTICE.txt LICENSE.txt RELEASE-NOTES.txt]
 
-    cd "unix"
-    system "./configure", "--with-java=/System/Library/Frameworks/JavaVM.framework",
-                          "--with-os-type=Headers"
-    system "make"
-    bin.install "jsvc"
+    cd "src/native/unix" do
+      system "./configure", "--with-java=#{Formula["openjdk"].opt_prefix}"
+      system "make"
+
+      libexec.install "jsvc"
+      (bin/"jsvc").write_env_script libexec/"jsvc", :JAVA_HOME => "${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
+    end
+  end
+
+  test do
+    output = shell_output("#{bin}/jsvc -help")
+    assert_match "jsvc (Apache Commons Daemon)", output
   end
 end
-
-__END__
-diff -r -u a/unix/native/java.c b/unix/native/java.c
---- a/unix/native/java.c  2013-03-28 13:53:58.000000000 +0100
-+++ b/unix/native/java.c	2013-05-14 21:52:01.000000000 +0200
-@@ -203,6 +203,13 @@
-             return false;
-         }
-     }
-+    if (stat(appf, &sb)) {
-+        if (replace(appf, 1024, "$JAVA_HOME/../MacOS/libjli.dylib",
-+                    "$JAVA_HOME", data->path) != 0) {
-+            log_error("Cannot replace values in loader library");
-+            return false;
-+        }
-+    }
-     apph = dso_link(appf);
-     if (apph == NULL) {
-         log_error("Cannot load required shell library %s", appf);
-diff -r -u a/unix/native/location.c b/unix/native/location.c
---- a/unix/native/location.c	2013-03-28 13:53:58.000000000 +0100
-+++ b/unix/native/location.c	2013-05-14 21:50:31.000000000 +0200
-@@ -144,6 +144,7 @@
- char *location_jvm_configured[] = {
- #if defined(OS_DARWIN)
-     "$JAVA_HOME/../Libraries/lib$VM_NAME.dylib",
-+    "$JAVA_HOME/jre/lib/$VM_NAME/libjvm.dylib",
- #elif defined(OS_CYGWIN)
-     "$JAVA_HOME/jre/bin/$VM_NAME/jvm.dll",              /* Sun JDK 1.3 */
- #elif defined(OS_LINUX) || defined(OS_SOLARIS) || defined(OS_BSD) || defined(OS_FREEBSD) || defined(OS_TRU64)

@@ -1,54 +1,58 @@
 class Diffoscope < Formula
+  include Language::Python::Virtualenv
+
   desc "In-depth comparison of files, archives, and directories"
   homepage "https://diffoscope.org"
-  url "https://files.pythonhosted.org/packages/e6/c2/69bb309f254c94eab6f4b0effb45b95f2237bdabedfe0a774bb98ed3517a/diffoscope-88.tar.gz"
-  sha256 "e25664b5aea0d0610879bf82d219cc97743a0b67236abcc8eb5abf78c6b2e6fe"
+  url "https://files.pythonhosted.org/packages/0f/c8/649dbfd2d16ce5200aec65e1121503e29097f987794f786486fa950b2df3/diffoscope-146.tar.gz"
+  sha256 "a031605c043577c908052763e49b0bd9c1d4d8a169eaf41364900ff1d9566ee2"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "754a119265afdcc919f30a67402e960770598f29b7f18ef3eb539278ba3b1f6b" => :high_sierra
-    sha256 "754a119265afdcc919f30a67402e960770598f29b7f18ef3eb539278ba3b1f6b" => :sierra
-    sha256 "754a119265afdcc919f30a67402e960770598f29b7f18ef3eb539278ba3b1f6b" => :el_capitan
+    sha256 "b89b43de9a61bd275f8d7ab0b3d45af735e82b66668285871e4d893a0bb7afc7" => :catalina
+    sha256 "1dde57364861d2a21fbc39ddaca858567ff46374e68a5d14ef56b2d32c814154" => :mojave
+    sha256 "a7596993a249d2d451c4c0f9ab8095e0681910df32f2cec78d44a141ee934cb5" => :high_sierra
   end
 
-  depends_on "libmagic"
-  depends_on "libarchive"
   depends_on "gnu-tar"
-  depends_on :python3
+  depends_on "libarchive"
+  depends_on "libmagic"
+  depends_on "python@3.8"
+
+  # required by cmdline
+  resource "argcomplete" do
+    url "https://files.pythonhosted.org/packages/43/61/345856864a72ccc004bea5f74183c58bfd6675f9eab931ff9ce21a8fe06b/argcomplete-1.11.1.tar.gz"
+    sha256 "5ae7b601be17bf38a749ec06aa07fb04e7b6b5fc17906948dc1866e7facf3740"
+  end
 
   resource "libarchive-c" do
-    url "https://files.pythonhosted.org/packages/1f/4a/7421e8db5c7509cf75e34b92a32b69c506f2b6f6392a909c2f87f3e94ad2/libarchive-c-2.7.tar.gz"
-    sha256 "56eadbc383c27ec9cf6aad3ead72265e70f80fa474b20944328db38bab762b04"
+    url "https://files.pythonhosted.org/packages/63/fe/9e6c78db381934e28c7ec3d30d4f209fe24442d17f1bd8c56d13ae185cf6/libarchive-c-2.9.tar.gz"
+    sha256 "9919344cec203f5db6596a29b5bc26b07ba9662925a05e24980b84709232ef60"
+  end
+
+  # required by cmdline
+  resource "progressbar" do
+    url "https://files.pythonhosted.org/packages/a3/a6/b8e451f6cff1c99b4747a2f7235aa904d2d49e8e1464e0b798272aa84358/progressbar-2.5.tar.gz"
+    sha256 "5d81cb529da2e223b53962afd6c8ca0f05c6670e40309a7219eacc36af9b6c63"
   end
 
   resource "python-magic" do
-    url "https://files.pythonhosted.org/packages/65/0b/c6b31f686420420b5a16b24a722fe980724b28d76f65601c9bc324f08d02/python-magic-0.4.13.tar.gz"
-    sha256 "604eace6f665809bebbb07070508dfa8cabb2d7cb05be9a56706c60f864f1289"
+    url "https://files.pythonhosted.org/packages/e3/85/1aff76b966622868a73717abd8b501a3c91890e23a65e5f574ff6df1970f/python-magic-0.4.18.tar.gz"
+    sha256 "b757db2a5289ea3f1ced9e60f072965243ea43a2221430048fd8cacab17be0ce"
   end
 
   def install
-    ENV.delete("PYTHONPATH") # play nice with libmagic --with-python
+    venv = virtualenv_create(libexec, Formula["python@3.8"].opt_bin/"python3")
+    venv.pip_install resources
+    venv.pip_install buildpath
 
-    pyver = Language::Python.major_minor_version "python3"
-    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python#{pyver}/site-packages"
-
-    resources.each do |r|
-      r.stage do
-        system "python3", *Language::Python.setup_install_args(libexec/"vendor")
-      end
-    end
-
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{pyver}/site-packages"
-    system "python3", *Language::Python.setup_install_args(libexec)
-    bin.install Dir[libexec/"bin/*"]
+    bin.install libexec/"bin/diffoscope"
     libarchive = Formula["libarchive"].opt_lib/"libarchive.dylib"
-    bin.env_script_all_files(libexec+"bin", :PYTHONPATH => ENV["PYTHONPATH"],
-                                            :LIBARCHIVE => libarchive)
+    bin.env_script_all_files(libexec/"bin", :LIBARCHIVE => libarchive)
   end
 
   test do
     (testpath/"test1").write "test"
     cp testpath/"test1", testpath/"test2"
-    system "#{bin}/diffoscope", "test1", "test2"
+    system "#{bin}/diffoscope", "--progress", "test1", "test2"
   end
 end

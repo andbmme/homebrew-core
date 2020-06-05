@@ -1,48 +1,50 @@
 class Gedit < Formula
   desc "The GNOME text editor"
   homepage "https://wiki.gnome.org/Apps/Gedit"
-  url "https://download.gnome.org/sources/gedit/3.22/gedit-3.22.1.tar.xz"
-  sha256 "aa7bc3618fffa92fdb7daf2f57152e1eb7962e68561a9c92813d7bbb7fc9492b"
+  url "https://download.gnome.org/sources/gedit/3.36/gedit-3.36.2.tar.xz"
+  sha256 "6887554643c5b1b3862ac364d97b7b50224bff95e6758aeaa08f4a482b554197"
 
   bottle do
-    rebuild 1
-    sha256 "20a1c65040063c87ce7543c91bc5bf567c775b81f1895949f4a42d003a6f2c12" => :high_sierra
-    sha256 "5909c7a8820499ab0d76d2946fa2d91f4e81b7a385acfdbb7b987c3f974e4c7e" => :sierra
-    sha256 "1a333dc7184f3d57b609d561895a07f7c3fb4f442dc6b3bdcaaec472310f9f61" => :el_capitan
+    sha256 "3f62658cf0219af33b8a82b976cbd67ccd1c8d48443fb9353b57d58f6b7e6b1d" => :catalina
+    sha256 "aaa102d21d429ff56289cf1a379446932437925d346758281bbee7a12602aaf8" => :mojave
+    sha256 "5f6fedf5196f272f6b1f5b9314b4449e74432d7f277aa003bc54f134b9f88dd3" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "itstool" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
+  depends_on "vala" => :build
+  depends_on "adwaita-icon-theme"
   depends_on "atk"
   depends_on "cairo"
   depends_on "gdk-pixbuf"
   depends_on "gettext"
   depends_on "glib"
-  depends_on "pango"
-  depends_on "gtk+3"
-  depends_on "gtk-mac-integration"
   depends_on "gobject-introspection"
-  depends_on "gspell"
-  depends_on "iso-codes"
-  depends_on "libxml2"
-  depends_on "libpeas"
-  depends_on "gtksourceview3"
   depends_on "gsettings-desktop-schemas"
-  depends_on "adwaita-icon-theme"
+  depends_on "gspell"
+  depends_on "gtk+3"
+  depends_on "gtksourceview4"
+  depends_on "libpeas"
+  depends_on "libsoup"
+  depends_on "libxml2"
+  depends_on "pango"
+  depends_on "tepl"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--disable-updater",
-                          "--disable-schemas-compile",
-                          "--disable-python"
-    system "make", "install"
+    ENV["DESTDIR"] = "/"
+
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   def post_install
     system "#{Formula["glib"].opt_bin}/glib-compile-schemas", "#{HOMEBREW_PREFIX}/share/glib-2.0/schemas"
+    system "#{Formula["gtk+3"].opt_bin}/gtk3-update-icon-cache", "-qtf", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
   end
 
   test do
@@ -67,7 +69,8 @@ class Gedit < Formula
     glib = Formula["glib"]
     gobject_introspection = Formula["gobject-introspection"]
     gtkx3 = Formula["gtk+3"]
-    gtksourceview3 = Formula["gtksourceview3"]
+    gtksourceview4 = Formula["gtksourceview4"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libffi = Formula["libffi"]
     libpeas = Formula["libpeas"]
@@ -85,9 +88,10 @@ class Gedit < Formula
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gobject_introspection.opt_include}/gobject-introspection-1.0
-      -I#{gtksourceview3.opt_include}/gtksourceview-3.0
+      -I#{gtksourceview4.opt_include}/gtksourceview-4
       -I#{gtkx3.opt_include}/gtk-3.0
-      -I#{include}/gedit-3.14
+      -I#{harfbuzz.opt_include}/harfbuzz
+      -I#{include}/gedit-3.36
       -I#{libepoxy.opt_include}
       -I#{libffi.opt_lib}/libffi-3.0.13/include
       -I#{libpeas.opt_include}/libpeas-1.0
@@ -102,7 +106,7 @@ class Gedit < Formula
       -L#{gettext.opt_lib}
       -L#{glib.opt_lib}
       -L#{gobject_introspection.opt_lib}
-      -L#{gtksourceview3.opt_lib}
+      -L#{gtksourceview4.opt_lib}
       -L#{gtkx3.opt_lib}
       -L#{libpeas.opt_lib}
       -L#{lib}
@@ -112,14 +116,14 @@ class Gedit < Formula
       -lcairo-gobject
       -lgdk-3
       -lgdk_pixbuf-2.0
-      -lgedit
+      -lgedit-3.36
       -lgio-2.0
       -lgirepository-1.0
       -lglib-2.0
       -lgmodule-2.0
       -lgobject-2.0
       -lgtk-3
-      -lgtksourceview-3.0
+      -lgtksourceview-4.0
       -lintl
       -lpango-1.0
       -lpangocairo-1.0

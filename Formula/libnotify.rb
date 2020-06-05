@@ -1,26 +1,65 @@
 class Libnotify < Formula
   desc "Library that sends desktop notifications to a notification daemon"
   homepage "https://developer.gnome.org/libnotify"
-  url "https://download.gnome.org/sources/libnotify/0.7/libnotify-0.7.7.tar.xz"
-  sha256 "9cb4ce315b2655860c524d46b56010874214ec27e854086c1a1d0260137efc04"
+  url "https://download.gnome.org/sources/libnotify/0.7/libnotify-0.7.9.tar.xz"
+  sha256 "66c0517ed16df7af258e83208faaf5069727dfd66995c4bbc51c16954d674761"
 
   bottle do
-    sha256 "1c8198d015712f696baabadc8b00faf02be4c22a28ce9023429e26298d579741" => :high_sierra
-    sha256 "7928ed78b1d0f0be06bb7ad177499f336543abea03433cc050e7d0de4be1dc35" => :sierra
-    sha256 "edd371fcf6906fa7bbec21ce9ea038ce30e5c9fde400f6deef1eb89eb01e1601" => :el_capitan
-    sha256 "e05515c53cdb39f36ff6001d2ebb2ac95dc4fc678ba80638373f71f0073d1a9a" => :yosemite
+    cellar :any
+    sha256 "367a8d51cb565452392b9bc92c753ca641c23f91fc4ff93fb6166b63f2beafda" => :catalina
+    sha256 "e6d5a6a87f885bf421e6a70c9cef1c6aaf89db46a98216af6c06754246a8f896" => :mojave
+    sha256 "0560e601843a3e42a4823904dd5534212efd823292444a9588f1cf99ea8bc8f5" => :high_sierra
   end
 
+  depends_on "docbook-xsl" => :build
+  depends_on "gobject-introspection" => :build
+  depends_on "gtk-doc" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
   depends_on "gdk-pixbuf"
-  depends_on "gobject-introspection"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--disable-tests",
-                          "--enable-introspection"
-    system "make", "install"
+    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
+
+    mkdir "build" do
+      system "meson", *std_meson_args, "-Dtests=false", ".."
+      system "ninja"
+      system "ninja", "install"
+    end
+  end
+
+  test do
+    (testpath/"test.c").write <<~EOS
+      #include <libnotify/notify.h>
+
+      int main(int argc, char *argv[]) {
+        g_assert_true(notify_init("testapp"));
+        return 0;
+      }
+    EOS
+    gettext = Formula["gettext"]
+    glib = Formula["glib"]
+    gdk_pixbuf = Formula["gdk-pixbuf"]
+    flags = %W[
+      -I#{gettext.opt_include}
+      -I#{gdk_pixbuf.opt_include}/gdk-pixbuf-2.0
+      -I#{glib.opt_include}/glib-2.0
+      -I#{glib.opt_lib}/glib-2.0/include
+      -I#{include}
+      -D_REENTRANT
+      -L#{gettext.opt_lib}
+      -L#{glib.opt_lib}
+      -L#{gdk_pixbuf.opt_lib}
+      -L#{lib}
+      -lnotify
+      -lgdk_pixbuf-2.0
+      -lgio-2.0
+      -lglib-2.0
+      -lgobject-2.0
+      -lintl
+    ]
+    system ENV.cc, "test.c", "-o", "test", *flags
+    system "./test"
   end
 end

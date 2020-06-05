@@ -1,14 +1,15 @@
 class Sdl2 < Formula
   desc "Low-level access to audio, keyboard, mouse, joystick, and graphics"
   homepage "https://www.libsdl.org/"
-  url "https://libsdl.org/release/SDL2-2.0.7.tar.gz"
-  sha256 "ee35c74c4313e2eda104b14b1b86f7db84a04eeab9430d56e001cea268bf4d5e"
+  url "https://libsdl.org/release/SDL2-2.0.12.tar.gz"
+  sha256 "349268f695c02efbc9b9148a70b85e58cefbbf704abd3e91be654db7f1e2c863"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "d3436a34a1795c14dd71616ea222b06f47b82d46818fb845b630431f3f036de6" => :high_sierra
-    sha256 "8e0ed1c42064a78da85f0375fa32e36e2f6e94d33fa1acbf67b7b2777691aeed" => :sierra
-    sha256 "44aa4e28bac52c21e3d1751394d1927768817a6af3cedd8c54e23ae09e52cff3" => :el_capitan
+    sha256 "4dcd635465d16372ca7a7bb2b94221aa21de02f681a22e9239d095b66fb00c63" => :catalina
+    sha256 "8733b127dd4ba6179e6ad9e6336418df9dbad8eb13f05597c05e6916f2ff0543" => :mojave
+    sha256 "b71346aebd499ed30f6de2f58a333c50575bc3bf73fbba6dcaef5a04c58282c5" => :high_sierra
   end
 
   head do
@@ -19,63 +20,24 @@ class Sdl2 < Formula
     depends_on "libtool" => :build
   end
 
-  option "with-test", "Compile and install the tests"
-
-  # https://github.com/mistydemeo/tigerbrew/issues/361
-  if MacOS.version <= :snow_leopard
-    patch do
-      url "https://gist.githubusercontent.com/miniupnp/26d6e967570e5729a757/raw/1a86f3cdfadbd9b74172716abd26114d9cb115d5/SDL2-2.0.3_OSX_104.patch"
-      sha256 "4d01f05f02568e565978308e42e98b4da2b62b1451f71c29d24e11202498837e"
-    end
+  # Fix library extension in CMake config file.
+  # https://bugzilla.libsdl.org/show_bug.cgi?id=5039
+  patch do
+    url "https://bugzilla.libsdl.org/attachment.cgi?id=4263"
+    sha256 "07ea066e805f82d85e6472e767ba75d265cb262053901ac9a9e22c5f8ff187a5"
   end
 
   def install
-    # we have to do this because most build scripts assume that all sdl modules
+    # we have to do this because most build scripts assume that all SDL modules
     # are installed to the same prefix. Consequently SDL stuff cannot be
     # keg-only but I doubt that will be needed.
     inreplace %w[sdl2.pc.in sdl2-config.in], "@prefix@", HOMEBREW_PREFIX
 
-    system "./autogen.sh" if build.head? || build.devel?
+    system "./autogen.sh" if build.head?
 
-    args = %W[--prefix=#{prefix}]
-
-    # LLVM-based compilers choke on the assembly code packaged with SDL.
-    if ENV.compiler == :clang && DevelopmentTools.clang_build_version < 421
-      args << "--disable-assembly"
-    end
-    args << "--without-x"
-    args << "--disable-haptic" << "--disable-joystick" if MacOS.version <= :snow_leopard
-
+    args = %W[--prefix=#{prefix} --without-x]
     system "./configure", *args
     system "make", "install"
-
-    if build.with? "test"
-      ENV.prepend_path "PATH", bin
-      # We need the build to point at the newly-built (not yet linked) copy of SDL.
-      inreplace bin/"sdl2-config", "prefix=#{HOMEBREW_PREFIX}", "prefix=#{prefix}"
-      cd "test" do
-        # These test source files produce binaries which by default will reference
-        # some sample resources in the working directory.
-        # Let's point them to the test_extras directory we're about to set up instead!
-        inreplace %w[controllermap.c loopwave.c loopwavequeue.c testmultiaudio.c
-                     testoverlay2.c testsprite2.c],
-                  /"(\w+\.(?:bmp|dat|wav))"/,
-                  "\"#{pkgshare}/test_extras/\\1\""
-        system "./configure", "--without-x"
-        system "make"
-        # Tests don't have a "make install" target
-        (pkgshare/"tests").install %w[checkkeys controllermap loopwave loopwavequeue testaudioinfo
-                                      testerror testfile testgl2 testiconv testjoystick testkeys
-                                      testloadso testlock testmultiaudio testoverlay2 testplatform
-                                      testsem testshape testsprite2 testthread testtimer testver
-                                      testwm2 torturethread]
-        (pkgshare/"test_extras").install %w[axis.bmp button.bmp controllermap.bmp icon.bmp moose.dat
-                                            picture.xbm sample.bmp sample.wav shapes]
-        bin.write_exec_script Dir["#{pkgshare}/tests/*"]
-      end
-      # Point sdl-config back at the normal prefix once we've built everything.
-      inreplace bin/"sdl2-config", "prefix=#{prefix}", "prefix=#{HOMEBREW_PREFIX}"
-    end
   end
 
   test do

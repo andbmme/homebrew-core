@@ -1,19 +1,20 @@
 class Log4cxx < Formula
   desc "Library of C++ classes for flexible logging"
   homepage "https://logging.apache.org/log4cxx/index.html"
-  url "https://www.apache.org/dyn/closer.cgi?path=logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.tar.gz"
+  url "https://www.apache.org/dyn/closer.lua?path=logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.tar.gz"
+  mirror "https://archive.apache.org/dist/logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.tar.gz"
   sha256 "0de0396220a9566a580166e66b39674cb40efd2176f52ad2c65486c99c920c8c"
   revision 1
 
   bottle do
     cellar :any
+    sha256 "61d3bf62743bd2e2d6537f0f7d795eab7098d2a3917b526832f2eeebdbbb5171" => :catalina
+    sha256 "3394ba006562401352b3ba42857f9e8ccd3f84d23e4ce7c22041c0bd82d1cdda" => :mojave
     sha256 "0d29b911db2c77048046e048589fcf6739b72f25494145f8d0650d81b67a36f1" => :high_sierra
     sha256 "0e1c8e304f87bdb864f14e7b158e2f9e82ab4300a0ea144a8abaf9c8d5bc2976" => :sierra
     sha256 "16eb54dca4f5d772a23d55d9599947f93a8c6003df5d6a4ad468b99daeda9153" => :el_capitan
     sha256 "b96afe3f4e4b63017d2061028ed8792c4190996b1e008d8c87c3f52dba660ec5" => :yosemite
   end
-
-  option :cxx11
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
@@ -43,7 +44,6 @@ class Log4cxx < Formula
 
   def install
     ENV.O2 # Using -Os causes build failures on Snow Leopard.
-    ENV.cxx11 if build.cxx11?
 
     # Fixes build error with clang, old libtool scripts. cf. #12127
     # Reported upstream here: https://issues.apache.org/jira/browse/LOGCXX-396

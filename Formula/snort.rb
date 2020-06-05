@@ -1,67 +1,70 @@
 class Snort < Formula
   desc "Flexible Network Intrusion Detection System"
   homepage "https://www.snort.org"
-  url "https://www.snort.org/downloads/snort/snort-2.9.11.tar.gz"
-  sha256 "23a45e3ea1e155a3d871c691a10fe23f2bfcfe4d6abc0ebbcdc2ab1fccca14ee"
+  url "https://www.snort.org/downloads/snort/snort-2.9.16.tar.gz"
+  mirror "https://fossies.org/linux/misc/snort-2.9.16.tar.gz"
+  sha256 "9688d8edf1da09dec6574000fb3c0e62f99c56428587616e17c60103c0bcbad7"
 
   bottle do
     cellar :any
-    sha256 "a703be9360454c2031021a9db4894b495cf135178749914f336c35a017f26312" => :high_sierra
-    sha256 "94711a7c4ea9ed122b87d679fd92c68d63491a80ca0bf7024b20300b016c2c9e" => :sierra
-    sha256 "097879b36e1f2eeb463c92c2111abe2c261e082ab21fceb63372bb7567df9cf2" => :el_capitan
+    sha256 "41f8545fadaf23b86aaa02fe5d3e3e6904eae8055f7ca9b766fc377dfa4f1678" => :catalina
+    sha256 "bd3fce63dafd1dc91b9fcffb184f6e3a5719998dd003860915db92aa810490c0" => :mojave
+    sha256 "fbf46b9ec8c98e6b1cab4828f392168ca51086e63ccc5d67bbe41b108854cdd0" => :high_sierra
   end
 
-  option "with-debug", "Compile Snort with debug options enabled"
-
-  deprecated_option "enable-debug" => "with-debug"
-
   depends_on "pkg-config" => :build
-  depends_on "luajit"
   depends_on "daq"
   depends_on "libdnet"
+  depends_on "libpcap"
+  depends_on "luajit"
+  depends_on "nghttp2"
+  depends_on "openssl@1.1"
   depends_on "pcre"
-  depends_on "openssl"
+
+  uses_from_macos "bison" => :build
+  uses_from_macos "flex" => :build
 
   def install
-    openssl = Formula["openssl"]
+    openssl = Formula["openssl@1.1"]
+    libpcap = Formula["libpcap"]
 
     args = %W[
       --prefix=#{prefix}
       --sysconfdir=#{etc}/snort
+      --disable-debug
       --disable-dependency-tracking
       --disable-silent-rules
+      --enable-active-response
+      --enable-flexresp3
       --enable-gre
       --enable-mpls
-      --enable-targetbased
+      --enable-normalizer
+      --enable-react
+      --enable-reload
       --enable-sourcefire
+      --enable-targetbased
       --with-openssl-includes=#{openssl.opt_include}
       --with-openssl-libraries=#{openssl.opt_lib}
-      --enable-active-response
-      --enable-normalizer
-      --enable-reload
-      --enable-react
-      --enable-flexresp3
+      --with-libpcap-includes=#{libpcap.opt_include}
+      --with-libpcap-libraries=#{libpcap.opt_lib}
     ]
-
-    if build.with? "debug"
-      args << "--enable-debug"
-      args << "--enable-debug-msgs"
-    else
-      args << "--disable-debug"
-    end
 
     system "./configure", *args
     system "make", "install"
 
+    # Currently configuration files in etc have strange permissions which causes postinstall to fail
+    # Reported to upstream: https://lists.snort.org/pipermail/snort-devel/2020-April/011466.html
+    (buildpath/"etc").children.each { |f| chmod 0644, f }
     rm Dir[buildpath/"etc/Makefile*"]
-    (etc/"snort").install Dir[buildpath/"etc/*"]
+    (etc/"snort").install (buildpath/"etc").children
   end
 
-  def caveats; <<~EOS
-    For snort to be functional, you need to update the permissions for /dev/bpf*
-    so that they can be read by non-root users.  This can be done manually using:
-        sudo chmod o+r /dev/bpf*
-    or you could create a startup item to do this for you.
+  def caveats
+    <<~EOS
+      For snort to be functional, you need to update the permissions for /dev/bpf*
+      so that they can be read by non-root users.  This can be done manually using:
+          sudo chmod o+r /dev/bpf*
+      or you could create a startup item to do this for you.
     EOS
   end
 

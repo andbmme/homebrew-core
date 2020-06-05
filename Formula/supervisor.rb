@@ -3,23 +3,17 @@ class Supervisor < Formula
 
   desc "Process Control System"
   homepage "http://supervisord.org/"
-  url "https://github.com/Supervisor/supervisor/archive/3.3.3.tar.gz"
-  sha256 "cb835ee21a755d32396f5ccb40daa4ce8bb4a24d92f8bf3f25d3a76ba2fb0bc3"
+  url "https://github.com/Supervisor/supervisor/archive/4.2.0.tar.gz"
+  sha256 "05031f36ad15cad47fb56f01d8e075f952ae39ba8ce492ea790ebb310e3f0368"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "f6f7aff7531170eb3fcf54066dfd485a2e0e4fe13323a881fa21193a74db9277" => :high_sierra
-    sha256 "ca6e0a9584230313a3e9080600b3dcb60b669a1122619c14096dd65308b5fec4" => :sierra
-    sha256 "67c6110abfcc4b9a53a4143bad1fe12259a41c7fee96400e15e231c4cfd21aa3" => :el_capitan
-    sha256 "4070b89b70cbdb2c9a68214fb4bc03f8b8363e33c9f7fde8b782f6f057d87e57" => :yosemite
+    sha256 "2e3d14abf6e8b63001bfe0b128da3853db20bec5e99073eeac7b5e6b63b8bd1e" => :catalina
+    sha256 "2d860cc6e534901d1c9c9d330955aa5b7e3c5e4bb9d460180eca222742545957" => :mojave
+    sha256 "cf5c9fe0c5d1af7d39000624b00b96d5b945da9a79b3273bc245237f477ac105" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
-
-  resource "meld3" do
-    url "https://files.pythonhosted.org/packages/45/a0/317c6422b26c12fe0161e936fc35f36552069ba8e6f7ecbd99bbffe32a5f/meld3-1.0.2.tar.gz"
-    sha256 "f7b754a0fde7a4429b2ebe49409db240b5699385a572501bb0d5627d299f9558"
-  end
+  depends_on "python@3.8"
 
   def install
     inreplace buildpath/"supervisor/skel/sample.conf" do |s|
@@ -33,6 +27,11 @@ class Supervisor < Formula
     virtualenv_install_with_resources
 
     etc.install buildpath/"supervisor/skel/sample.conf" => "supervisord.ini"
+  end
+
+  def post_install
+    (var/"run").mkpath
+    (var/"log").mkpath
   end
 
   plist_options :manual => "supervisord -c #{HOMEBREW_PREFIX}/etc/supervisord.ini"
@@ -60,11 +59,6 @@ class Supervisor < Formula
         </dict>
       </plist>
     EOS
-  end
-
-  def post_install
-    (var/"run").mkpath
-    (var/"log").mkpath
   end
 
   test do

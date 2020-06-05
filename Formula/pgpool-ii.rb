@@ -1,16 +1,16 @@
 class PgpoolIi < Formula
   desc "PostgreSQL connection pool server"
   homepage "https://www.pgpool.net/mediawiki/index.php/Main_Page"
-  url "https://www.pgpool.net/download.php?f=pgpool-II-3.6.7.tar.gz"
-  sha256 "09cfe2cb36b9171d4a987a8b100e298e46d6a369c1b61d9e1a47d442ce16e249"
+  url "https://www.pgpool.net/mediawiki/images/pgpool-II-4.1.2.tar.gz"
+  sha256 "d13b587c1268fadb687adc1a2255cf573f9eaea511a9661955ceb7deb6821811"
 
   bottle do
-    sha256 "003329039ed94efc5ed99c2ff9c903323fe1061c7d545c791f62836ea1e94bd6" => :high_sierra
-    sha256 "ab710a008b3a1692f0773a15bd2a979f31588e64a0647536d273c529b1d700fb" => :sierra
-    sha256 "c1590bcbf5b65e0b4f4f0438fbc5f86e5c6c876d971443ade09bdbeeeab05eed" => :el_capitan
+    sha256 "5f64f049dd3f0b8211dfda69c4099035e3dd5192907507329c5dc03b1deed3ac" => :catalina
+    sha256 "a7415fcbf87a371ceb7545b24946e198982aa8af29583506ff6ffaeb0730c92b" => :mojave
+    sha256 "d3a77fd114c9820e94ca5a16bfc450dffdc1960baaeeba7435eb03390d97f77b" => :high_sierra
   end
 
-  depends_on :postgresql
+  depends_on "postgresql"
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}",

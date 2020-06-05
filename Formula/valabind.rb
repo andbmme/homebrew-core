@@ -1,42 +1,32 @@
 class Valabind < Formula
   desc "Vala bindings for radare, reverse engineering framework"
-  homepage "https://radare.org/"
-  url "https://github.com/radare/valabind/archive/1.4.0.tar.gz"
-  sha256 "b2e4939912feada6138b8269d228ea82fb0f1391fd2e2e7003f404677b0cdbc9"
+  homepage "https://github.com/radare/valabind"
+  url "https://github.com/radare/valabind/archive/1.7.1.tar.gz"
+  sha256 "b463b18419de656e218855a2f30a71051f03a9c4540254b4ceaea475fb79102e"
+  revision 4
   head "https://github.com/radare/valabind.git"
 
   bottle do
-    sha256 "09ecd58afe5c101c661d20c18a229ca4d8204adfd65d508e6e46387faf8a5980" => :high_sierra
-    sha256 "05e13594c23aca12a1ea9c7ff4a5e3a17bbe1a68a65dea80d5a8aa89892d26cf" => :sierra
-    sha256 "bf466be7a14313608f3d68a86135b2b25094457c0fb89b7dd389f57fc4cd173c" => :el_capitan
+    cellar :any
+    sha256 "c5ad6fe97fa944521c3848f282a940aa3f37d22bc96a472d6f320715f679b38b" => :catalina
+    sha256 "e120768e4de31c6d5efcfd3e09eacf59c9b8d2388f3a402a296fc13a50c35263" => :mojave
+    sha256 "90ee3663f74b52b5efb182792bbb4bd76780929bc7444dd319dcf51d27888390" => :high_sierra
   end
 
-  depends_on "pkg-config" => :run # :run, not :build, for vala
-  depends_on "swig" => :run
+  depends_on "pkg-config" => :build
+  depends_on "swig"
+  depends_on "vala"
 
-  # vala dependencies
-  depends_on "gettext"
-  depends_on "glib"
+  uses_from_macos "bison" => :build
+  uses_from_macos "flex" => :build
 
-  # Upstream issue "Build failure with vala 0.38.0"
-  # Reported 6 Sep 2017 https://github.com/radare/valabind/issues/43
-  resource "vala" do
-    url "https://download.gnome.org/sources/vala/0.36/vala-0.36.5.tar.xz"
-    sha256 "7ae7eb8a976005afecf4f647b9043f2bb11e8b263c7fe9e905ab740b3d8a9f40"
+  # Vala 0.48 compatibility
+  patch do
+    url "https://github.com/radare/valabind/commit/9d4fb181e24346a8c5d570290fa9892ce10c8c3b.diff?full_index=1"
+    sha256 "db3f6afc2e4ff968d887c1f86ed8a666e2a2f8210e37a18297372265f24cd767"
   end
 
   def install
-    resource("vala").stage do
-      system "./configure", "--disable-dependency-tracking",
-                            "--disable-silent-rules",
-                            "--prefix=#{libexec}"
-      system "make"
-      system "make", "install"
-    end
-
-    ENV.prepend_path "PATH", libexec/"bin"
-    ENV.prepend_path "PKG_CONFIG_PATH", libexec/"lib/pkgconfig"
-
     system "make"
     system "make", "install", "PREFIX=#{prefix}"
   end

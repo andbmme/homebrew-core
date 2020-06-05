@@ -3,25 +3,26 @@
 class Mercurial < Formula
   desc "Scalable distributed version control system"
   homepage "https://mercurial-scm.org/"
-  url "https://mercurial-scm.org/release/mercurial-4.4.1.tar.gz"
-  sha256 "8f2a5512d6cc2ffb08988aef639330a2f0378e4ac3ee0e1fbbdb64d9fff56246"
+  url "https://www.mercurial-scm.org/release/mercurial-5.4.tar.gz"
+  sha256 "1df8d1978aefcbb65dc51e3666a452583f47aeaf3c5682e4c00a3b23cd805d6a"
 
   bottle do
-    sha256 "cee57316679bbb37b89ed087740b085f65b8748eaab340df9181a1fc8ac9c390" => :high_sierra
-    sha256 "d10a8844d95103586f9bf8107518fb3aa26f6873ff80ebe2a49cec29a98263b7" => :sierra
-    sha256 "8c200ad781d5b3ab265f4e9bfbc8f6ee3fde5337cda0a89c73edcf01142da0e4" => :el_capitan
+    sha256 "9531d13dbfa541fafa87d364c82a3ce46436d5dac8f63ac5bf13577226e83985" => :catalina
+    sha256 "e2a67d9eada384ceebfc13f0e32fece7cd4334e46f31a45d5f628a3ebcbada18" => :mojave
+    sha256 "35da4d9f77fef15bfb8780a28377e51f339db57d7b01095f8b3b6974a0e6414f" => :high_sierra
   end
 
-  option "with-custom-python", "Install against the python in PATH instead of Homebrew's python"
-  depends_on :python
+  depends_on "python@3.8"
 
   def install
-    system "make", "PREFIX=#{prefix}", "install-bin"
+    ENV["HGPYTHON3"] = "1"
+
+    system "make", "PREFIX=#{prefix}", "PYTHON=python3", "install-bin"
 
     # Install chg (see https://www.mercurial-scm.org/wiki/CHg)
     cd "contrib/chg" do
-      system "make", "PREFIX=#{prefix}", "HGPATH=#{bin}/hg", \
-             "HG=#{bin}/hg"
+      system "make", "PREFIX=#{prefix}", "PYTHON=python3", "HGPATH=#{bin}/hg",
+                     "HG=#{bin}/hg"
       bin.install "chg"
     end
 
@@ -44,8 +45,10 @@ class Mercurial < Formula
 
   def caveats
     return unless (opt_bin/"hg").exist?
+
     cacerts_configured = `#{opt_bin}/hg config web.cacerts`.strip
     return if cacerts_configured.empty?
+
     <<~EOS
       Homebrew has detected that Mercurial is configured to use a certificate
       bundle file as its trust store for TLS connections instead of using the

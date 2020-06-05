@@ -6,13 +6,11 @@ class Qwtpolar < Formula
   revision 3
 
   bottle do
-    sha256 "41e46c5c73df6518ec55cd0c7fba26d98f6b9bce72da7e40a1dba12e6e3f88a5" => :high_sierra
-    sha256 "b558ba6e4b4b269cd8ff207eccf1882073103aa702e2848a7a0f0cce711aff73" => :sierra
-    sha256 "8d9e370d42d980081cf7626fc9a0ff7315e05fe1c41dc48c9de21edf353aab5d" => :el_capitan
-    sha256 "e9ac24fce3339281d5b17f38a6c0fc1ff11b2d1afa3f7f727b620992348bf4c4" => :yosemite
+    rebuild 1
+    sha256 "29e8dcae83fabafd75613c3299482b3d126ade4837b6c312d882994726fe3667" => :catalina
+    sha256 "29e8dcae83fabafd75613c3299482b3d126ade4837b6c312d882994726fe3667" => :mojave
+    sha256 "5bd97a27b353a338b97b1e5f33f1c95b568dacc9e49f9d56a1e085bf554264bb" => :high_sierra
   end
-
-  option "without-plugin", "Skip building the Qt Designer plugin"
 
   depends_on "qt"
   depends_on "qwt"
@@ -22,19 +20,14 @@ class Qwtpolar < Formula
   patch :DATA
 
   def install
-    cd "doc" do
-      doc.install "html"
-      man3.install Dir["man/man3/{q,Q}wt*"]
-    end
-    # Remove leftover doxygen files, so they don't get installed
+    # Doc install is broken, remove it to avoid errors
     rm_r "doc"
 
     inreplace "qwtpolarconfig.pri" do |s|
-      s.gsub! /^(\s*)QWT_POLAR_INSTALL_PREFIX\s*=\s*(.*)$/,
-              "\\1QWT_POLAR_INSTALL_PREFIX=#{prefix}"
-      s.sub! /\+(=\s*QwtPolarDesigner)/, "-\\1" if build.without? "plugin"
+      s.gsub!(/^(\s*)QWT_POLAR_INSTALL_PREFIX\s*=\s*(.*)$/,
+              "\\1QWT_POLAR_INSTALL_PREFIX=#{prefix}")
       # Don't build examples now, since linking flawed until qwtpolar installed
-      s.sub! /\+(=\s*QwtPolarExamples)/, "-\\1"
+      s.sub!(/\+(=\s*QwtPolarExamples)/, "-\\1")
 
       # Install Qt plugin in `lib/qt/plugins/designer`, not `plugins/designer`.
       s.sub! %r{(= \$\$\{QWT_POLAR_INSTALL_PREFIX\})/(plugins/designer)$},
@@ -65,8 +58,12 @@ class Qwtpolar < Formula
       system Formula["qt"].opt_bin/"qmake"
       rm_rf "bin" # just in case
       system "make"
-      assert_predicate Pathname.pwd/"bin/polardemo.app/Contents/MacOS/polardemo", :exist?, "Failed to build polardemo"
-      assert_predicate Pathname.pwd/"bin/spectrogram.app/Contents/MacOS/spectrogram", :exist?, "Failed to build spectrogram"
+      assert_predicate Pathname.pwd/"bin/polardemo.app/Contents/MacOS/polardemo",
+                       :exist?,
+                       "Failed to build polardemo"
+      assert_predicate Pathname.pwd/"bin/spectrogram.app/Contents/MacOS/spectrogram",
+                       :exist?,
+                       "Failed to build spectrogram"
     end
   end
 end

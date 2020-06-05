@@ -1,16 +1,22 @@
 class BashCompletionAT2 < Formula
   desc "Programmable completion for Bash 4.1+"
   homepage "https://github.com/scop/bash-completion"
-  url "https://github.com/scop/bash-completion/releases/download/2.7/bash-completion-2.7.tar.xz"
-  sha256 "41ba892d3f427d4a686de32673f35401bc947a7801f684127120cdb13641441e"
-  head "https://github.com/scop/bash-completion.git"
+  url "https://github.com/scop/bash-completion/releases/download/2.10/bash-completion-2.10.tar.xz"
+  sha256 "123c17998e34b937ce57bb1b111cd817bc369309e9a8047c0bcf06ead4a3ec92"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "cbd57a0d85d776ca61c6d9dbf6ae3a81d1c2f89c98852a355b5b0ccb5dec20dc" => :high_sierra
-    sha256 "e6f6452c42646f3bc8687ed02811612c8689c34d8b12b6826042ea3b0598f53d" => :sierra
-    sha256 "f3b55c185807dc431ec0d01693c99fdad34c25f644bd2e9d54225df2610f7734" => :el_capitan
-    sha256 "f3b55c185807dc431ec0d01693c99fdad34c25f644bd2e9d54225df2610f7734" => :yosemite
+    sha256 "b162bc315662861c84f428b262c9883d34ff7eab80ddff09148f81aef4d5d7ff" => :catalina
+    sha256 "b162bc315662861c84f428b262c9883d34ff7eab80ddff09148f81aef4d5d7ff" => :mojave
+    sha256 "b162bc315662861c84f428b262c9883d34ff7eab80ddff09148f81aef4d5d7ff" => :high_sierra
+  end
+
+  head do
+    url "https://github.com/scop/bash-completion.git"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
 
   depends_on "bash"
@@ -18,18 +24,22 @@ class BashCompletionAT2 < Formula
   conflicts_with "bash-completion", :because => "Differing version of same formula"
 
   def install
-    inreplace "bash_completion", "readlink -f", "readlink"
+    inreplace "bash_completion" do |s|
+      s.gsub! "readlink -f", "readlink"
+      # Automatically read Homebrew's existing v1 completions
+      s.gsub! ":-/etc/bash_completion.d", ":-#{etc}/bash_completion.d"
+    end
 
-    system "./configure", "--prefix=#{prefix}", "--sysconfdir=#{etc}"
+    system "autoreconf", "-i" if build.head?
+    system "./configure", "--prefix=#{prefix}"
     ENV.deparallelize
     system "make", "install"
   end
 
-  def caveats; <<~EOS
-    Add the following to your ~/.bash_profile:
-      if [ -f #{HOMEBREW_PREFIX}/share/bash-completion/bash_completion ]; then
-        . #{HOMEBREW_PREFIX}/share/bash-completion/bash_completion
-      fi
+  def caveats
+    <<~EOS
+      Add the following line to your ~/.bash_profile:
+        [[ -r "#{etc}/profile.d/bash_completion.sh" ]] && . "#{etc}/profile.d/bash_completion.sh"
     EOS
   end
 

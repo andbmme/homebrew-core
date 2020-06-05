@@ -1,15 +1,14 @@
 class Gtkdatabox < Formula
   desc "Widget for live display of large amounts of changing data"
   homepage "https://sourceforge.net/projects/gtkdatabox/"
-  url "https://downloads.sourceforge.net/project/gtkdatabox/gtkdatabox/0.9.3.0/gtkdatabox-0.9.3.0.tar.gz"
-  sha256 "1f426b525c31a9ba8bf2b61084b7aef89eaed11f8d0b2a54bde467da16692ff2"
+  url "https://downloads.sourceforge.net/project/gtkdatabox/gtkdatabox/0.9.3.1/gtkdatabox-0.9.3.1.tar.gz"
+  sha256 "d04938d969d5458bd0df1b4fa22f647fb2eeeef75555a71f967e6c039fb4bde5"
 
   bottle do
     cellar :any
-    sha256 "b75b6701d5d94ce047235f1957a7be2a5f3c08ec1ed1eae8c6b6981c9d13add0" => :high_sierra
-    sha256 "f58cf9bd17de4573596172b6ea10c4b2892f75c8dd597f5c98d74e30f21aacc6" => :sierra
-    sha256 "eed0f8e816ec34ae1995e14f6596aeee02cb51f2b8f12a90715431de8847ca8f" => :el_capitan
-    sha256 "f18139540018b72756a5ed3c89cd67e4235d75aa61bd15a7b86825441f4d33cd" => :yosemite
+    sha256 "e85124ef7180c8803f8700e9269a47d3b5841c1cdace25e6914a50a0b7389dd1" => :catalina
+    sha256 "bfb185bdad65010d94e7ec0d343f11dafb0135adecf0480a43b705a54b062ff1" => :mojave
+    sha256 "f0b09b52354b68f4bc4e2d01dcd970f5f5f6f549141dd75af3734a9b3c1f0b2f" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
@@ -38,6 +37,7 @@ class Gtkdatabox < Formula
     gettext = Formula["gettext"]
     glib = Formula["glib"]
     gtkx = Formula["gtk+"]
+    harfbuzz = Formula["harfbuzz"]
     libpng = Formula["libpng"]
     pango = Formula["pango"]
     pixman = Formula["pixman"]
@@ -52,6 +52,7 @@ class Gtkdatabox < Formula
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gtkx.opt_include}/gtk-2.0
       -I#{gtkx.opt_lib}/gtk-2.0/include
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}
       -I#{libpng.opt_include}/libpng16
       -I#{pango.opt_include}/pango-1.0

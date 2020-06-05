@@ -1,14 +1,13 @@
 class Msitools < Formula
   desc "Windows installer (.MSI) tool"
   homepage "https://wiki.gnome.org/msitools"
-  url "https://download.gnome.org/sources/msitools/0.97/msitools-0.97.tar.xz"
-  sha256 "3a5b286c9ae3a7b7126a4a95506d12f34ac91e1a564c99e67d9644fee88fc65e"
+  url "https://download.gnome.org/sources/msitools/0.100/msitools-0.100.tar.xz"
+  sha256 "bbf1a6e3a9c2323b860a3227ac176736a3eafc4a44a67346c6844591f10978ea"
 
   bottle do
-    sha256 "5e8b16daa36ebf7a12b1e3c740c2cdac418b55fd143e8c9db13e21e6cdefeade" => :high_sierra
-    sha256 "9998081784b1b9db641d50425306010fc8614b1f3da28014148d409f636e4779" => :sierra
-    sha256 "0afe60bc5926135b385307720c771e687dd0d246ba9d7dc4e8acf5eec51a13a5" => :el_capitan
-    sha256 "87c8aebb5180826e9a45e2fd8c03f2b33a2df7f250761ef52a82d0b1a0055d3c" => :yosemite
+    sha256 "f9b65f68c973c323e96a0492df562bae32e3ede79d9e5a6f24b89f53ef085883" => :catalina
+    sha256 "b7646423954ae62a8dcb8ee413f98e0f5e1c4b8a73876255fcd2f0371e547f92" => :mojave
+    sha256 "fd8689ba0902ed4d784f85969d281a0e1c58bb76f0fe17a93d96ba2d3f845cdb" => :high_sierra
   end
 
   depends_on "intltool" => :build
@@ -19,6 +18,21 @@ class Msitools < Formula
   depends_on "glib"
   depends_on "libgsf"
   depends_on "vala"
+
+  # Workaround for https://gitlab.gnome.org/GNOME/msitools/issues/15
+  # Merged upstream in the following commits:
+  # https://gitlab.gnome.org/GNOME/msitools/commit/248450a2f2a23df59428fa816865a26f7e2496e0
+  # https://gitlab.gnome.org/GNOME/msitools/commit/9bbcc6da06ccf6144258c26ddcaab3262538d3ce
+  # Remove in next release.
+  patch do
+    url "https://gitlab.gnome.org/GNOME/msitools/commit/248450a2f2a23df59428fa816865a26f7e2496e0.diff"
+    sha256 "5046316e61af8af32a2b7d4ed2579a88fe0618e56d0aca32fea2c8a64b747f06"
+  end
+
+  patch do
+    url "https://gitlab.gnome.org/GNOME/msitools/commit/9bbcc6da06ccf6144258c26ddcaab3262538d3ce.diff"
+    sha256 "fadc1c5ade1afd8add5f5a4997a10098efa9f24a5788230a16af89965551c1c7"
+  end
 
   def install
     system "./configure", "--disable-dependency-tracking",

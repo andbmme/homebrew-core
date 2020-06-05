@@ -1,18 +1,17 @@
 class Hevea < Formula
   desc "LaTeX-to-HTML translator"
   homepage "http://hevea.inria.fr/"
-  url "http://hevea.inria.fr/old/hevea-2.31.tar.gz"
-  sha256 "fbd7ad20aff45e557f5835f99a53d29a1753657cf2c004f26de83345b1b5b997"
+  url "http://hevea.inria.fr/old/hevea-2.34.tar.gz"
+  sha256 "3ad08a0dce6675df3caa912ec1497d8019ce10733263092bbb7482c4fbd7fedf"
 
   bottle do
-    sha256 "b4ed09c5e29b302070a67251c8c87c56bca0817c704438fbd013fa5370bb0fbc" => :high_sierra
-    sha256 "876829b6fea3a803ad583e0939fd7272618f1e82a21da4e73e0b581238dc34e0" => :sierra
-    sha256 "5689cf43754e25c57bfea971d44186e737d73bab0f2489956861a98bcdb065a4" => :el_capitan
+    sha256 "34fd968c75f335330d256da9ad1b3e39b65b4286deb36810f898a6a729794b41" => :catalina
+    sha256 "780ecfdaaac0985d9d9a6ef2b92c966d101144637bb65c41880f9b71c27c3c13" => :mojave
+    sha256 "851ce38d9468eee9b2548f303e1e9d029e863dadcf90caa68039b8615b5acf07" => :high_sierra
   end
 
-  depends_on "ocaml"
   depends_on "ocamlbuild" => :build
-  depends_on "ghostscript" => :optional
+  depends_on "ocaml"
 
   def install
     ENV["PREFIX"] = prefix

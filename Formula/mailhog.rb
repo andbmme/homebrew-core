@@ -112,6 +112,8 @@ class Mailhog < Formula
 
   bottle do
     cellar :any_skip_relocation
+    sha256 "f079f8175a4669000f5d0cc30e3c091675cc97cf03473503f0974f20bdfbf88b" => :catalina
+    sha256 "f74c763c363961bf74dbd9aec7ee4d4a1faa010184c765889f23b7018dc58e39" => :mojave
     sha256 "be78e98dffa8a35f0aa435fdc4f56b40614b6dad6759ab23d7c55ea88f999644" => :high_sierra
     sha256 "fa2fad0872e20bc0d8e302306e38c0a66fa7c92f3f0c61ff6952e3ec2de089dc" => :sierra
     sha256 "ee9851eae56a0b8f2e52274ee358323dc4887a1e7c40ee8f1e7a9b0ae0bc07dd" => :el_capitan
@@ -138,27 +140,28 @@ class Mailhog < Formula
 
   plist_options :manual => "MailHog"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>KeepAlive</key>
-      <true/>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>#{opt_bin}/MailHog</string>
-      </array>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>StandardErrorPath</key>
-      <string>#{var}/log/mailhog.log</string>
-      <key>StandardOutPath</key>
-      <string>#{var}/log/mailhog.log</string>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>KeepAlive</key>
+        <true/>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/MailHog</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>StandardErrorPath</key>
+        <string>#{var}/log/mailhog.log</string>
+        <key>StandardOutPath</key>
+        <string>#{var}/log/mailhog.log</string>
+      </dict>
+      </plist>
     EOS
   end
 

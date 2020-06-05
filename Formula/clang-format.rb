@@ -1,77 +1,65 @@
 class ClangFormat < Formula
   desc "Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript"
   homepage "https://clang.llvm.org/docs/ClangFormat.html"
-  version "2017-06-22"
+  version_scheme 1
+  head "https://github.com/llvm/llvm-project.git"
 
   stable do
-    if MacOS.version >= :sierra
-      url "https://llvm.org/svn/llvm-project/llvm/tags/google/stable/2017-06-22/", :using => :svn
-    else
-      url "http://llvm.org/svn/llvm-project/llvm/tags/google/stable/2017-06-22/", :using => :svn
-    end
+    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/llvm-10.0.0.src.tar.xz"
+    sha256 "df83a44b3a9a71029049ec101fb0077ecbbdf5fe41e395215025779099a98fdf"
 
     resource "clang" do
-      if MacOS.version >= :sierra
-        url "https://llvm.org/svn/llvm-project/cfe/tags/google/stable/2017-06-22/", :using => :svn
-      else
-        url "http://llvm.org/svn/llvm-project/cfe/tags/google/stable/2017-06-22/", :using => :svn
-      end
+      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang-10.0.0.src.tar.xz"
+      sha256 "885b062b00e903df72631c5f98b9579ed1ed2790f74e5646b4234fa084eacb21"
+    end
+
+    resource "libcxx" do
+      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/libcxx-10.0.0.src.tar.xz"
+      sha256 "270f8a3f176f1981b0f6ab8aa556720988872ec2b48ed3b605d0ced8d09156c7"
     end
   end
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "2ed95f4747c71e4c456fbc9a0851324d7036deac8f3b7d15c1b4a04299239574" => :high_sierra
-    sha256 "9d02a904e0d76bbb5f814d952a8c4b3e15e0f6d671c0c53a90272fcefb0ada88" => :sierra
-    sha256 "184425911fe753006214f0f1dcd9c87e0e7c171f737d916445eadc760eac9eb8" => :el_capitan
-    sha256 "4a2146f1fc5009e79d8ca10c6371c3443ac2069e851c29e08ee01f2e710c5ff0" => :yosemite
-  end
-
-  head do
-    if MacOS.version >= :sierra
-      url "https://llvm.org/svn/llvm-project/llvm/trunk/", :using => :svn
-    else
-      url "http://llvm.org/svn/llvm-project/llvm/trunk/", :using => :svn
-    end
-
-    resource "clang" do
-      if MacOS.version >= :sierra
-        url "https://llvm.org/svn/llvm-project/cfe/trunk/", :using => :svn
-      else
-        url "http://llvm.org/svn/llvm-project/cfe/trunk/", :using => :svn
-      end
-    end
+    sha256 "7a2d877df6d298cba78b2ea3e543b5a874cf7af853538d9e1ae4b74b5f69bb65" => :catalina
+    sha256 "91e010b88d1779626bd693c6df0da1e10156887bc5bc2d3ed6500965ea66ec96" => :mojave
+    sha256 "dc9b3fe7f1b043286fb5554d26a70defabf0aa668b2861624451005c9593eca3" => :high_sierra
   end
 
   depends_on "cmake" => :build
   depends_on "ninja" => :build
-  depends_on "subversion" => :build
 
-  resource "libcxx" do
-    url "https://releases.llvm.org/4.0.0/libcxx-4.0.0.src.tar.xz"
-    sha256 "4f4d33c4ad69bf9e360eebe6b29b7b19486948b1a41decf89d4adec12473cf96"
-  end
+  uses_from_macos "libxml2"
+  uses_from_macos "ncurses"
+  uses_from_macos "zlib"
 
   def install
-    (buildpath/"projects/libcxx").install resource("libcxx")
-    (buildpath/"tools/clang").install resource("clang")
+    if build.head?
+      ln_s buildpath/"libcxx", buildpath/"llvm/projects/libcxx"
+      ln_s buildpath/"clang", buildpath/"llvm/tools/clang"
+    else
+      (buildpath/"projects/libcxx").install resource("libcxx")
+      (buildpath/"tools/clang").install resource("clang")
+    end
 
-    mkdir "build" do
+    llvmpath = build.head? ? buildpath/"llvm" : buildpath
+
+    mkdir llvmpath/"build" do
       args = std_cmake_args
-      args << "-DCMAKE_OSX_SYSROOT=/" unless MacOS::Xcode.installed?
       args << "-DLLVM_ENABLE_LIBCXX=ON"
       args << ".."
       system "cmake", "-G", "Ninja", *args
       system "ninja", "clang-format"
-      bin.install "bin/clang-format"
     end
-    bin.install "tools/clang/tools/clang-format/git-clang-format"
-    (share/"clang").install Dir["tools/clang/tools/clang-format/clang-format*"]
+
+    bin.install llvmpath/"build/bin/clang-format"
+    bin.install llvmpath/"tools/clang/tools/clang-format/git-clang-format"
+    (share/"clang").install Dir[llvmpath/"tools/clang/tools/clang-format/clang-format*"]
   end
 
   test do
     # NB: below C code is messily formatted on purpose.
-    (testpath/"test.c").write <<-EOS
+    (testpath/"test.c").write <<~EOS
       int         main(char *args) { \n   \t printf("hello"); }
     EOS
 

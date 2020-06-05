@@ -1,21 +1,24 @@
 class Libtrng < Formula
   desc "Tina's Random Number Generator Library"
   homepage "https://www.numbercrunch.de/trng/"
-  url "https://www.numbercrunch.de/trng/trng-4.19.tar.gz"
-  sha256 "36b49961c631ae01d770ff481796c8b280e18c6b6e6b5ca00f2b868533b0492e"
+  url "https://www.numbercrunch.de/trng/trng-4.22.tar.gz"
+  sha256 "6acff0a6136e41cbf0b265ae1f4392c8f4394ecfe9803bc98255e9e8d926f3d8"
 
   bottle do
     cellar :any
-    sha256 "5ae8a961a4bc56da1347d97aff8f75f019a35f475cf756a7534ddb88fd151b15" => :high_sierra
-    sha256 "ae717cd2fe16f077d13b6ea286d6ff5a4eaddc03829c88b2536e679a046302c3" => :sierra
-    sha256 "f74d4d146c484604d4f33e43068ba8629bbea8757b63456cc8405ded55993e85" => :el_capitan
-    sha256 "b34fb6439f66eec2f315d678208baf4444a1a89d82db2e485770ff3bea364895" => :yosemite
+    sha256 "b0e5af117a32d265de30662de4d7ef61e412853f262949e86ac1ff91dfd69875" => :catalina
+    sha256 "4b753374a4fb6305e417ea5d89237f6e62b47b8c9e2c034c76e26475184de48c" => :mojave
+    sha256 "4f269f561d5b8b692189e90cba163578ad68b2fa83a84660d8da4d367c4a2e93" => :high_sierra
   end
 
+  depends_on "cmake" => :build
+
+  # Examples do not build. Should be fixed in next release.
+  # https://github.com/rabauke/trng4/commit/78f7aea798b12603d9a2f6c68e19692f61c70647
+  patch :DATA
+
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+    system "cmake", ".", *std_cmake_args
     system "make"
     system "make", "install"
   end
@@ -32,7 +35,22 @@ class Libtrng < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "test.cpp", "-o", "test", "-I#{include}", "-L#{lib}", "-ltrng4"
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", "-I#{include}", "-L#{lib}", "-ltrng4"
     system "./test"
   end
 end
+
+__END__
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index a916560..b29ab99 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -6,7 +6,7 @@ find_package(OpenMP)
+ find_package(TBB)
+
+ include_directories(..)
+-link_libraries(trng4)
++link_libraries(trng4_static)
+ link_directories(${PROJECT_BINARY_DIR}/trng)
+
+ add_executable(hello_world hello_world.cc)

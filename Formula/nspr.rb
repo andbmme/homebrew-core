@@ -1,14 +1,14 @@
 class Nspr < Formula
   desc "Platform-neutral API for system-level and libc-like functions"
   homepage "https://developer.mozilla.org/docs/Mozilla/Projects/NSPR"
-  url "https://archive.mozilla.org/pub/mozilla.org/nspr/releases/v4.17/src/nspr-4.17.tar.gz"
-  sha256 "590a0aea29412ae22d7728038c21ef2ab42646e48172a47d2e4bb782846d1095"
+  url "https://archive.mozilla.org/pub/nspr/releases/v4.25/src/nspr-4.25.tar.gz"
+  sha256 "0bc309be21f91da4474c56df90415101c7f0c7c7cab2943cd943cd7896985256"
 
   bottle do
     cellar :any
-    sha256 "e90cc21f350aefb57ddb6e3f2c27e86e95fa9c7a9d7e40772a6603846b17a078" => :high_sierra
-    sha256 "e28f7bf25551e93a29b2310b80b7e492323f42677ecbefc43b64d6e09e76b354" => :sierra
-    sha256 "f083506086d7a0a72d90689f108d116a991e3da26c91416f6c980ff9fe59a9e7" => :el_capitan
+    sha256 "d1b37153ae32255e1c6a851c497f1d6a81b9580403e889d0a2d77266e5aaf54a" => :catalina
+    sha256 "4ea0a985bdca85cc08510a2a8e5f1aa2d295bcd0bc2fc048b174f9432c4eb8bc" => :mojave
+    sha256 "7d66be141d5cfd5bb1e62ebc7c6fef92a40f1cbd1cc596b1d2d014a356016184" => :high_sierra
   end
 
   def install
@@ -16,8 +16,7 @@ class Nspr < Formula
     cd "nspr" do
       # Fixes a bug with linking against CoreFoundation, needed to work with SpiderMonkey
       # See: https://openradar.appspot.com/7209349
-      target_frameworks = Hardware::CPU.is_32_bit? ? "-framework Carbon" : ""
-      inreplace "pr/src/Makefile.in", "-framework CoreServices -framework CoreFoundation", target_frameworks
+      inreplace "pr/src/Makefile.in", "-framework CoreServices -framework CoreFoundation", ""
 
       args = %W[
         --disable-debug
@@ -26,8 +25,8 @@ class Nspr < Formula
         --with-pthreads
         --enable-ipv6
         --enable-macos-target=#{MacOS.version}
+        --enable-64bit
       ]
-      args << "--enable-64bit" if MacOS.prefer_64_bit?
       system "./configure", *args
       # Remove the broken (for anyone but Firefox) install_name
       inreplace "config/autoconf.mk", "-install_name @executable_path/$@ ", "-install_name #{lib}/$@ "
@@ -38,5 +37,9 @@ class Nspr < Formula
       (bin/"compile-et.pl").unlink
       (bin/"prerr.properties").unlink
     end
+  end
+
+  test do
+    system "#{bin}/nspr-config", "--version"
   end
 end

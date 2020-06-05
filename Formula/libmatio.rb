@@ -1,14 +1,15 @@
 class Libmatio < Formula
   desc "C library for reading and writing MATLAB MAT files"
   homepage "https://matio.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/matio/matio/1.5.11/matio-1.5.11.tar.gz"
-  sha256 "0ccced0c55c9c2cdc21348b7e16447843402d729ffaadd6135767faad7c9cf0b"
+  url "https://downloads.sourceforge.net/project/matio/matio/1.5.17/matio-1.5.17.tar.gz"
+  sha256 "5e455527d370ab297c4abe5a2ab4d599c93ac7c1a0c85d841cc5c22f8221c400"
+  revision 2
 
   bottle do
     cellar :any
-    sha256 "532117e692497b68749dc0dc396d1099f7339ee8bb252cf29d4f9292cfe4e9ae" => :high_sierra
-    sha256 "b98585e1162ee51929f2ba589eaa23e34d1cb42b98b93bb89780cf0e6b877535" => :sierra
-    sha256 "405ebd987019e5793a269ae1ebb9a2da15b51f6b04bf72dd32105ef368b3a889" => :el_capitan
+    sha256 "5b8bf79fa47dddfa85405fc2e0ea4e0ca44d9154ff690144568b1b8d334edd03" => :catalina
+    sha256 "fb0f8804978485fedcdd4cd8b6800840aa0b25778be9bbfab29b4dcabb76f5d8" => :mojave
+    sha256 "961900fbb90c3c37a0e1607bead7c92baa23f289afaee607775731303e335b4b" => :high_sierra
   end
 
   depends_on "hdf5"
@@ -36,11 +37,28 @@ class Libmatio < Formula
     (testpath/"mat.c").write <<~'EOS'
       #include <stdlib.h>
       #include <matio.h>
+
+      size_t dims[2] = {5, 5};
+      double data[25] = {0.0, };
+      mat_t *mat;
+      matvar_t *matvar;
+
       int main(int argc, char **argv) {
-        mat_t *matfp;
-        if (!(matfp = Mat_Open(argv[1], MAT_ACC_RDONLY)))
+        if (!(mat = Mat_Open(argv[1], MAT_ACC_RDONLY)))
           abort();
-        Mat_Close(matfp);
+        Mat_Close(mat);
+
+        mat = Mat_CreateVer("test_writenan.mat", NULL, MAT_FT_DEFAULT);
+        if (mat) {
+          matvar = Mat_VarCreate("foo", MAT_C_DOUBLE, MAT_T_DOUBLE, 2,
+                                 dims, data, MAT_F_DONT_COPY_DATA);
+          Mat_VarWrite(mat, matvar, MAT_COMPRESSION_NONE);
+          Mat_VarFree(matvar);
+          Mat_Close(mat);
+        } else {
+          abort();
+        }
+        mat = Mat_CreateVer("foo", NULL, MAT_FT_MAT73);
         return EXIT_SUCCESS;
       }
     EOS

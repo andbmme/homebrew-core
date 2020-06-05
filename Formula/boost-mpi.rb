@@ -1,49 +1,43 @@
 class BoostMpi < Formula
   desc "C++ library for C++/MPI interoperability"
   homepage "https://www.boost.org/"
-  url "https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.bz2"
-  sha256 "9807a5d16566c57fd74fb522764e0b134a8bbe6b6e8967b83afefd30dcd3be81"
-  revision 1
+  url "https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.bz2"
+  mirror "https://dl.bintray.com/homebrew/mirror/boost_1_72_0.tar.bz2"
+  sha256 "59c9b274bc451cf91a9ba1dd2c7fdcaf5d60b1b3aa83f2c9fa143417cc660722"
   head "https://github.com/boostorg/boost.git"
 
   bottle do
-    sha256 "ab1599905ccc3891aaf12ccb8fc7d82a48f3c62c5a0b949c9594fcec41f11f96" => :high_sierra
-    sha256 "c6a68706caf6d58e6e2efed6d96a56877c9b198bb4ea9036013b144fc589f5d3" => :sierra
-    sha256 "268a16ac0a424bf62366591a4b6b8a1347ab82705aa70d3ede245fd81e9565f1" => :el_capitan
+    sha256 "85d4a3e20c2b6c3383a6fc6bb2829a08284bd23dfed1ddfe23c95b042ab6a73d" => :catalina
+    sha256 "76a3472fb7d69bd52c36f936d932dc70b800108c8ecedf1c11c132ce094af595" => :mojave
+    sha256 "9f6879e54a786105e9a2d4cc7275a31f22d4aea0f62417b8eed45e7f82d80449" => :high_sierra
   end
 
-  option :cxx11
+  depends_on "boost"
+  depends_on "open-mpi"
 
-  if build.cxx11?
-    depends_on "boost" => "c++11"
-    depends_on "open-mpi" => "c++11"
-  else
-    depends_on "boost"
-    depends_on :mpi => [:cc, :cxx]
+  # Fix build on Xcode 11.4
+  patch do
+    url "https://github.com/boostorg/build/commit/b3a59d265929a213f02a451bb63cea75d668a4d9.patch?full_index=1"
+    sha256 "04a4df38ed9c5a4346fbb50ae4ccc948a1440328beac03cb3586c8e2e241be08"
+    directory "tools/build"
   end
 
   def install
     # "layout" should be synchronized with boost
-    args = ["--prefix=#{prefix}",
-            "--libdir=#{lib}",
-            "-d2",
-            "-j#{ENV.make_jobs}",
-            "--layout=tagged",
-            "--user-config=user-config.jam",
-            "threading=multi,single",
-            "link=shared,static"]
+    args = %W[
+      -d2
+      -j#{ENV.make_jobs}
+      --layout=tagged-1.66
+      --user-config=user-config.jam
+      install
+      threading=multi,single
+      link=shared,static
+    ]
 
-    # Build in C++11 mode if boost was built in C++11 mode.
     # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
     # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
-    if build.cxx11?
-      args << "cxxflags=-std=c++11"
-      if ENV.compiler == :clang
-        args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
-      end
-    elsif Tab.for_name("boost").cxx11?
-      odie "boost was built in C++11 mode so boost-mpi must be built with --c++11."
-    end
+    args << "cxxflags=-std=c++11"
+    args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++" if ENV.compiler == :clang
 
     open("user-config.jam", "a") do |file|
       file.write "using darwin : : #{ENV.cxx} ;\n"
@@ -52,9 +46,13 @@ class BoostMpi < Formula
 
     system "./bootstrap.sh", "--prefix=#{prefix}", "--libdir=#{lib}", "--with-libraries=mpi"
 
-    system "./b2", *args
+    system "./b2",
+           "--prefix=install-mpi",
+           "--libdir=install-mpi/lib",
+           *args
 
-    lib.install Dir["stage/lib/*mpi*"]
+    lib.install Dir["install-mpi/lib/*mpi*"]
+    (lib/"cmake").install Dir["install-mpi/lib/cmake/*mpi*"]
 
     # libboost_mpi links to libboost_serialization, which comes from the main boost formula
     boost = Formula["boost"]

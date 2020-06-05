@@ -1,8 +1,9 @@
 class Fuseki < Formula
   desc "SPARQL server"
   homepage "https://jena.apache.org/documentation/fuseki2/"
-  url "https://www.apache.org/dyn/closer.lua?path=/jena/binaries/apache-jena-fuseki-2.6.0.tar.gz"
-  sha256 "a6d7843fcd3ce730349505442195ba8e611312325ae46cbe4a0a08f1788bb004"
+  url "https://www.apache.org/dyn/closer.lua?path=jena/binaries/apache-jena-fuseki-3.15.0.tar.gz"
+  mirror "https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-3.15.0.tar.gz"
+  sha256 "221f29084fecd34000b31db510887a436a112b3d2e9df9a33c836b7b4832fdfc"
 
   bottle :unneeded
 
@@ -15,7 +16,8 @@ class Fuseki < Formula
                                  :FUSEKI_BASE => var/"fuseki",
                                  :FUSEKI_HOME => libexec,
                                  :FUSEKI_LOGS => var/"log/fuseki",
-                                 :FUSEKI_RUN => var/"run")
+                                 :FUSEKI_RUN  => var/"run")
+      chmod 0755, libexec/exe
     end
 
     # Non-symlinked binaries and application files
@@ -33,23 +35,24 @@ class Fuseki < Formula
 
   plist_options :manual => "fuseki start"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <false/>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/fuseki-server</string>
-        </array>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>KeepAlive</key>
+          <false/>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/fuseki-server</string>
+          </array>
+        </dict>
+      </plist>
     EOS
   end
 

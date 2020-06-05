@@ -1,16 +1,19 @@
 class Splint < Formula
   desc "Secure Programming Lint"
-  homepage "http://www.splint.org/"
-  url "http://www.splint.org/downloads/splint-3.1.2.src.tgz"
+  homepage "https://sourceforge.net/projects/splint/"
+  url "https://mirrorservice.org/sites/distfiles.macports.org/splint/splint-3.1.2.src.tgz"
+  mirror "https://src.fedoraproject.org/repo/pkgs/splint/splint-3.1.2.src.tgz/25f47d70bd9c8bdddf6b03de5949c4fd/splint-3.1.2.src.tgz"
   sha256 "c78db643df663313e3fa9d565118391825dd937617819c6efc7966cdf444fb0a"
 
   bottle do
-    sha256 "4d97939d58a64670256ea18422ae7ddd75ea1d12e89d12f40faa0b54e6d9d3a8" => :high_sierra
-    sha256 "e5847a77e137e1f2339b55ae1fff93a94de33c6ad1a3a34c8a45b3d06a6bf0f9" => :sierra
-    sha256 "9eac9f8e530c1d9fc238b57f9d4e143fbf5727450657ba92e6d721660777753b" => :el_capitan
-    sha256 "4b385e4fcf9b82fa2ebd8dabaef7e712039b3f7c83d2f6d5e3263ebf51e7b6d7" => :yosemite
-    sha256 "ad8551b508f303c69499a60456de49d2b77d1f0f2383383d3c01c1b657a230b6" => :mavericks
+    cellar :any_skip_relocation
+    rebuild 1
+    sha256 "98cc2bfccef60b21ec014ff35e71cc91a85e77435b4e429090e2767d0696bef8" => :catalina
+    sha256 "abe5a5d75a01fa272839dbc219a5fde2c76c7c7593e7dd365c152e4cb02a2c59" => :mojave
+    sha256 "b95c7e4981cb11c23b686dbb01dcc01c1317909371b5d21ba0aa155e47569eec" => :high_sierra
   end
+
+  uses_from_macos "flex"
 
   # fix compiling error of osd.c
   patch :DATA
@@ -38,7 +41,7 @@ class Splint < Formula
     EOS
 
     output = shell_output("#{bin}/splint #{path} 2>&1", 1)
-    assert_match "5:18: Variable c used before definition", output
+    assert_match /5:18:\s+Variable c used before definition/, output
   end
 end
 

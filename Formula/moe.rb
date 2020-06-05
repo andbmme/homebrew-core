@@ -1,15 +1,18 @@
 class Moe < Formula
   desc "Console text editor for ISO-8859 and ASCII"
   homepage "https://www.gnu.org/software/moe/moe.html"
-  url "https://ftp.gnu.org/gnu/moe/moe-1.9.tar.lz"
-  mirror "https://ftpmirror.gnu.org/moe/moe-1.9.tar.lz"
-  sha256 "18919e9ffae08f34d8beb3a26fc5a595614e0aff34866e79420ca81881ff4ef3"
+  url "https://ftp.gnu.org/gnu/moe/moe-1.10.tar.lz"
+  mirror "https://ftpmirror.gnu.org/moe/moe-1.10.tar.lz"
+  sha256 "8cfd44ab5623ed4185ee53962b879fd9bdd18eab47bf5dd9bdb8271f1bf7d53b"
 
   bottle do
-    sha256 "ff9de589a2c3d65b95ab1d137b8ee56e54f3a0f64a43d8d0dc8ebede9369cba7" => :sierra
-    sha256 "9d2c0647210a48775c9d829d50c91966bf7a4ca2c6485ad7b906a2b9582db778" => :el_capitan
-    sha256 "94983572209b4fcebc765e1a74738eab64f239a97f02d919867ce49105622fdb" => :yosemite
+    sha256 "204f87443d288dd953d310ca2e2fa3de0051f460f1586e357ddfdcc540411412" => :catalina
+    sha256 "934ee30ec5f7f95c74183e5faf6ccc7ac36c426747476a5a0fb9628a6169de04" => :mojave
+    sha256 "fdfffe18871a25a5f0a8cf86ac8682f2cc6623dea335575d39f1dd529ee2ae46" => :high_sierra
+    sha256 "f83a8e961f1a7d295741a6abfe7434580761fa485e32498327ffb0e09322fa1e" => :sierra
   end
+
+  uses_from_macos "ncurses"
 
   def install
     system "./configure", "--prefix=#{prefix}"

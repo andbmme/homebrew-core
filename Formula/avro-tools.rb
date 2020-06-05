@@ -1,8 +1,9 @@
 class AvroTools < Formula
   desc "Avro command-line tools and utilities"
   homepage "https://avro.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=avro/avro-1.8.2/java/avro-tools-1.8.2.jar"
-  sha256 "8a1e2cc40daf89a29a30f15309077e5d0b9e0434ec5521a1fdd1d005159b89c4"
+  url "https://www.apache.org/dyn/closer.lua?path=avro/avro-1.9.2/java/avro-tools-1.9.2.jar"
+  mirror "https://archive.apache.org/dist/avro/avro-1.9.2/java/avro-tools-1.9.2.jar"
+  sha256 "ca771b70d53852735da9132bfe0c2651cfcbe38bba8094d8beb0a13bb8f43529"
 
   bottle :unneeded
 

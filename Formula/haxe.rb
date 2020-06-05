@@ -2,47 +2,45 @@ class Haxe < Formula
   desc "Multi-platform programming language"
   homepage "https://haxe.org/"
   url "https://github.com/HaxeFoundation/haxe.git",
-      :tag => "3.4.4",
-      :revision => "4f09586f6691e8a9645844b62036c8c974a00d15"
+      :tag      => "4.1.1",
+      :revision => "5e3f33b5c1c66d22607b264f7cd3107881788765"
+  head "https://github.com/HaxeFoundation/haxe.git", :branch => "development"
 
   bottle do
     cellar :any
-    sha256 "baa0a054502fb1151d7dad57626cce36c5c6601db9f980639b61ea7810674908" => :high_sierra
-    sha256 "bb9d6e20fb0c1ca9cc27633f5bc6c29e5187b37be89226cb59f038fa5dacd7b1" => :sierra
-    sha256 "5dfaab0cfa7585478456bc8c4aeabc7d7e1cfae34aac3260399cfcc9df2a8fd8" => :el_capitan
+    sha256 "2c0b674d41fb136237974ffbde36a164d259f14fe080ca55f1240ca1c58b5557" => :catalina
+    sha256 "50c5f77a145d276a0364d74930beae1e0c9682d696de83be623dc23f6d11d9d0" => :mojave
+    sha256 "0219ce46db55d386581d6eff4ddeb08b60c49fd48964ef06ba5dea31c2332c54" => :high_sierra
   end
 
-  head do
-    url "https://github.com/HaxeFoundation/haxe.git", :branch => "development"
-    depends_on "opam" => :build
-  end
-
-  depends_on "ocaml" => :build
-  depends_on "camlp4" => :build
   depends_on "cmake" => :build
+  depends_on "ocaml" => :build
+  depends_on "opam" => :build
+  depends_on "pkg-config" => :build
+  depends_on "mbedtls"
   depends_on "neko"
   depends_on "pcre"
 
   def install
-    ENV["OCAMLPARAM"] = "safe-string=0,_" # OCaml 4.06.0 compat
-
     # Build requires targets to be built in specific order
     ENV.deparallelize
 
-    if build.head?
-      ENV["OPAMROOT"] = buildpath/"opamroot"
+    Dir.mktmpdir("opamroot") do |opamroot|
+      ENV["OPAMROOT"] = opamroot
       ENV["OPAMYES"] = "1"
-      system "opam", "init", "--no-setup"
-      system "opam", "config", "exec", "--", "opam", "install", "ocamlfind",
-             "sedlex", "xml-light", "extlib", "rope", "ptmap>2.0.1"
-      system "opam", "config", "exec", "--", "make", "ADD_REVISION=1"
-    else
-      system "make", "OCAMLOPT=ocamlopt.opt"
+      ENV["ADD_REVISION"] = "1" if build.head?
+      system "opam", "init", "--no-setup", "--disable-sandboxing"
+      system "opam", "config", "exec", "--",
+             "opam", "pin", "add", "haxe", buildpath, "--no-action"
+      system "opam", "config", "exec", "--",
+             "opam", "install", "haxe", "--deps-only"
+      system "opam", "config", "exec", "--",
+             "make"
     end
 
     # Rebuild haxelib as a valid binary
     cd "extra/haxelib_src" do
-      system "cmake", "."
+      system "cmake", ".", *std_cmake_args
       system "make"
     end
     rm "haxelib"
@@ -51,16 +49,12 @@ class Haxe < Formula
     bin.mkpath
     system "make", "install", "INSTALL_BIN_DIR=#{bin}",
            "INSTALL_LIB_DIR=#{lib}/haxe", "INSTALL_STD_DIR=#{lib}/haxe/std"
-
-    # Replace the absolute symlink by a relative one,
-    # such that binary package created by homebrew will work in non-/usr/local locations.
-    rm bin/"haxe"
-    bin.install_symlink lib/"haxe/haxe"
   end
 
-  def caveats; <<~EOS
-    Add the following line to your .bashrc or equivalent:
-      export HAXE_STD_PATH="#{HOMEBREW_PREFIX}/lib/haxe/std"
+  def caveats
+    <<~EOS
+      Add the following line to your .bashrc or equivalent:
+        export HAXE_STD_PATH="#{HOMEBREW_PREFIX}/lib/haxe/std"
     EOS
   end
 
@@ -68,5 +62,16 @@ class Haxe < Formula
     ENV["HAXE_STD_PATH"] = "#{HOMEBREW_PREFIX}/lib/haxe/std"
     system "#{bin}/haxe", "-v", "Std"
     system "#{bin}/haxelib", "version"
+
+    (testpath/"HelloWorld.hx").write <<~EOS
+      import js.html.Console;
+
+      class HelloWorld {
+          static function main() Console.log("Hello world!");
+      }
+    EOS
+    system "#{bin}/haxe", "-js", "out.js", "-main", "HelloWorld"
+    _, stderr, = Open3.capture3("osascript -so -lJavaScript out.js")
+    assert_match /^Hello world!$/, stderr
   end
 end

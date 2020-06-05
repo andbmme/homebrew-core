@@ -1,18 +1,17 @@
 class Dungeon < Formula
   desc "The classic text adventure"
   homepage "https://github.com/GOFAI/dungeon"
-  url "https://github.com/GOFAI/dungeon/archive/4.0.tar.gz"
-  sha256 "be2217be9e23861f22c14c4395da272fca5fb08a1741f52fd393792908279bea"
-  revision 1
+  url "https://github.com/GOFAI/dungeon/archive/4.1.tar.gz"
+  sha256 "b88c49ef60e908e8611257fbb5a6a41860e1058760df2dfcb7eb141eb34e198b"
 
   bottle do
-    sha256 "e0252a20faaee35aa1768a3f7a31441de5d73028bd722419f632cc66bb92d22b" => :high_sierra
-    sha256 "18af74d676dbc99acfa51088bbcf89dd4c80f89290bc25b4ca030ae23ad82c01" => :sierra
-    sha256 "7e293839e0e151c0bb20423f8bdad447d2b31c905737359c7a47cb296f223816" => :el_capitan
-    sha256 "6177df6d7568967456aad92c0b1e55c45eab0c91e4d88d25ad76ff90d9704fda" => :yosemite
+    cellar :any
+    sha256 "e6053a32332a47c67f278eb771d660e765ff2fdbd4e25f5de71eb8ad429ab482" => :catalina
+    sha256 "5e78dda1bcf691d43008ae18a8013a46d8c8f4cf59e0801b7fd98577f5204c7c" => :mojave
+    sha256 "1b5ee6cef285b8c96baa060a2d4ea3c55e42a8ad2afd0cfd7f9f776d7f358cba" => :high_sierra
   end
 
-  depends_on :fortran
+  depends_on "gcc" # for gfortran
 
   def install
     chdir "src" do

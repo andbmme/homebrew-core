@@ -1,20 +1,16 @@
 class Grep < Formula
   desc "GNU grep, egrep and fgrep"
   homepage "https://www.gnu.org/software/grep/"
-  url "https://ftp.gnu.org/gnu/grep/grep-3.1.tar.xz"
-  mirror "https://ftpmirror.gnu.org/grep/grep-3.1.tar.xz"
-  sha256 "db625c7ab3bb3ee757b3926a5cfa8d9e1c3991ad24707a83dde8a5ef2bf7a07e"
+  url "https://ftp.gnu.org/gnu/grep/grep-3.4.tar.xz"
+  mirror "https://ftpmirror.gnu.org/grep/grep-3.4.tar.xz"
+  sha256 "58e6751c41a7c25bfc6e9363a41786cff3ba5709cf11d5ad903cf7cce31cc3fb"
 
   bottle do
     cellar :any
-    sha256 "8dadfa6959ee17790ef8cc578981ede226b29339549c72d26eaaa1c1dab5e0e8" => :high_sierra
-    sha256 "75fd5efc0986b1771c3082e08b9dc2d8495546f81ad1a38a9a05f506c8046687" => :sierra
-    sha256 "867dffadb33d24d4a743df13c95ec08ff526f3be96b4965ae5e97ec08d46192d" => :el_capitan
-    sha256 "72ea449768eb5745712b40464b8eb1e7b9dc908ce26c8353e453681ee824ec89" => :yosemite
+    sha256 "52fb744dfc1f2766b41d90bc4126bc6101663d12c3e31446719ef723b7883266" => :catalina
+    sha256 "cbce0c10ed3edc352347287ec36a8a199bb7649892943a6948e4dbe4127e83ac" => :mojave
+    sha256 "bcc9802f916e1db94b2879ff66b058d42142b391bfbc2002fd1fb13fd9e4c8ca" => :high_sierra
   end
-
-  option "with-default-names", "Do not prepend 'g' to the binary"
-  deprecated_option "default-names" => "with-default-names"
 
   depends_on "pkg-config" => :build
   depends_on "pcre"
@@ -27,29 +23,38 @@ class Grep < Formula
       --infodir=#{info}
       --mandir=#{man}
       --with-packager=Homebrew
+      --program-prefix=g
     ]
-
-    args << "--program-prefix=g" if build.without? "default-names"
 
     system "./configure", *args
     system "make"
     system "make", "install"
+
+    %w[grep egrep fgrep].each do |prog|
+      (libexec/"gnubin").install_symlink bin/"g#{prog}" => prog
+      (libexec/"gnuman/man1").install_symlink man1/"g#{prog}.1" => "#{prog}.1"
+    end
+
+    libexec.install_symlink "gnuman" => "man"
   end
 
   def caveats
-    if build.without? "default-names" then <<~EOS
-      The command has been installed with the prefix "g".
-      If you do not want the prefix, install using the "with-default-names"
-      option.
-      EOS
-    end
+    <<~EOS
+      All commands have been installed with the prefix "g".
+      If you need to use these commands with their normal names, you
+      can add a "gnubin" directory to your PATH from your bashrc like:
+        PATH="#{opt_libexec}/gnubin:$PATH"
+    EOS
   end
 
   test do
     text_file = testpath/"file.txt"
     text_file.write "This line should be matched"
-    cmd = build.with?("default-names") ? "grep" : "ggrep"
-    grepped = shell_output("#{bin}/#{cmd} match #{text_file}")
+
+    grepped = shell_output("#{bin}/ggrep match #{text_file}")
+    assert_match "should be matched", grepped
+
+    grepped = shell_output("#{opt_libexec}/gnubin/grep match #{text_file}")
     assert_match "should be matched", grepped
   end
 end

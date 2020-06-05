@@ -1,36 +1,38 @@
 class GtkDoc < Formula
   desc "GTK+ documentation tool"
-  homepage "https://www.gtk.org/gtk-doc/"
-  url "https://download.gnome.org/sources/gtk-doc/1.26/gtk-doc-1.26.tar.xz"
-  sha256 "bff3f44467b1d39775e94fad545f050faa7e8d68dc6a31aef5024ba3c2d7f2b7"
+  homepage "https://gitlab.gnome.org/GNOME/gtk-doc"
+  url "https://download.gnome.org/sources/gtk-doc/1.32/gtk-doc-1.32.tar.xz"
+  sha256 "de0ef034fb17cb21ab0c635ec730d19746bce52984a6706e7bbec6fb5e0b907c"
   revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "f479ba17889e905cceea6e0a0c5cda20ddab85e506089a6eb1fb1a0827537055" => :high_sierra
-    sha256 "f479ba17889e905cceea6e0a0c5cda20ddab85e506089a6eb1fb1a0827537055" => :sierra
-    sha256 "f479ba17889e905cceea6e0a0c5cda20ddab85e506089a6eb1fb1a0827537055" => :el_capitan
+    sha256 "2e0c508a1f6fe8ab48a03ab83f8471c3153ce937099437dad6bbbd1dd36a42ce" => :catalina
+    sha256 "2e0c508a1f6fe8ab48a03ab83f8471c3153ce937099437dad6bbbd1dd36a42ce" => :mojave
+    sha256 "2e0c508a1f6fe8ab48a03ab83f8471c3153ce937099437dad6bbbd1dd36a42ce" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "itstool" => :build
-  depends_on "gettext"
+  depends_on "pkg-config" => :build
   depends_on "docbook"
   depends_on "docbook-xsl"
+  depends_on "gettext"
   depends_on "libxml2"
+  depends_on "python@3.8"
   depends_on "source-highlight"
 
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/b3/b2/238e2590826bfdd113244a40d9d3eb26918bd798fc187e2360a8367068db/six-1.10.0.tar.gz"
-    sha256 "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a"
+  uses_from_macos "libxslt"
+
+  resource "Pygments" do
+    url "https://files.pythonhosted.org/packages/7e/ae/26808275fc76bf2832deb10d3a3ed3107bc4de01b85dcccbe525f2cd6d1e/Pygments-2.4.2.tar.gz"
+    sha256 "881c4c157e45f30af185c1ffe8d549d48ac9127433f2c380c24b84572ad66297"
   end
 
   def install
-    ENV.append_path "PYTHONPATH", "#{Formula["libxml2"].opt_lib}/python2.7/site-packages"
-
-    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python2.7/site-packages"
-    resource("six").stage do
-      system "python", *Language::Python.setup_install_args(libexec/"vendor")
+    xy = Language::Python.major_minor_version Formula["python@3.8"].opt_bin/"python3"
+    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python#{xy}/site-packages"
+    resource("Pygments").stage do
+      system Formula["python@3.8"].opt_bin/"python3", *Language::Python.setup_install_args(libexec/"vendor")
     end
 
     system "./configure", "--disable-debug",

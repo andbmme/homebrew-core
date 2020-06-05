@@ -1,8 +1,8 @@
 class Jenkins < Formula
   desc "Extendable open source continuous integration server"
   homepage "https://jenkins.io/"
-  url "http://mirrors.jenkins.io/war/2.90/jenkins.war"
-  sha256 "1f697e7db6e42b3c34f3c9b77a8df9bc25b699ed3be24928b265a1bcd9520196"
+  url "http://mirrors.jenkins.io/war/2.239/jenkins.war"
+  sha256 "12e196922b24b540dfcce18d77443a1ec907ace97bba9fc4e1f51d9c996092b4"
 
   head do
     url "https://github.com/jenkinsci/jenkins.git"
@@ -11,7 +11,7 @@ class Jenkins < Formula
 
   bottle :unneeded
 
-  depends_on :java => "1.8+"
+  depends_on :java => "1.8"
 
   def install
     if build.head?
@@ -20,53 +20,57 @@ class Jenkins < Formula
       system "jar", "xvf", "jenkins.war"
     end
     libexec.install Dir["**/jenkins.war", "**/jenkins-cli.jar"]
-    bin.write_jar_script libexec/"jenkins.war", "jenkins"
-    bin.write_jar_script libexec/"jenkins-cli.jar", "jenkins-cli"
+    bin.write_jar_script libexec/"jenkins.war", "jenkins", :java_version => "1.8"
+    bin.write_jar_script libexec/"jenkins-cli.jar", "jenkins-cli", :java_version => "1.8"
   end
 
-  def caveats; <<~EOS
-    Note: When using launchctl the port will be 8080.
-  EOS
+  def caveats
+    <<~EOS
+      Note: When using launchctl the port will be 8080.
+    EOS
   end
 
   plist_options :manual => "jenkins"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>/usr/bin/java</string>
-          <string>-Dmail.smtp.starttls.enable=true</string>
-          <string>-jar</string>
-          <string>#{opt_libexec}/jenkins.war</string>
-          <string>--httpListenAddress=127.0.0.1</string>
-          <string>--httpPort=8080</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-    </plist>
-  EOS
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>/usr/libexec/java_home</string>
+            <string>-v</string>
+            <string>1.8</string>
+            <string>--exec</string>
+            <string>java</string>
+            <string>-Dmail.smtp.starttls.enable=true</string>
+            <string>-jar</string>
+            <string>#{opt_libexec}/jenkins.war</string>
+            <string>--httpListenAddress=127.0.0.1</string>
+            <string>--httpPort=8080</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+        </dict>
+      </plist>
+    EOS
   end
 
   test do
     ENV["JENKINS_HOME"] = testpath
     ENV.prepend "_JAVA_OPTIONS", "-Djava.io.tmpdir=#{testpath}"
-    pid = fork do
-      exec "#{bin}/jenkins"
+
+    port = free_port
+    fork do
+      exec "#{bin}/jenkins --httpPort=#{port}"
     end
     sleep 60
 
-    begin
-      assert_match /Welcome to Jenkins!|Unlock Jenkins|Authentication required/, shell_output("curl localhost:8080/")
-    ensure
-      Process.kill("SIGINT", pid)
-      Process.wait(pid)
-    end
+    output = shell_output("curl localhost:#{port}/")
+    assert_match /Welcome to Jenkins!|Unlock Jenkins|Authentication required/, output
   end
 end

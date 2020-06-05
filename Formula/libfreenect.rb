@@ -1,16 +1,15 @@
 class Libfreenect < Formula
   desc "Drivers and libraries for the Xbox Kinect device"
   homepage "https://openkinect.org/"
-  url "https://github.com/OpenKinect/libfreenect/archive/v0.5.6.tar.gz"
-  sha256 "5ec1973cd01fd864f4c5ccc84536aa2636d0be768ba8b1c2d99026f3cd1abfd3"
+  url "https://github.com/OpenKinect/libfreenect/archive/v0.6.1.tar.gz"
+  sha256 "a2e426cf42d9289b054115876ec39502a1144bc782608900363a0c38056b6345"
   head "https://github.com/OpenKinect/libfreenect.git"
 
   bottle do
     cellar :any
-    sha256 "8a316115acf5c52e75380d994a29df9f14134a741983b46eb377bfc89cb90fb4" => :high_sierra
-    sha256 "5b15e3bc7e75c5916b236be3f4c42929302f47edc2d269e7a76131ea4fec1939" => :sierra
-    sha256 "46af9983bad90585eb9eafb10b08af0f5d4b27d57d392f4a327719ac4338fea8" => :el_capitan
-    sha256 "985526f21c7730bd63b213151fefec7a87f134a89c44dcfc0ee14abfcab31a62" => :yosemite
+    sha256 "a9098e0b3d868c85de4b0bb243d16200361002ff5d27d6d9c9bc5a08fb6ab95a" => :catalina
+    sha256 "d150e4351036b1b3174d24c359736e04a3bbdbe966c77b1714f0edbef486d012" => :mojave
+    sha256 "c08bad975cc7175fdf88a603fb300cac3493f0e20172fc99a69da568d4ad68ff" => :high_sierra
   end
 
   depends_on "cmake" => :build

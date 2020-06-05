@@ -1,16 +1,19 @@
 class ClosureCompiler < Formula
   desc "JavaScript optimizing compiler"
   homepage "https://github.com/google/closure-compiler"
-  url "https://search.maven.org/remotecontent?filepath=com/google/javascript/closure-compiler/v20171112/closure-compiler-v20171112.jar"
-  sha256 "255878e9d42d266478b9a7a76a30fe6196df1b42cc3e57a98730d8c1345e506f"
+  url "https://search.maven.org/remotecontent?filepath=com/google/javascript/closure-compiler/v20200517/closure-compiler-v20200517.jar"
+  sha256 "1a022ae1f31fd1833625fd18951a385ce7ddc27206d22e30b6f24ed48ac12d8c"
 
   bottle :unneeded
 
-  depends_on :java => "1.7+"
+  depends_on "openjdk"
 
   def install
     libexec.install Dir["*"]
-    bin.write_jar_script libexec.children.first, "closure-compiler"
+    (bin/"closure-compiler").write <<~EOS
+      #!/bin/bash
+      exec "#{Formula["openjdk"].opt_bin}/java" -jar "#{libexec.children.first}" "$@"
+    EOS
   end
 
   test do

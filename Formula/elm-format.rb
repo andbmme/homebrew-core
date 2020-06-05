@@ -1,33 +1,39 @@
-require "language/haskell"
-
 class ElmFormat < Formula
-  include Language::Haskell::Cabal
   desc "Elm source code formatter, inspired by gofmt"
   homepage "https://github.com/avh4/elm-format"
   url "https://github.com/avh4/elm-format.git",
-      :tag => "0.6.1-alpha",
-      :revision => "24cbc66245289dd3ca5c08a14e86358dc039fcf3"
-  version "0.6.1-alpha"
+      :tag      => "0.8.3",
+      :revision => "b97e3593d564a1e069c0a022da8cbd98ca2c5a4b"
   head "https://github.com/avh4/elm-format.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d63d07ef26edd91e1b10c4b1286dd271ac7f2958eb5e92aa78bb62ec49f4802a" => :high_sierra
-    sha256 "0d803f1ba6449fc85db9edac0bf55f14c9358868b015559ec2836c799bdf9cb4" => :sierra
-    sha256 "034a1da2a60646992a7571e1879f6ff31ebc43c3f43250689d4b6d6f1c12286d" => :el_capitan
-    sha256 "964df8c9e60c3ab2968fa6d6304beee5d0eefd993001a35e26da279b54e2e543" => :yosemite
+    sha256 "5a325127c11c78285bfc7c68812dc6c0425c9c3305e32312c10c39e2dc2c1ce9" => :catalina
+    sha256 "b785f70ac7b4cb766f7d09e6263268ed2d3934331c65b6f5fde4829a530d5fa3" => :mojave
+    sha256 "e1807b5063dd15258a1fd041bdc21faea8f598e7c0c8a3f39557e880fc22ec2c" => :high_sierra
   end
 
-  depends_on "ghc" => :build
   depends_on "cabal-install" => :build
+  depends_on "ghc@8.6" => :build
+
+  def build_elm_format_conf
+    <<~EOS
+      module Build_elm_format where
+
+      gitDescribe :: String
+      gitDescribe = "#{version}"
+    EOS
+  end
 
   def install
+    defaults = buildpath/"generated/Build_elm_format.hs"
+    defaults.write(build_elm_format_conf)
+
     (buildpath/"elm-format").install Dir["*"]
 
-    cabal_sandbox do
-      cabal_sandbox_add_source "elm-format"
-      cabal_install "--only-dependencies", "elm-format"
-      cabal_install "--prefix=#{prefix}", "elm-format"
+    cd "elm-format" do
+      system "cabal", "v2-update"
+      system "cabal", "v2-install", *std_cabal_v2_args
     end
   end
 
@@ -38,6 +44,7 @@ class ElmFormat < Formula
       main = text "Hello, world!"
     EOS
 
-    system bin/"elm-format-0.17", testpath/"Hello.elm", "--yes"
+    system bin/"elm-format", "--elm-version=0.18", testpath/"Hello.elm", "--yes"
+    system bin/"elm-format", "--elm-version=0.19", testpath/"Hello.elm", "--yes"
   end
 end

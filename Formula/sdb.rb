@@ -1,26 +1,15 @@
 class Sdb < Formula
   desc "Ondisk/memory hashtable based on CDB"
   homepage "https://github.com/radare/sdb"
+  url "https://github.com/radare/sdb/archive/1.4.1.tar.gz"
+  sha256 "79cb0a41f7511c0568c05d889960e5ae3f00d3f2d2d72343671f95f4cf4b3bd3"
   head "https://github.com/radare/sdb.git"
-
-  stable do
-    url "https://github.com/radare/sdb/archive/0.12.tar.gz"
-    sha256 "6f1ea21495f2df1030f56ef3517c907466eb817840d2730d4a5abb8a85096a0d"
-
-    # Remove for > 0.12
-    # Avoid "sdbtypes.h: No such file or directory"
-    # Reported 12 Sep 2017 https://github.com/radare/sdb/issues/147
-    patch do
-      url "https://github.com/radare/sdb/commit/f824720.patch?full_index=1"
-      sha256 "23ad3e130e40ca078a488103d510062fe5bcadf844e01b3ac03c0dd50133f16b"
-    end
-  end
 
   bottle do
     cellar :any
-    sha256 "f089288c26450fa019be9d1abb789df85751f21b3cbb00cb22dcba640b48d563" => :high_sierra
-    sha256 "9e92bfac5dbcf84fe5e8b3067f3b3e04fd5f0a1d5639cd1bf676425132c45152" => :sierra
-    sha256 "b135f21561fedbcf92734ec7776ff5db0b00f0fd84cb7a9bcb3b9b823f6e767e" => :el_capitan
+    sha256 "1f661b4f93a7161a941cb3db5477d95453f7a6b789d4eb8c8d20b5a1a86b91ee" => :catalina
+    sha256 "5e36426a73fca9c8b127af893a9d50bc571ecc2b4dd38517260e0555bdea49b3" => :mojave
+    sha256 "aeb8d25f8c7552334e9dbb33a4bcb250b9b867fc1af0864a2e805a63b412ba8f" => :high_sierra
   end
 
   depends_on "pkg-config" => :build

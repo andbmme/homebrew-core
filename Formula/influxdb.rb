@@ -2,17 +2,17 @@ class Influxdb < Formula
   desc "Time series, events, and metrics database"
   homepage "https://influxdata.com/time-series-platform/influxdb/"
   url "https://github.com/influxdata/influxdb.git",
-      :tag => "v1.4.2",
-      :revision => "6d2685d1738277a1c2672fc58df7994627769be6"
+      :tag      => "v1.8.0",
+      :revision => "781490de48220d7695a05c29e5a36f550a4568f5"
   head "https://github.com/influxdata/influxdb.git"
 
   bottle do
-    sha256 "9b435192e9d99fae976538e39fe5b5b228b87e0f1dca945a82fbdbac0af2b411" => :high_sierra
-    sha256 "bb76f0040f743225f25b956556e856414605e746c277710e1ca83ba9d1f7faae" => :sierra
-    sha256 "931fd54b8b01494dc05362d3524b7b6979b6f682f0b63fe64c15a3db6e157a73" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "79c4ceedc4829159bafc592b9363e33719ecbd105c681db0d49217a5d276e354" => :catalina
+    sha256 "6393249a983631cde5bb524dfbf2f92c3b53e5984e88082ea38d157db54d32ad" => :mojave
+    sha256 "7c8070708d95ed863c5fc37eefed541624410feb58ec3d20cc46f349528d9e8a" => :high_sierra
   end
 
-  depends_on "gdm" => :build
   depends_on "go" => :build
 
   def install
@@ -23,9 +23,8 @@ class Influxdb < Formula
     version = `git describe --tags`.strip
 
     cd influxdb_path do
-      system "gdm", "restore"
       system "go", "install",
-             "-ldflags", "-X main.version=#{version} -X main.commit=#{revision} -X main.branch=master",
+             "-ldflags", "-X main.version=#{version} -X main.commit=#{revision} -X main.branch=master-1.x",
              "./..."
     end
 
@@ -49,39 +48,40 @@ class Influxdb < Formula
 
   plist_options :manual => "influxd -config #{HOMEBREW_PREFIX}/etc/influxdb.conf"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/influxd</string>
+            <string>-config</string>
+            <string>#{HOMEBREW_PREFIX}/etc/influxdb.conf</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/influxdb.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/influxdb.log</string>
+          <key>SoftResourceLimits</key>
+          <dict>
+            <key>NumberOfFiles</key>
+            <integer>10240</integer>
+          </dict>
         </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/influxd</string>
-          <string>-config</string>
-          <string>#{HOMEBREW_PREFIX}/etc/influxdb.conf</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/influxdb.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/influxdb.log</string>
-        <key>SoftResourceLimits</key>
-        <dict>
-          <key>NumberOfFiles</key>
-          <integer>10240</integer>
-        </dict>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 
@@ -97,12 +97,11 @@ class Influxdb < Formula
       pid = fork do
         exec "#{bin}/influxd -config #{testpath}/config.toml"
       end
-      sleep 1
+      sleep 6
       output = shell_output("curl -Is localhost:8086/ping")
-      sleep 1
       assert_match /X-Influxdb-Version:/, output
     ensure
-      Process.kill("SIGINT", pid)
+      Process.kill("SIGTERM", pid)
       Process.wait(pid)
     end
   end

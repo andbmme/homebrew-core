@@ -1,38 +1,32 @@
 class Smali < Formula
   desc "Assembler/disassembler for Android's Java VM implementation"
   homepage "https://github.com/JesusFreke/smali"
-  url "https://bitbucket.org/JesusFreke/smali/downloads/smali-2.2.2.jar"
-  sha256 "5ec0ce98146d36c5826f1fbf362180a0a264ce0a31d50b8c24833975b47d98e6"
+  url "https://github.com/JesusFreke/smali/archive/v2.4.0.tar.gz"
+  sha256 "6a9014ecffd7d374f1b9e3c236b11d18a8d8f9c33dbb8ca171c79cc243a0f902"
 
-  bottle :unneeded
-
-  resource "baksmali-jar" do
-    url "https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.2.2.jar"
-    sha256 "cf7484d8c090fedfa9cd35215144ffabda43c30afd35e00b57c1cf53bde4c66f"
+  bottle do
+    cellar :any_skip_relocation
+    sha256 "efa9c4eae8301de352ce02cb8180a8e21c4df6e6aaf080e9dfd7ec493a1467ba" => :catalina
+    sha256 "cd91042aa24ff1f209ce3b4461114f9c2cfb773df77258a029449873e2eab9ed" => :mojave
+    sha256 "3c6001a0005d2b80c5e646a0823cc48cd752f9ad37e9badc50d3d100a0a88885" => :high_sierra
   end
 
-  resource "baksmali" do
-    url "https://bitbucket.org/JesusFreke/smali/downloads/baksmali"
-    sha256 "5d4b79776d401f2cbdb66c7c88e23cca773b9a939520fef4bf42e2856bbbfed4"
-  end
-
-  resource "smali" do
-    url "https://bitbucket.org/JesusFreke/smali/downloads/smali"
-    sha256 "910297fbeefb4590e6bffd185726c878382a0960fb6a7f0733f045b6faf60a30"
-  end
+  depends_on "gradle" => :build
+  depends_on "openjdk"
 
   def install
-    resource("baksmali-jar").stage do
-      libexec.install "baksmali-#{version}.jar" => "baksmali.jar"
-    end
+    system "gradle", "build", "--no-daemon"
 
-    libexec.install "smali-#{version}.jar" => "smali.jar"
+    %w[smali baksmali].each do |name|
+      jarfile = "#{name}-#{version}-dev-fat.jar"
 
-    %w[smali baksmali].each do |r|
-      libexec.install resource(r)
-      inreplace libexec/r, /^libdir=.*$/, "libdir=\"#{libexec}\""
-      chmod 0755, libexec/r
-      bin.install_symlink libexec/r
+      libexec.install "#{name}/build/libs/#{jarfile}"
+
+      (bin/name).write <<~EOS
+        #!/bin/bash
+        export JAVA_HOME="${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
+        exec "${JAVA_HOME}/bin/java" -jar "#{libexec}/#{jarfile}" "$@"
+      EOS
     end
   end
 

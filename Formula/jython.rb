@@ -1,15 +1,15 @@
 class Jython < Formula
   desc "Python implementation written in Java (successor to JPython)"
-  homepage "http://www.jython.org"
-  url "https://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.1/jython-installer-2.7.1.jar"
-  sha256 "6e58dad0b8565b95c6fb14b4bfbf570523d1c5290244cfb33822789fa53b1d25"
+  homepage "https://www.jython.org/"
+  url "https://search.maven.org/remotecontent?filepath=org/python/jython-installer/2.7.2/jython-installer-2.7.2.jar"
+  sha256 "36e40609567ce020a1de0aaffe45e0b68571c278c14116f52e58cc652fb71552"
 
   # This isn't accidental; there is actually a compile process here.
   bottle do
-    sha256 "71b9c25bb4ef023ad684f4c1f062eafe678d388a11cf20ce1a1e69732ef557f5" => :high_sierra
-    sha256 "98bd9e1dcd92f8a0e281db6430985a2b67b2db36143d04a286502128fa9598af" => :sierra
-    sha256 "865533fa4016f5d378badbd0fce6e9bad6b373a65b6feab152a27dffdd12603b" => :el_capitan
-    sha256 "39b916844c6df58ca9e20f8125df6d4166fbcb18d732069a92a5b71edab13093" => :yosemite
+    cellar :any_skip_relocation
+    sha256 "ecac33d533e405e4bd45cdf7023cd334fa655e17446cbfa5231dbf1e580166c5" => :catalina
+    sha256 "3bd7cbb55035525c113c7608b9e18215b1a214c0f21e45203c900029765ba09f" => :mojave
+    sha256 "644da593101c796e9b39e10ad7cd65f96e8e0d9ccf19109c8337a1f262ef005a" => :high_sierra
   end
 
   def install

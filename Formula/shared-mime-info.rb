@@ -1,50 +1,62 @@
 class SharedMimeInfo < Formula
   desc "Database of common MIME types"
   homepage "https://wiki.freedesktop.org/www/Software/shared-mime-info"
-  url "https://freedesktop.org/~hadess/shared-mime-info-1.9.tar.xz"
-  sha256 "5c0133ec4e228e41bdf52f726d271a2d821499c2ab97afd3aa3d6cf43efcdc83"
+  url "https://gitlab.freedesktop.org/xdg/shared-mime-info/uploads/0440063a2e6823a4b1a6fb2f2af8350f/shared-mime-info-2.0.tar.xz"
+  sha256 "23c1cb7919f31cf97aeb5225548f75705f706aa5cc7d1c4c503364bcc8681e06"
 
   bottle do
     cellar :any
-    sha256 "d9874846a89ac41dcc2b95f1c35c4d566ae02ae287b213500c02acd141a9c0bf" => :high_sierra
-    sha256 "a20f07e05094e370bb70ed36eeb1f570a466d8b4b12267659b99bc382cb995cf" => :sierra
-    sha256 "4c81754ed0ea158e77f4f2de100515c4fc4f6f3204e3bf8baf95f8b37f0d7a29" => :el_capitan
+    sha256 "5aefdc7964e569188cb67a49f4a428c64130f7c048ffd55106c656eb0c6caa25" => :catalina
+    sha256 "26629464888f464e3aacfec50d6b5c28ecd91c9c56ae74a418eac49b07abc3a3" => :mojave
+    sha256 "c548f5a23851ce6d807fd9e152c57e65ad99c3d0cf2cd40a473b55346935ec61" => :high_sierra
   end
 
   head do
-    url "https://anongit.freedesktop.org/git/xdg/shared-mime-info.git"
-    depends_on "automake" => :build
+    url "https://gitlab.freedesktop.org/xdg/shared-mime-info.git"
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "intltool" => :build
   end
 
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
+  depends_on "itstool" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "glib"
+  depends_on "xmlto"
+
+  uses_from_macos "libxml2"
 
   def install
+    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
     # Disable the post-install update-mimedb due to crash
-    args = %W[
-      --disable-dependency-tracking
-      --prefix=#{prefix}
-      --disable-update-mimedb
-    ]
-    if build.head?
-      system "./autogen.sh", *args
-    else
-      system "./configure", *args
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja"
+      system "ninja", "install"
+      pkgshare.install share/"mime/packages"
+      rmdir share/"mime"
     end
-    system "make", "install"
-    pkgshare.install share/"mime/packages"
-    rmdir share/"mime"
   end
 
   def post_install
-    ln_sf HOMEBREW_PREFIX/"share/mime", share/"mime"
-    (HOMEBREW_PREFIX/"share/mime/packages").mkpath
-    cp (pkgshare/"packages").children, HOMEBREW_PREFIX/"share/mime/packages"
-    system bin/"update-mime-database", HOMEBREW_PREFIX/"share/mime"
+    global_mime = HOMEBREW_PREFIX/"share/mime"
+    cellar_mime = share/"mime"
+
+    # Remove bad links created by old libheif postinstall
+    rm_rf global_mime if global_mime.symlink?
+
+    if !cellar_mime.exist? || !cellar_mime.symlink?
+      rm_rf cellar_mime
+      ln_sf global_mime, cellar_mime
+    end
+
+    (global_mime/"packages").mkpath
+    cp (pkgshare/"packages").children, global_mime/"packages"
+
+    system bin/"update-mime-database", global_mime
   end
 
   test do

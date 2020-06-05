@@ -3,29 +3,29 @@ class Dmd < Formula
   homepage "https://dlang.org/"
 
   stable do
-    url "https://github.com/dlang/dmd/archive/v2.077.0.tar.gz"
-    sha256 "15cf389248c41744fdc382154a95dfd92056f2af7c2c3153ce5f4e52f041f43c"
+    url "https://github.com/dlang/dmd/archive/v2.092.0.tar.gz"
+    sha256 "e21b7d20c2251fb5c8a77d573f1f3ee5038c6a719bd3902c019d616e2e8e7f72"
 
     resource "druntime" do
-      url "https://github.com/dlang/druntime/archive/v2.077.0.tar.gz"
-      sha256 "d0d4c8f8b5c2084718091bb3f599888063a40e29cb3a9cca6f294386f45a6cc0"
+      url "https://github.com/dlang/druntime/archive/v2.092.0.tar.gz"
+      sha256 "a33dbd54439bac4fda0f8c6de3ff54787a456fcea66dae64c91415d151e7e3df"
     end
 
     resource "phobos" do
-      url "https://github.com/dlang/phobos/archive/v2.077.0.tar.gz"
-      sha256 "41c1de92adb95facaddea0013d25391fc966494592b6c3255dc3118df6175b38"
+      url "https://github.com/dlang/phobos/archive/v2.092.0.tar.gz"
+      sha256 "e7e6529ae79e088ce2e1b79793151d15b8b1f80221c50dfa8ecafc149bd8cc31"
     end
 
     resource "tools" do
-      url "https://github.com/dlang/tools/archive/v2.077.0.tar.gz"
-      sha256 "422985a812301e3c25e663d9816be27c5985ff6d300b952e2a4805c8792a7dfa"
+      url "https://github.com/dlang/tools/archive/v2.092.0.tar.gz"
+      sha256 "169891c348bc282b570ed84ef8b26683c7dc0c04e391132fecef96dcfa23042d"
     end
   end
 
   bottle do
-    sha256 "6ccd402fc38b4913a18ae743b213e1932217fd2aad6e7f640fd68679be0e97fe" => :high_sierra
-    sha256 "90f298ed85cb2bce3bad4e1cc90ceb04b43f451f350086dac660d05d7daa621c" => :sierra
-    sha256 "69171480cfbc66a8567aec052ab7db8d3d7ad236063084d290688d69da0e5d29" => :el_capitan
+    sha256 "2a3d60bb722c8a2222d639802d9daca2f23967a5d3dc52d0908b3c7b01d400a3" => :catalina
+    sha256 "cd1eb63007da7a74a50fe48a76c05b1c78eec3016fee6be3dd6ecb4851e86776" => :mojave
+    sha256 "4771a5b877c70c8eb7089681eb26e8f86cb7c2e94a934a4eb46c7cbd228e1075" => :high_sierra
   end
 
   head do
@@ -44,25 +44,45 @@ class Dmd < Formula
     end
   end
 
+  uses_from_macos "unzip" => :build
+  uses_from_macos "xz" => :build
+
   def install
-    make_args = ["INSTALL_DIR=#{prefix}", "MODEL=#{Hardware::CPU.bits}", "-f", "posix.mak"]
+    # DMD defaults to v2.088.0 to bootstrap as of DMD 2.090.0
+    # On MacOS Catalina, a version < 2.087.1 would not work due to TLS related symbols missing
 
-    system "make", "SYSCONFDIR=#{etc}", "TARGET_CPU=X86", "AUTO_BOOTSTRAP=1", "RELEASE=1", *make_args
+    make_args = %W[
+      INSTALL_DIR=#{prefix}
+      MODEL=64
+      BUILD=release
+      -f posix.mak
+    ]
 
-    bin.install "src/dmd"
-    prefix.install "samples"
-    man.install Dir["docs/man/*"]
+    dmd_make_args = %W[
+      SYSCONFDIR=#{etc}
+      TARGET_CPU=X86
+      AUTO_BOOTSTRAP=1
+      ENABLE_RELEASE=1
+    ]
+
+    system "make", *dmd_make_args, *make_args
 
     make_args.unshift "DMD_DIR=#{buildpath}", "DRUNTIME_PATH=#{buildpath}/druntime", "PHOBOS_PATH=#{buildpath}/phobos"
+
     (buildpath/"druntime").install resource("druntime")
-    (buildpath/"phobos").install resource("phobos")
     system "make", "-C", "druntime", *make_args
+
+    (buildpath/"phobos").install resource("phobos")
     system "make", "-C", "phobos", "VERSION=#{buildpath}/VERSION", *make_args
 
     resource("tools").stage do
       inreplace "posix.mak", "install: $(TOOLS) $(CURL_TOOLS)", "install: $(TOOLS) $(ROOT)/dustmite"
       system "make", "install", *make_args
     end
+
+    bin.install "generated/osx/release/64/dmd"
+    pkgshare.install "samples"
+    man.install Dir["docs/man/*"]
 
     (include/"dlang/dmd").install Dir["druntime/import/*"]
     cp_r ["phobos/std", "phobos/etc"], include/"dlang/dmd"
@@ -97,7 +117,7 @@ class Dmd < Formula
   end
 
   test do
-    system bin/"dmd", prefix/"samples/hello.d"
+    system bin/"dmd", pkgshare/"samples/hello.d"
     system "./hello"
   end
 end

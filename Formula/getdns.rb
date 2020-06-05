@@ -1,48 +1,27 @@
 class Getdns < Formula
   desc "Modern asynchronous DNS API"
   homepage "https://getdnsapi.net"
-  url "https://getdnsapi.net/releases/getdns-1-2-1/getdns-1.2.1.tar.gz"
-  sha256 "3ed37135b4aa447160fa68205b8552477b6829da48eb63943994c6193e1d891d"
+  url "https://getdnsapi.net/releases/getdns-1-6-0/getdns-1.6.0.tar.gz"
+  sha256 "40e5737471a3902ba8304b0fd63aa7c95802f66ebbc6eae53c487c8e8a380f4a"
+  head "https://github.com/getdnsapi/getdns.git", :branch => "develop"
 
   bottle do
-    sha256 "095aa79a5d4dd416502c843dd3ab004814cc17017f3c3199ce03f6cbad19d9b8" => :high_sierra
-    sha256 "ec8b8937dbe8b2e2c52c2d4bde4484294e93fefccc451214ef79205b46277929" => :sierra
-    sha256 "70291f3a9b33a0531ff3043036ee6fcbe54aa6ea648e1a2156e219954c60174e" => :el_capitan
+    cellar :any
+    sha256 "e921bc22b5d49af0cf93a3daf035828b286cf28faf4e3916c863214c58cb100d" => :catalina
+    sha256 "dddc38b808f9901c02b56755838005ff9f04cb665f40d7145709838e8e38ef99" => :mojave
+    sha256 "431361fe29326a2c2b8ecb57b87f8a09c26fc21b5e3170c74bfe61b9ce6b1864" => :high_sierra
   end
 
-  head do
-    url "https://github.com/getdnsapi/getdns.git", :branch => "develop"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "openssl"
-  depends_on "unbound" => :recommended
-  depends_on "libidn" => :recommended
-  depends_on "libevent" => :recommended
-  depends_on "libuv" => :optional
-  depends_on "libev" => :optional
+  depends_on "cmake" => :build
+  depends_on "libevent"
+  depends_on "libidn2"
+  depends_on "openssl@1.1"
+  depends_on "unbound"
 
   def install
-    if build.head?
-      system "glibtoolize", "-ci"
-      system "autoreconf", "-fi"
-    end
-
-    args = [
-      "--with-ssl=#{Formula["openssl"].opt_prefix}",
-      "--with-trust-anchor=#{etc}/getdns-root.key",
-      "--without-stubby",
-    ]
-    args << "--enable-stub-only" if build.without? "unbound"
-    args << "--without-libidn" if build.without? "libidn"
-    args << "--with-libevent" if build.with? "libevent"
-    args << "--with-libuv" if build.with? "libuv"
-    args << "--with-libev" if build.with? "libev"
-
-    system "./configure", "--prefix=#{prefix}", *args
+    system "cmake", ".", *std_cmake_args,
+                         "-DBUILD_TESTING=OFF",
+                         "-DPATH_TRUST_ANCHOR_FILE=#{etc}/getdns-root.key"
     system "make"
     system "make", "install"
   end

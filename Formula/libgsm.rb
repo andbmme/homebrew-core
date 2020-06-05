@@ -1,14 +1,14 @@
 class Libgsm < Formula
   desc "Lossy speech compression library"
   homepage "http://www.quut.com/gsm/"
-  url "http://www.quut.com/gsm/gsm-1.0.17.tar.gz"
-  sha256 "855a57d1694941ddf3c73cb79b8d0b3891e9c9e7870b4981613b734e1ad07601"
+  url "http://www.quut.com/gsm/gsm-1.0.19.tar.gz"
+  sha256 "4903652f68a8c04d0041f0d19b1eb713ddcd2aa011c5e595b3b8bca2755270f6"
 
   bottle do
     cellar :any
-    sha256 "a09c56c1092d573d0f0e2eac64cc0b24c052d644e882c83f7fa1479809490d99" => :high_sierra
-    sha256 "81adb1475c78284f6794e172a8259c3a16bd60a6cb322e015443bedd24238597" => :sierra
-    sha256 "0aaa622ead97802072f54ebb8e33e4aeac94607fa66a38c36ff9b4b96aac8518" => :el_capitan
+    sha256 "9a3eaa556cd1a5429c458ee11c29b5c757ee6f32fbc334355110a37622357dc4" => :catalina
+    sha256 "f7a7683ef5f7f916e81e3ed51aa754da92ca2b993533608f8fc95187baaf8b3c" => :mojave
+    sha256 "5a2b52e7ed65f005f32bb56519dd425b26e537f888b49402322fe1424f0901e4" => :high_sierra
   end
 
   # Builds a dynamic library for gsm, this package is no longer developed
@@ -39,5 +39,23 @@ class Libgsm < Formula
            "INSTALL_ROOT=#{prefix}",
            "GSM_INSTALL_INC=#{include}"
     lib.install Dir["lib/*dylib"]
+  end
+
+  test do
+    (testpath/"test.c").write <<~EOS
+      #include <gsm.h>
+
+      int main()
+      {
+        gsm g = gsm_create();
+        if (g == 0)
+        {
+          return 1;
+        }
+        return 0;
+      }
+    EOS
+    system ENV.cc, "-L#{lib}", "-lgsm", "test.c", "-o", "test"
+    system "./test"
   end
 end

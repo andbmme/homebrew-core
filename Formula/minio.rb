@@ -2,44 +2,35 @@ class Minio < Formula
   desc "Amazon S3 compatible object storage server"
   homepage "https://github.com/minio/minio"
   url "https://github.com/minio/minio.git",
-      :tag => "RELEASE.2017-08-05T00-00-53Z",
-      :revision => "aeafe668d8b6d25caac671d59e2b0f0473ce35d0"
-  version "20170805000053"
+      :tag      => "RELEASE.2020-04-28T23-56-56Z",
+      :revision => "c3c3e9087bc15e058eac89b5b130cc73e90c6d33"
+  version "20200428235656"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d7ad63cef8dfe1f858332c757f140ad099deb71870c203bd3fcfb9d04243fa6d" => :high_sierra
-    sha256 "6b709fcae2ed50362119377ab41e81b79e5b128c2a56f29ce40aa815e7e4eaa5" => :sierra
-    sha256 "0a4965a1608c5fbc514d1a5ce2e7eb443250d9549a120800cf604ada71408856" => :el_capitan
-    sha256 "307b271c6b03b32927c1eddacf4d3a940727704a4e12dc84cb716d2d8546a344" => :yosemite
+    sha256 "ac27e9834abda9a57d97f950641be3085e21cf00d2e34da6947b2fe5abbc7143" => :catalina
+    sha256 "8b321241b9eadd4c6464133158a55b381d268ba3b43157e154735546d0ed5693" => :mojave
+    sha256 "364654073feb1f7794b6ed94aef0dba566b742f52d59e8039a7e97b5adda5518" => :high_sierra
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
+    if build.head?
+      system "go", "build", "-trimpath", "-o", bin/"minio"
+    else
+      release = `git tag --points-at HEAD`.chomp
+      version = release.gsub(/RELEASE\./, "").chomp.gsub(/T(\d+)-(\d+)-(\d+)Z/, 'T\1:\2:\3Z')
+      commit = `git rev-parse HEAD`.chomp
+      proj = "github.com/minio/minio"
 
-    clipath = buildpath/"src/github.com/minio/minio"
-    clipath.install Dir["*"]
-
-    cd clipath do
-      if build.head?
-        system "go", "build", "-o", buildpath/"minio"
-      else
-        release = `git tag --points-at HEAD`.chomp
-        version = release.gsub(/RELEASE\./, "").chomp.gsub(/T(\d+)\-(\d+)\-(\d+)Z/, 'T\1:\2:\3Z')
-        commit = `git rev-parse HEAD`.chomp
-        proj = "github.com/minio/minio"
-
-        system "go", "build", "-o", buildpath/"minio", "-ldflags", <<~EOS
-          -X #{proj}/cmd.Version=#{version}
-          -X #{proj}/cmd.ReleaseTag=#{release}
-          -X #{proj}/cmd.CommitID=#{commit}
-        EOS
-      end
+      system "go", "build", "-trimpath", "-o", bin/"minio", "-ldflags", <<~EOS
+        -X #{proj}/cmd.Version=#{version}
+        -X #{proj}/cmd.ReleaseTag=#{release}
+        -X #{proj}/cmd.CommitID=#{commit}
+      EOS
     end
 
-    bin.install buildpath/"minio"
     prefix.install_metafiles
   end
 
@@ -65,7 +56,7 @@ class Minio < Formula
             <string>#{opt_bin}/minio</string>
             <string>server</string>
             <string>--config-dir=#{etc}/minio</string>
-            <string>--address :9000</string>
+            <string>--address=:9000</string>
             <string>#{var}/minio</string>
           </array>
           <key>RunAtLoad</key>
@@ -75,9 +66,9 @@ class Minio < Formula
           <key>WorkingDirectory</key>
           <string>#{HOMEBREW_PREFIX}</string>
           <key>StandardErrorPath</key>
-          <string>#{var}/log/minio/output.log</string>
+          <string>#{var}/log/minio.log</string>
           <key>StandardOutPath</key>
-          <string>#{var}/log/minio/output.log</string>
+          <string>#{var}/log/minio.log</string>
           <key>RunAtLoad</key>
           <true/>
         </dict>
@@ -86,6 +77,6 @@ class Minio < Formula
   end
 
   test do
-    system "#{bin}/minio", "version"
+    system "#{bin}/minio", "--version"
   end
 end

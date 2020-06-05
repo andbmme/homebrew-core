@@ -1,17 +1,17 @@
 class Bluepill < Formula
-  desc "iOS testing tool that runs UI tests using multiple simulators"
+  desc "Testing tool for iOS that runs UI tests using multiple simulators"
   homepage "https://github.com/linkedin/bluepill"
-  url "https://github.com/linkedin/bluepill/archive/v2.0.2.tar.gz"
-  sha256 "eed223e5c55db679267ee637fb2730b3e8e6848f3febe3245a1fbf05ad27960f"
+  url "https://github.com/linkedin/bluepill.git",
+    :tag => "v5.2.2", :revision => "89010caaff60e75e23d612d3d60a1efd7b2e2b99"
   head "https://github.com/linkedin/bluepill.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "3e67c31f8dfe739788e7078e5220e91ebfd956a290803c8e62167ad26d8ad909" => :high_sierra
-    sha256 "449c426e4d287ba952845568f79f1df59d7c21c6bf85716f745a68db5ff24fe1" => :sierra
+    sha256 "0670232c1218eafe49bcdc694cf288f0cb88137dcbfce12fa7c991a523eb873f" => :catalina
+    sha256 "68dcc80fd4cc0e3d685251330680702b05fc898824537639bfdea08a094fea29" => :mojave
   end
 
-  depends_on :xcode => ["9.0", :build]
+  depends_on :xcode => ["11.2", :build]
 
   def install
     xcodebuild "-workspace", "Bluepill.xcworkspace",

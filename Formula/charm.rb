@@ -3,28 +3,37 @@ require "language/go"
 class Charm < Formula
   desc "Tool for managing Juju Charms"
   homepage "https://github.com/juju/charmstore-client"
-  url "https://github.com/juju/charmstore-client/archive/2.2.2.tar.gz"
-  sha256 "9e603b7af4f6e136c3cdfbfff0ce0f8f986cae49c0c17fa1bee2a2e3f7f4b853"
+  url "https://github.com/juju/charmstore-client/archive/v2.4.0.tar.gz"
+  sha256 "02f5b9c5211467353dbcf9589ecf70d6e7debf16e3a8b85fa870084525466731"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "799504859bf743752a1b7018b0138374682682cde61067a38f1d8b414440217e" => :high_sierra
-    sha256 "ea04bd37b2df2ea2824d8d87a506929bbcb443a99f9c2c1a04a2888c1baca577" => :sierra
-    sha256 "20a11dc53ae3388fd819b7c8074eafab242eadeb79d4c3057eb5cb748205c8b7" => :el_capitan
-    sha256 "abf62af86d0061fab31f92aabc3d5a9d1ff2d9f18a524d16a49313a94774bb81" => :yosemite
+    sha256 "8fceac06a83052ab1a67a5845ebc910438105e543677756c774c05b3a03a81c8" => :mojave
+    sha256 "0b0552a903e6a0a29fbf38c1d2110263df22fd5a12599e36cd60b22bc1dab71e" => :high_sierra
+    sha256 "1e3250586c714b629398dc02cd1b8168fe0cfe70a8a067d700b8b425f16d2ffa" => :sierra
   end
 
-  depends_on "go" => :build
   depends_on "bazaar" => :build
+  depends_on "go" => :build
 
   go_resource "github.com/kisielk/gotool" do
     url "https://github.com/kisielk/gotool.git",
-        :revision => "0de1eaf82fa3f583ce21fde859f1e7e0c5e9b220"
+        :revision => "80517062f582ea3340cd4baf70e86d539ae7d84d"
+  end
+
+  go_resource "github.com/pelletier/go-toml" do
+    url "https://github.com/pelletier/go-toml.git",
+        :revision => "603baefff989777996bf283da430d693e78eba3a"
+  end
+
+  go_resource "golang.org/x/tools" do
+    url "https://go.googlesource.com/tools.git",
+        :revision => "fd2d2c45eb2dff7b87eab4303a1016b4dbf95e81"
   end
 
   go_resource "github.com/rogpeppe/godeps" do
     url "https://github.com/rogpeppe/godeps.git",
-        :revision => "e0581207fc59197e6caa4dc03f425fdca872c4a7"
+        :revision => "404a7e748cd352bb0d7449dedc645546eebbfc6e"
   end
 
   def install

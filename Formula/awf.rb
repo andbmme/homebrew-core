@@ -3,14 +3,15 @@ class Awf < Formula
   homepage "https://github.com/valr/awf"
   url "https://github.com/valr/awf/archive/v1.4.0.tar.gz"
   sha256 "bb14517ea3eed050b3fec37783b79c515a0f03268a55dfd0b96a594b5b655c78"
+  revision 2
   head "https://github.com/valr/awf.git"
 
   bottle do
     cellar :any
-    sha256 "05447f2e8fd02a3c1bc9e2a7c96a0c5c9c294d2e67746f4102f0c781cf46e857" => :high_sierra
-    sha256 "bbe56879c4de58ef832bb6ba45d07555eaf481ccb2fdafdb627ed0598ef0c3dd" => :sierra
-    sha256 "191615297091a381c7d5ac0b3702d936ef41c50fbdfec153df00369acac53106" => :el_capitan
-    sha256 "6b9e3490b4f19691535979787ff5d586c6781061bfbb26dbcbc731d64eb5f13b" => :yosemite
+    sha256 "cb84883afc611eacadc474b10407dee6b7177758054fbc2eaa65f21ba7d96f9f" => :catalina
+    sha256 "b0290ffc5c750f924cbf96a2a5398215a41137a69211d262387789e399aba9d8" => :mojave
+    sha256 "090ec40bbd96bea15714d411b9c89e6b06ca9723050252f00623b49c61da1497" => :high_sierra
+    sha256 "417806f1ab0aa5d1c2e2e0302dd2c3c4cdaaf2957ac18fbfe1f9a2ced72947bd" => :sierra
   end
 
   depends_on "autoconf" => :build

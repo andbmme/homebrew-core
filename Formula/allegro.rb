@@ -1,19 +1,19 @@
 class Allegro < Formula
   desc "C/C++ multimedia library for cross-platform game development"
-  homepage "http://liballeg.org/"
-  url "https://github.com/liballeg/allegro5/releases/download/5.2.3.0/allegro-5.2.3.0.tar.gz"
-  sha256 "5a4d40601899492b697ad5cfdf11d8265fe554036a2c912c86a6e6d23001f905"
-
-  head "https://github.com/liballeg/allegro5.git", :branch => "master"
+  homepage "https://liballeg.org/"
+  url "https://github.com/liballeg/allegro5/releases/download/5.2.6.0/allegro-5.2.6.0.tar.gz"
+  sha256 "5de8189ec051e1865f359654f86ec68e2a12a94edd00ad06d1106caa5ff27763"
+  head "https://github.com/liballeg/allegro5.git"
 
   bottle do
     cellar :any
-    sha256 "35a544646e7e4d38a77afa7032c67506f40cd93447de255d81b1879fa8956c9e" => :high_sierra
-    sha256 "ca4daf0ada1bf65e4a0a8cfa6afcde4805fb4921199393f1ca37bd20bdfe4af0" => :sierra
-    sha256 "687ea283ee293728c40889db1589844ad4e56acd53ae7fd7238e67e4eea79a0e" => :el_capitan
+    sha256 "9e71511f6c8faa8449dd06bc30bd74497ee832e3e0ca7f3eb02bcef263ab4b3f" => :catalina
+    sha256 "ead9f69a2af4720ad8a9e020657b1db71e49cb3e83d9d8477d425de9d948ce07" => :mojave
+    sha256 "4ab4367b267e257a1aeee6cd65301922cf38cb37e8c11865edecedac5960f96e" => :high_sierra
   end
 
   depends_on "cmake" => :build
+  depends_on "dumb"
   depends_on "flac"
   depends_on "freetype"
   depends_on "libogg"
@@ -22,32 +22,29 @@ class Allegro < Formula
   depends_on "physfs"
   depends_on "theora"
   depends_on "webp"
-  depends_on "dumb" => :optional
 
   def install
-    args = std_cmake_args
-    args << "-DWANT_DOCS=OFF"
-    args << "-DWANT_MODAUDIO=1" if build.with?("dumb")
     mkdir "build" do
-      system "cmake", "..", *args
+      system "cmake", "..", *std_cmake_args, "-DWANT_DOCS=OFF"
       system "make", "install"
     end
   end
 
   test do
-    (testpath/"allegro_test.cpp").write <<-EOS
-    #include <assert.h>
-    #include <allegro5/allegro5.h>
+    (testpath/"allegro_test.cpp").write <<~EOS
+      #include <assert.h>
+      #include <allegro5/allegro5.h>
 
-    int main(int n, char** c) {
-      if (!al_init()) {
-        return 1;
+      int main(int n, char** c) {
+        if (!al_init()) {
+          return 1;
+        }
+        return 0;
       }
-      return 0;
-    }
     EOS
 
-    system ENV.cxx, "-I#{include}", "-L#{lib}", "-lallegro", "-lallegro_main", "-o", "allegro_test", "allegro_test.cpp"
+    system ENV.cxx, "-I#{include}", "-L#{lib}", "-lallegro", "-lallegro_main",
+                    "-o", "allegro_test", "allegro_test.cpp"
     system "./allegro_test"
   end
 end

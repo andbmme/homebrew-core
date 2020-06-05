@@ -1,15 +1,15 @@
 class Ocamlbuild < Formula
   desc "Generic build tool for OCaml"
   homepage "https://github.com/ocaml/ocamlbuild"
-  url "https://github.com/ocaml/ocamlbuild/archive/0.11.0.tar.gz"
-  sha256 "1717edc841c9b98072e410f1b0bc8b84444b4b35ed3b4949ce2bec17c60103ee"
-  revision 3
+  url "https://github.com/ocaml/ocamlbuild/archive/0.14.0.tar.gz"
+  sha256 "87b29ce96958096c0a1a8eeafeb6268077b2d11e1bf2b3de0f5ebc9cf8d42e78"
+  revision 2
   head "https://github.com/ocaml/ocamlbuild.git"
 
   bottle do
-    sha256 "16c1d84895f766e95e5a4d5b52c6ef94a392d570a0ceeb1c0d884d06e17f88f9" => :high_sierra
-    sha256 "31aa1670e71e813d2c84ba3d593e51ac99c66bcee2d00d0ed5f2d3fcd58fec3b" => :sierra
-    sha256 "3634d6b1a4be0876183c94b30bd9a80a620051a7d67761dd1403703dbd51b80e" => :el_capitan
+    sha256 "8f6fc7e7413b24faa041b7651349a3128f9eadefae5c9aa0c50f0d1a56e010f6" => :catalina
+    sha256 "04fed811edb4dd3903f742ec6678643f9959e85c4fcb763972c8779dec059515" => :mojave
+    sha256 "e4cd0274f9657874e29add30545055af4ea8697d426ed95f799ddce63aef5cfe" => :high_sierra
   end
 
   depends_on "ocaml"

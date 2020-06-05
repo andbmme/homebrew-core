@@ -1,46 +1,23 @@
 class Exim < Formula
   desc "Complete replacement for sendmail"
   homepage "https://exim.org"
-  url "https://ftp.exim.org/pub/exim/exim4/exim-4.89.tar.bz2"
-  sha256 "912f2ee03c8dba06a3a4c0ee40522d367e1b65dc59e38dfcc1f5d9eecff51ab0"
-  revision 2
+  url "https://ftp.exim.org/pub/exim/exim4/fixes/exim-4.93.0.4.tar.xz"
+  mirror "https://dl.bintray.com/homebrew/mirror/exim-4.93.0.4.tar.xz"
+  sha256 "537d366ee18ed357656f54f255f8f9e11bde9684fcaaecaaa56f84cdbcd3e405"
 
   bottle do
-    sha256 "e034ee4ff0a3a7c4ba72be9c9dd971dc0e3d26c4559dc30e5c6a67608e54d216" => :high_sierra
-    sha256 "cfacabfcec0746abc0b8c285216bec3604de3f5974cba9d70efed4564cfb9972" => :sierra
-    sha256 "76f0bff4cbc20acbfc51728c5110ebfb2aa201a14f543fe05f70bd1a77c1e613" => :el_capitan
+    sha256 "f31d37d1402ba863051e37097c8450f6459dcd1fffb080c437af587cb0ef106d" => :catalina
+    sha256 "6dc2283760c7196639cb9ad90a4fd73bb0a869969aa3b22799c5a430295228fd" => :mojave
+    sha256 "0dcca0007f092e720db484159cca69f1d00d86dcbc8a45e59252b135611c691c" => :high_sierra
   end
 
-  deprecated_option "support-maildir" => "with-maildir"
-  option "with-maildir", "Support delivery in Maildir format"
-
-  depends_on "pcre"
   depends_on "berkeley-db@4"
-  depends_on "openssl"
-
-  # Patch applied upstream but doesn't apply cleanly from git.
-  # https://github.com/Exim/exim/commit/65e061b76867a9ea7aeeb535341b790b90ae6c21
-  patch do
-    url "https://mirrors.ocf.berkeley.edu/debian/pool/main/e/exim4/exim4_4.89-7.debian.tar.xz"
-    mirror "https://mirrorservice.org/sites/ftp.debian.org/debian/pool/main/e/exim4/exim4_4.89-7.debian.tar.xz"
-    sha256 "e24464a5a803e4063b32e42543f9a9352ed2fa6bfde7b0f608e59582a23a853f"
-    apply "patches/75_fixes_01-Start-exim-4_89-fixes-to-cherry-pick-some-commits-fr.patch"
-    apply "patches/75_fixes_02-Cleanup-prevent-repeated-use-of-p-oMr-to-avoid-mem-l.patch"
-    apply "patches/75_fixes_03-Fix-log-line-corruption-for-DKIM-status.patch"
-    apply "patches/75_fixes_04-Openssl-disable-session-tickets-by-default-and-sessi.patch"
-    apply "patches/75_fixes_05-Transport-fix-smtp-under-combo-of-mua_wrapper-and-li.patch"
-    apply "patches/75_fixes_07-Openssl-disable-session-tickets-by-default-and-sessi.patch"
-    apply "patches/75_fixes_08-Transport-fix-smtp-under-combo-of-mua_wrapper-and-li.patch"
-    apply "patches/75_fixes_09-Use-the-BDB-environment-so-that-a-database-config-fi.patch"
-    apply "patches/75_fixes_10-Fix-cache-cold-random-callout-verify.-Bug-2147.patch"
-    apply "patches/75_fixes_11-On-callout-avoid-SIZE-every-time-but-noncacheable-rc.patch"
-    apply "patches/75_fixes_12-Fix-build-for-earlier-version-Berkeley-DB.patch"
-  end
+  depends_on "openssl@1.1"
+  depends_on "pcre"
 
   def install
     cp "src/EDITME", "Local/Makefile"
     inreplace "Local/Makefile" do |s|
-      s.remove_make_var! "EXIM_MONITOR"
       s.change_make_var! "EXIM_USER", ENV["USER"]
       s.change_make_var! "SYSTEM_ALIASES_FILE", etc/"aliases"
       s.gsub! "/usr/exim/configure", etc/"exim.conf"
@@ -48,9 +25,9 @@ class Exim < Formula
       s.gsub! "/var/spool/exim", var/"spool/exim"
       # https://trac.macports.org/ticket/38654
       s.gsub! 'TMPDIR="/tmp"', "TMPDIR=/tmp"
-      s << "SUPPORT_MAILDIR=yes\n" if build.with? "maildir"
       s << "AUTH_PLAINTEXT=yes\n"
       s << "SUPPORT_TLS=yes\n"
+      s << "USE_OPENSSL=yes\n"
       s << "TLS_LIBS=-lssl -lcrypto\n"
       s << "TRANSPORT_LMTP=yes\n"
 
@@ -79,34 +56,36 @@ class Exim < Formula
   end
 
   # Inspired by MacPorts startup script. Fixes restart issue due to missing setuid.
-  def startup_script; <<~EOS
-    #!/bin/sh
-    PID=#{var}/spool/exim/exim-daemon.pid
-    case "$1" in
-    start)
-      echo "starting exim mail transfer agent"
-      #{bin}/exim -bd -q30m
-      ;;
-    restart)
-      echo "restarting exim mail transfer agent"
-      /bin/kill -15 `/bin/cat $PID` && sleep 1 && #{bin}/exim -bd -q30m
-      ;;
-    stop)
-      echo "stopping exim mail transfer agent"
-      /bin/kill -15 `/bin/cat $PID`
-      ;;
-    *)
-      echo "Usage: #{bin}/exim_ctl {start|stop|restart}"
-      exit 1
-      ;;
-    esac
+  def startup_script
+    <<~EOS
+      #!/bin/sh
+      PID=#{var}/spool/exim/exim-daemon.pid
+      case "$1" in
+      start)
+        echo "starting exim mail transfer agent"
+        #{bin}/exim -bd -q30m
+        ;;
+      restart)
+        echo "restarting exim mail transfer agent"
+        /bin/kill -15 `/bin/cat $PID` && sleep 1 && #{bin}/exim -bd -q30m
+        ;;
+      stop)
+        echo "stopping exim mail transfer agent"
+        /bin/kill -15 `/bin/cat $PID`
+        ;;
+      *)
+        echo "Usage: #{bin}/exim_ctl {start|stop|restart}"
+        exit 1
+        ;;
+      esac
     EOS
   end
 
-  def caveats; <<~EOS
-    Start with:
-      exim_ctl start
-    Don't forget to run it as root to be able to bind port 25.
+  def caveats
+    <<~EOS
+      Start with:
+        exim_ctl start
+      Don't forget to run it as root to be able to bind port 25.
     EOS
   end
 

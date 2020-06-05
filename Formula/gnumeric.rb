@@ -1,28 +1,23 @@
 class Gnumeric < Formula
   desc "GNOME Spreadsheet Application"
   homepage "https://projects.gnome.org/gnumeric/"
-  url "https://download.gnome.org/sources/gnumeric/1.12/gnumeric-1.12.35.tar.xz"
-  sha256 "77b1e3ce523578a807767ad71680fb865ac021d7bfadf93eada99ae094c06c0a"
+  url "https://download.gnome.org/sources/gnumeric/1.12/gnumeric-1.12.47.tar.xz"
+  sha256 "40159f34128a13c6102a512c01cdb050a779801072e55b16f2a0e038c57119ce"
 
   bottle do
-    rebuild 1
-    sha256 "eee1f26786c0c4773616dc6e1a2bd1e60f1697321310e99f0e875e45300f59f8" => :high_sierra
-    sha256 "606c2d0fc786ee45c0a7e3349def6e596ce666518d53dc2ef583a309da5a9b8e" => :sierra
-    sha256 "1955c0ae14d94c849b399c19485bc16f7bb981ee84ecc926d8cefd1494a67b39" => :el_capitan
+    sha256 "04e56643897cfc7699f16dcf0cdb5bd48783eb8ccbcc8b12dd5ebb1af445b5d7" => :catalina
+    sha256 "666fafcd212cf2ed17c714b616b0828fdcd5608eaec5611dd5256375da9c5320" => :mojave
+    sha256 "dab647cf3378e1b5a3a7e24abb427190994dd5d19b6b5b8c499f8bd4e065d1bd" => :high_sierra
   end
 
-  option "with-python-scripting", "Enable Python scripting."
-
-  deprecated_option "python-scripting" => "with-python-scripting"
-
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
-  depends_on "itstool" => :build
+  depends_on "pkg-config" => :build
+  depends_on "adwaita-icon-theme"
   depends_on "gettext"
   depends_on "goffice"
+  depends_on "itstool"
+  depends_on "libxml2"
   depends_on "rarian"
-  depends_on "adwaita-icon-theme"
-  depends_on "pygobject" if build.with? "python-scripting"
 
   def install
     # ensures that the files remain within the keg

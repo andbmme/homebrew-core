@@ -1,9 +1,8 @@
 class Elasticsearch < Formula
   desc "Distributed search & analytics engine"
   homepage "https://www.elastic.co/products/elasticsearch"
-  url "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.0.0.tar.gz"
-  sha256 "0420e877a8b986485244f603770737e9e4e47186fdfa1093768a11e391e3d9f4"
-  revision 1
+  url "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.8.8.tar.gz"
+  sha256 "aa2d751ec449d70164338049e9596e77d6f6fed8ab47cd604663605031217364"
 
   head do
     url "https://github.com/elasticsearch/elasticsearch.git"
@@ -25,7 +24,8 @@ class Elasticsearch < Formula
       # Extract the package to the tar directory
       mkdir "tar"
       cd "tar"
-      system "tar", "--strip-components=1", "-xf", Dir["../distribution/tar/build/distributions/elasticsearch-*.tar.gz"].first
+      system "tar", "--strip-components=1", "-xf",
+        Dir["../distribution/tar/build/distributions/elasticsearch-*.tar.gz"].first
     end
 
     # Remove Windows files
@@ -42,7 +42,7 @@ class Elasticsearch < Formula
     # Set up Elasticsearch for local development:
     inreplace "#{libexec}/config/elasticsearch.yml" do |s|
       # 1. Give the cluster a unique name
-      s.gsub!(/#\s*cluster\.name\: .*/, "cluster.name: #{cluster_name}")
+      s.gsub!(/#\s*cluster\.name: .*/, "cluster.name: #{cluster_name}")
 
       # 2. Configure paths
       s.sub!(%r{#\s*path\.data: /path/to.+$}, "path.data: #{var}/lib/elasticsearch/")
@@ -62,16 +62,18 @@ class Elasticsearch < Formula
 
   def post_install
     # Make sure runtime directories exist
-    (var/"lib/elasticsearch/#{cluster_name}").mkpath
+    (var/"lib/elasticsearch").mkpath
     (var/"log/elasticsearch").mkpath
-    ln_s etc/"elasticsearch", libexec/"config"
+    ln_s etc/"elasticsearch", libexec/"config" unless (libexec/"config").exist?
     (var/"elasticsearch/plugins").mkpath
-    ln_s var/"elasticsearch/plugins", libexec/"plugins"
+    ln_s var/"elasticsearch/plugins", libexec/"plugins" unless (libexec/"plugins").exist?
+    # fix test not being able to create keystore because of sandbox permissions
+    system bin/"elasticsearch-keystore", "create" unless (etc/"elasticsearch/elasticsearch.keystore").exist?
   end
 
   def caveats
     s = <<~EOS
-      Data:    #{var}/lib/elasticsearch/#{cluster_name}/
+      Data:    #{var}/lib/elasticsearch/
       Logs:    #{var}/log/elasticsearch/#{cluster_name}.log
       Plugins: #{var}/elasticsearch/plugins/
       Config:  #{etc}/elasticsearch/
@@ -113,12 +115,9 @@ class Elasticsearch < Formula
   end
 
   test do
-    require "socket"
+    assert_includes(stable.url, "-oss-")
 
-    server = TCPServer.new(0)
-    port = server.addr[1]
-    server.close
-
+    port = free_port
     system "#{bin}/elasticsearch-plugin", "list"
     pid = testpath/"pid"
     begin
@@ -129,10 +128,7 @@ class Elasticsearch < Formula
       Process.kill(9, pid.read.to_i)
     end
 
-    server = TCPServer.new(0)
-    port = server.addr[1]
-    server.close
-
+    port = free_port
     (testpath/"config/elasticsearch.yml").write <<~EOS
       path.data: #{testpath}/data
       path.logs: #{testpath}/logs

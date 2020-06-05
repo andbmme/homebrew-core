@@ -1,27 +1,27 @@
 class MariadbConnectorC < Formula
   desc "MariaDB database connector for C applications"
   homepage "https://downloads.mariadb.org/connector-c/"
-  url "https://downloads.mariadb.org/f/connector-c-2.2.2/mariadb-connector-c-2.2.2-src.tar.gz"
-  sha256 "93f56ad9f08bbaf0da8ef03bc96f7093c426ae40dede60575d485e1b99e6406b"
+  url "https://downloads.mariadb.org/f/connector-c-3.1.8/mariadb-connector-c-3.1.8-src.tar.gz"
+  sha256 "431434d3926f4bcce2e5c97240609983f60d7ff50df5a72083934759bb863f7b"
 
   bottle do
-    sha256 "d569c9bbc70e38697625aaf1ff939689b1b7189d2fcf890546a72dc0e4d8f4c8" => :high_sierra
-    sha256 "2efc882d3518dc6932d711b62d5d65a6b2151f7e44d2e6a15917ca4f1d3ce897" => :sierra
-    sha256 "fe5606d7c8ac822398f01f2b2b9045c8d6b3a46df8b862e1fe151aa17619d3b2" => :el_capitan
-    sha256 "6b5b743616a46585a9bfe1505a94addccf24802090094a9dcd791852bf8d566c" => :yosemite
-    sha256 "14f9440a48d0035a8e77ff8e7b260b50c89326453041ec77d0cc38febbf4f5cc" => :mavericks
+    sha256 "9b46c115a5e52eda9c098ddb5f426119af1b2fe706c936a23af9dcd8396e5a2d" => :catalina
+    sha256 "b1677f7aab7d36908ec07abe4427fb1d04929a7d59a5b08de103a5ae573dffea" => :mojave
+    sha256 "c681d5b8bf178d5e1e4bd6ea08ed819fe1128845dc290eda2776e7c06731731f" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
-  conflicts_with "mysql", "mariadb", "percona-server",
-                 :because => "both install plugins"
+  uses_from_macos "curl"
+
+  conflicts_with "mariadb",
+                 :because => "both install mariadb_config"
 
   def install
     args = std_cmake_args
     args << "-DWITH_OPENSSL=On"
-    args << "-DOPENSSL_INCLUDE_DIR=#{Formula["openssl"].opt_include}"
+    args << "-DOPENSSL_INCLUDE_DIR=#{Formula["openssl@1.1"].opt_include}"
     args << "-DCOMPILATION_COMMENT=Homebrew"
 
     system "cmake", ".", *args

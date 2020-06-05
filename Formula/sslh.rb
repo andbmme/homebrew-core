@@ -1,19 +1,20 @@
 class Sslh < Formula
   desc "Forward connections based on first data packet sent by client"
   homepage "https://www.rutschle.net/tech/sslh.shtml"
-  url "https://www.rutschle.net/tech/sslh/sslh-v1.18.tar.gz"
-  sha256 "1601a5b377dcafc6b47d2fbb8d4d25cceb83053a4adcc5874d501a2d5a7745ad"
-  revision 1
+  url "https://www.rutschle.net/tech/sslh/sslh-v1.20.tar.gz"
+  sha256 "a7f49b0a1cfcb7bb9d97f5ffa932bff11c5f65d9a9bd8fe1812481dee5855116"
   head "https://github.com/yrutschle/sslh.git"
 
   bottle do
     cellar :any
-    sha256 "fe98f0cd7455170be02b755a9501ac54e8e95716344f7b01052dd8651e24bb2f" => :high_sierra
-    sha256 "db949cf82e5db94862e6ac64f952a4face1bdf04e5aa5058f858deba64e5c826" => :sierra
-    sha256 "5803ea7f103f4f36c00842a2f7aee0e02bd87a077e713040113ffa5fa2f94fdc" => :el_capitan
+    sha256 "be0c707c6a1216bc06da14003f0af6197ac450a2fe4b6b6ce12b3e614b54fbca" => :catalina
+    sha256 "cee0f6398a940312dd3198dda55d949955aa1374cd15fb5841c0446c67508e4d" => :mojave
+    sha256 "b1d1ea3c654defbd69cc850ecb9b5b97b09e3b8c991faf48cb22d4190e0791b6" => :high_sierra
+    sha256 "8a4b0d4715358a714c8f3ef86496e91416bcfe70067f3d71db30f97616b71080" => :sierra
   end
 
   depends_on "libconfig"
+  depends_on "pcre"
 
   def install
     ENV.deparallelize

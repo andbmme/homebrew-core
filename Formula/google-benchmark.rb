@@ -1,27 +1,23 @@
 class GoogleBenchmark < Formula
   desc "C++ microbenchmark support library"
   homepage "https://github.com/google/benchmark"
-  url "https://github.com/google/benchmark/archive/v1.3.0.tar.gz"
-  sha256 "f19559475a592cbd5ac48b61f6b9cedf87f0b6775d1443de54cfe8f53940b28d"
+  url "https://github.com/google/benchmark/archive/v1.5.0.tar.gz"
+  sha256 "3c6a165b6ecc948967a1ead710d4a181d7b0fbcaa183ef7ea84604994966221a"
   head "https://github.com/google/benchmark.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "cd223b9dfaed9208c8c683e933525c46f0a871a3e4bad67b818577f3b1d761ab" => :high_sierra
-    sha256 "59851a02622cbb62c485cf9d42a7b364ded70c0b40ce11c133f79195e2ea9844" => :sierra
-    sha256 "5052dafe9ca883c844dcf1f85270851d4163d7a2d134b2ebb96a592b30c53590" => :el_capitan
+    sha256 "6d7902db4dfdcc4a0c6e928fe2ef178238b5e4d4ca0c02f536fd8c94d8f2c7c6" => :catalina
+    sha256 "e2acb14eb43b34f2ccb30ff82a0efd540c3ff0ee9a036a83a00187980457ab17" => :mojave
+    sha256 "d9a78a0c14c161ca9c490605f2800328fc5899ffc98cec09af1bd0622338dcc5" => :high_sierra
+    sha256 "27cfc3243938226aca675a93ec347bb1a15e482ccfb95b356352b2f1391ac4d1" => :sierra
   end
 
   depends_on "cmake" => :build
 
-  needs :cxx11
-
   def install
     ENV.cxx11
-
-    system "cmake", *std_cmake_args
-    system "make"
-    system "make", "test"
+    system "cmake", "-DBENCHMARK_ENABLE_GTEST_TESTS=OFF", *std_cmake_args
     system "make", "install"
   end
 

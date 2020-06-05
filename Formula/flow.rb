@@ -1,36 +1,19 @@
 class Flow < Formula
   desc "Static type checker for JavaScript"
   homepage "https://flowtype.org/"
+  url "https://github.com/facebook/flow/archive/v0.126.1.tar.gz"
+  sha256 "30836754f038f4fff278edadda7153ff4536e0f4cef365fee319dac2d582b8ee"
   head "https://github.com/facebook/flow.git"
-
-  stable do
-    url "https://github.com/facebook/flow/archive/v0.59.0.tar.gz"
-    sha256 "732f4d3018bba2d082537190fda68c7cf4d84e24a3a4714361e9949b6ea02961"
-
-    patch do
-      url "https://github.com/facebook/flow/commit/ff9c1038c.patch?full_index=1"
-      sha256 "e571298199fe0fe557c83f8bd7974438dc4e2587ff0e9c5d32fe3bd7e9685ab0"
-    end
-
-    patch do
-      url "https://github.com/facebook/flow/commit/12dd84abf.patch?full_index=1"
-      sha256 "dfab373d1d7ffe876e27f47757416fe3ef759c2a99ee0d193dd018e6e625e8f8"
-    end
-  end
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c305dc721b437c3e0d6bf78894748e44f694f2ae19909bac5754b86d9d434b30" => :high_sierra
-    sha256 "1ee4548967f46773a4683dd4e9db71b524d683d09f0859a4c5c7c6e65505b62f" => :sierra
-    sha256 "13d9544cc2abef6b30e8bfe39230063e76dcac11a135f9199560f3ca9dbe6ea1" => :el_capitan
+    sha256 "9be5e6872cf9e785a2eccae42e900eee2e08100003127d6a0b25b9f70951c44b" => :catalina
+    sha256 "f862a67fb5b231ab3edeb6c98cc7553ee8ca718b02cc3d69894d52b7fcfadfd2" => :mojave
+    sha256 "27cda4c8a071a9bf2d36200686698558e5b6cec3cc48e737cf69649af48b814f" => :high_sierra
   end
 
   depends_on "ocaml" => :build
   depends_on "opam" => :build
-
-  # Fix "compilation of ocaml-migrate-parsetree failed"
-  # Reported 24 Jul 2017 https://github.com/ocaml/opam/issues/3007
-  patch :DATA
 
   def install
     system "make", "all-homebrew"
@@ -51,20 +34,3 @@ class Flow < Formula
     assert_match expected, shell_output("#{bin}/flow check #{testpath}", 2)
   end
 end
-
-__END__
-diff --git a/Makefile b/Makefile
-index 515e581..8886bf6 100644
---- a/Makefile
-+++ b/Makefile
-@@ -174,8 +174,8 @@ all-homebrew:
-	export OPAMYES="1"; \
-	export FLOW_RELEASE="1"; \
-	opam init --no-setup && \
--	opam pin add flowtype . && \
--	opam install flowtype --deps-only && \
-+	opam pin add -n flowtype . && \
-+	opam config exec -- opam install flowtype --deps-only && \
-	opam config exec -- make
-
- clean:

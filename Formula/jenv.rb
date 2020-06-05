@@ -1,8 +1,9 @@
 class Jenv < Formula
   desc "Manage your Java environment"
-  homepage "http://www.jenv.be"
-  url "https://github.com/gcuisinier/jenv/archive/0.4.4.tar.gz"
-  sha256 "74b48d9c33ceae4e141272c4096086c6ec1a8f10073da379b816518615c79881"
+  homepage "https://www.jenv.be/"
+  url "https://github.com/jenv/jenv/archive/0.5.3.tar.gz"
+  sha256 "b30b1a4c2a213f01c89ac111df1be7e027a93512e34d14cdbdd263a0fbec5fff"
+
   head "https://github.com/gcuisinier/jenv.git"
 
   bottle :unneeded
@@ -10,6 +11,15 @@ class Jenv < Formula
   def install
     libexec.install Dir["*"]
     bin.write_exec_script libexec/"bin/jenv"
+  end
+
+  def caveats
+    <<~EOS
+      To activate jenv, add the following to your #{shell_profile}:
+
+        export PATH="$HOME/.jenv/bin:$PATH"
+        eval "$(jenv init -)"
+    EOS
   end
 
   test do

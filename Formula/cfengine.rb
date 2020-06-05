@@ -1,32 +1,25 @@
 class Cfengine < Formula
   desc "Help manage and understand IT infrastructure"
   homepage "https://cfengine.com/"
-  url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-3.10.1.tar.gz"
-  sha256 "0abb7e91d667a4f339b61e105dc66c583fa98e0217c6fc7fcf8a73300badca98"
+  url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-3.15.1.tar.gz"
+  sha256 "ab597456f9d44d907bb5a2e82b8ce2af01e9c59641dc828457cd768ef05a831d"
 
   bottle do
-    sha256 "2f3f54145ff6fc4b6e7892de3d0895e3ffb353f35953a1c2ae943ab0802b916c" => :high_sierra
-    sha256 "c20e03c47ec3c2d5e580dbef1b60cdab5619aab548b92904e1fc3f4e20308b74" => :sierra
-    sha256 "3146afa8ef4e2c5cedc7861dece69a9dc51f4fb4724b724363a616a600b6045f" => :el_capitan
-    sha256 "a3a2527726612948e9ca8e6f82ef5bd6d21c53780b8c618db2c0455b0aa7e19c" => :yosemite
+    sha256 "783eacd961c402e7565fa15bd46e7efd685d3efaa726b67b39da5b3b45a36f05" => :catalina
+    sha256 "889174df90c768ba5f636e9d5e25a1875de7554de759bdd83db188a6151f0eb8" => :mojave
+    sha256 "df9382ac5c4ed17eea80ec5dd998e3903d061a15afb347534bdbe9eaf0cd0fc5" => :high_sierra
   end
 
-  depends_on "libxml2" if MacOS.version < :mountain_lion
-  depends_on "pcre"
   depends_on "lmdb"
-  depends_on "openssl"
+  depends_on "openssl@1.1"
+  depends_on "pcre"
 
   resource "masterfiles" do
-    url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-masterfiles-3.10.1.tar.gz"
-    sha256 "c4b0ff856d9af1cc62559b0ca4a7d39548442b13167a294637ed65cd5a811900"
+    url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-masterfiles-3.15.1.tar.gz"
+    sha256 "051369054a2e17a4ea1f68a41198fe5377fbbf33f600168246bf0b667fc1ab74"
   end
 
   def install
-    # Fix "typedef redefinition with different types"
-    if DevelopmentTools.clang_build_version >= 800
-      ENV["ac_cv_type_clockid_t"] = "yes"
-    end
-
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--with-workdir=#{var}/cfengine",

@@ -1,48 +1,30 @@
 class Dar < Formula
   desc "Backup directory tree and files"
   homepage "http://dar.linux.free.fr/doc/index.html"
-  url "https://downloads.sourceforge.net/project/dar/dar/2.5.13/dar-2.5.13.tar.gz"
-  sha256 "729119784f86197542c2b3786a956b46384e2a85fc22a5e39d93d7c16969c6cf"
+  url "https://downloads.sourceforge.net/project/dar/dar/2.6.10/dar-2.6.10.tar.gz"
+  sha256 "16a0b755c648c4ce6598e258ccf375f55d4f2f943448341ed41085ac7a27d2e7"
 
   bottle do
-    sha256 "2646d4bc7a2845dcfd1651c41894580cfc214e4d4e5aef60028ee0d782b5ec6e" => :high_sierra
-    sha256 "1d6cdd62de131427ec5a5663493ed6421366dadb2a408c42ed6fabcee7baa6b7" => :sierra
-    sha256 "deb3c49f3ba8642440c9d30514d6b9ecda6860fff7d16f9b058e76ccfbb6d699" => :el_capitan
+    cellar :any
+    sha256 "715d4c42deee8466b4c4ca1eb5c1eb0e353531f008162a1caa0ac3cebed80eea" => :catalina
+    sha256 "da4e6447538509a0cf9b67cd126096ff8b4967ea9503681d8a985b557128cd1a" => :mojave
+    sha256 "589731424a6eb153ea8ad9f60e05f18e077194c7ca5d95784bd102bb7781652b" => :high_sierra
   end
 
-  option "with-doxygen", "build libdar API documentation and html man page"
-  option "with-libgcrypt", "enable strong encryption support"
-  option "with-lzo", "enable lzo compression support"
-  option "with-upx", "make executables compressed at installation time"
-
-  deprecated_option "with-docs" => "with-doxygen"
-
+  depends_on "upx" => :build
+  depends_on "libgcrypt"
+  depends_on "lzo"
   depends_on :macos => :el_capitan # needs thread-local storage
-  depends_on "doxygen" => [:build, :optional]
-  depends_on "upx" => [:build, :optional]
-  depends_on "libgcrypt" => :optional
-  depends_on "lzo" => :optional
-  depends_on "xz" => :optional
-
-  needs :cxx11
 
   def install
     ENV.cxx11
 
-    args = %W[
-      --enable-mode=64
-      --disable-debug
-      --disable-dependency-tracking
-      --disable-dar-static
-      --prefix=#{prefix}
-    ]
-    args << "--disable-build-html" if build.without? "doxygen"
-    args << "--disable-upx" if build.without? "upx"
-    args << "--disable-libgcrypt-linking" if build.without? "libgcrypt"
-    args << "--disable-liblzo2-linking" if build.without? "lzo"
-    args << "--disable-libxz-linking" if build.without? "xz"
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}",
+                          "--disable-build-html",
+                          "--disable-dar-static",
+                          "--disable-dependency-tracking",
+                          "--disable-libxz-linking",
+                          "--enable-mode=64"
     system "make", "install"
   end
 

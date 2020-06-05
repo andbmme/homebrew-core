@@ -1,27 +1,38 @@
 class Xdot < Formula
   desc "Interactive viewer for graphs written in Graphviz's dot language"
   homepage "https://github.com/jrfonseca/xdot.py"
-  url "https://files.pythonhosted.org/packages/f5/52/7cec1decf2b07c7749eb997fa5f365781a512722f48e6ad4294e31c94629/xdot-0.7.tar.gz"
-  sha256 "d2100c3201d974915d1b89220ce52f380334eb365ab48903573a8135f51d0ee0"
+  url "https://files.pythonhosted.org/packages/0f/1b/7ae17e0931ff011bba1c86000674666176021756d07ed29ce0b263b3fddf/xdot-1.1.tar.gz"
+  sha256 "e15c53d80dc8777402a7258eebe6cbf395d04085ff9699bbffae91df0ecc2433"
   revision 1
-
   head "https://github.com/jrfonseca/xdot.py.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "1c748698c57c726086ca193b424c46fd62763bb98ead4f5a53adca4fec07f04a" => :high_sierra
-    sha256 "4034a49a5d0d730089b5d55755e2d39edd8f17c67a65e9d210adf09b4916239c" => :sierra
-    sha256 "4034a49a5d0d730089b5d55755e2d39edd8f17c67a65e9d210adf09b4916239c" => :el_capitan
-    sha256 "4034a49a5d0d730089b5d55755e2d39edd8f17c67a65e9d210adf09b4916239c" => :yosemite
+    sha256 "a92e47d64ecc06ba29af228325bb6ca78f063e410a26a5458e016660a600b3b4" => :catalina
+    sha256 "a92e47d64ecc06ba29af228325bb6ca78f063e410a26a5458e016660a600b3b4" => :mojave
+    sha256 "a92e47d64ecc06ba29af228325bb6ca78f063e410a26a5458e016660a600b3b4" => :high_sierra
   end
 
+  depends_on "adwaita-icon-theme"
+  depends_on "gtk+3"
+  depends_on "py3cairo"
   depends_on "pygobject3"
-  depends_on "pygtk"
-  depends_on :python if MacOS.version <= :snow_leopard
+  depends_on "python@3.8"
+
+  resource "graphviz" do
+    url "https://files.pythonhosted.org/packages/9a/00/481ad02701f952c59671a574a808d9d34d200103f0c7396db75f2e3df717/graphviz-0.11.1.zip"
+    sha256 "914b8b124942d82e3e1dcef499c9fe77c10acd3d18a1cfeeb2b9de05f6d24805"
+  end
 
   def install
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"
-    system "python", *Language::Python.setup_install_args(libexec)
+    xy = Language::Python.major_minor_version Formula["python@3.8"].opt_bin/"python3"
+    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python#{xy}/site-packages"
+    resource("graphviz").stage do
+      system Formula["python@3.8"].opt_bin/"python3", *Language::Python.setup_install_args(libexec/"vendor")
+    end
+
+    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{xy}/site-packages"
+    system Formula["python@3.8"].opt_bin/"python3", *Language::Python.setup_install_args(libexec)
 
     bin.install Dir[libexec/"bin/*"]
     bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])

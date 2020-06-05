@@ -1,21 +1,18 @@
 class Automake < Formula
   desc "Tool for generating GNU Standards-compliant Makefiles"
   homepage "https://www.gnu.org/software/automake/"
-  url "https://ftp.gnu.org/gnu/automake/automake-1.15.1.tar.xz"
-  mirror "https://ftpmirror.gnu.org/automake/automake-1.15.1.tar.xz"
-  sha256 "af6ba39142220687c500f79b4aa2f181d9b24e4f8d8ec497cea4ba26c64bedaf"
+  url "https://ftp.gnu.org/gnu/automake/automake-1.16.2.tar.xz"
+  mirror "https://ftpmirror.gnu.org/automake/automake-1.16.2.tar.xz"
+  sha256 "ccc459de3d710e066ab9e12d2f119bd164a08c9341ca24ba22c9adaa179eedd0"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "8dd10fd54af6157796f66037f8f4ab81546824909d17dfcdfa61d42b8433d3f9" => :high_sierra
-    sha256 "d2b27ce7782a966eb7c8570f7855c8c659bbefc97491a1fb54b66e7b58d26c63" => :sierra
-    sha256 "0b25b38f9df72b7869783514811b7ccd17284a240a7ee5950da501811b9942ff" => :el_capitan
-    sha256 "0b25b38f9df72b7869783514811b7ccd17284a240a7ee5950da501811b9942ff" => :yosemite
+    sha256 "fe26d4df57481b6a7ca0a6915c37c53648c27ffb41926b3570c45f80fdd8888e" => :catalina
+    sha256 "fe26d4df57481b6a7ca0a6915c37c53648c27ffb41926b3570c45f80fdd8888e" => :mojave
+    sha256 "fe26d4df57481b6a7ca0a6915c37c53648c27ffb41926b3570c45f80fdd8888e" => :high_sierra
   end
 
-  keg_only :provided_until_xcode43
-
-  depends_on "autoconf" => :run
+  depends_on "autoconf"
 
   def install
     ENV["PERL"] = "/usr/bin/perl"

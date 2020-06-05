@@ -1,44 +1,37 @@
 class Unbound < Formula
   desc "Validating, recursive, caching DNS resolver"
   homepage "https://www.unbound.net"
-  url "https://www.unbound.net/downloads/unbound-1.6.7.tar.gz"
-  sha256 "4e7bd43d827004c6d51bef73adf941798e4588bdb40de5e79d89034d69751c9f"
+  url "https://nlnetlabs.nl/downloads/unbound/unbound-1.10.1.tar.gz"
+  sha256 "b73677c21a71cf92f15cc8cfe76a3d875e40f65b6150081c39620b286582d536"
+  head "https://github.com/NLnetLabs/unbound.git"
 
   bottle do
-    sha256 "6c2088a0ce3d415e5364c3580bdd797c77f5302f054216d2e5f08455b0654f32" => :high_sierra
-    sha256 "aa331fd3f81151688aefe67289323cfeaf2e7ab176eb3f786f8bfd732337a681" => :sierra
-    sha256 "ffe70f8e112a42fd48128e8cbea512bbef73a04a4416b9137279c8de957930a3" => :el_capitan
+    sha256 "7f66893bc42c776fb8437ae87c27b744fa30ebbea4dc349cb43aa72114b79937" => :catalina
+    sha256 "04dfb0c9becb94b0e76ad11ba6b0ba70fae5bf5101533e57ac4ec2f9c8d31f5d" => :mojave
+    sha256 "ba37bc57cd6a16c16e10ecd79c159849ffd16ef90845d0d50253c45b958fb8b3" => :high_sierra
   end
 
-  depends_on "openssl"
   depends_on "libevent"
+  depends_on "openssl@1.1"
 
-  depends_on :python => :optional
-  depends_on "swig" if build.with?("python")
+  uses_from_macos "expat"
 
   def install
     args = %W[
       --prefix=#{prefix}
       --sysconfdir=#{etc}
+      --enable-event-api
+      --enable-tfo-client
+      --enable-tfo-server
       --with-libevent=#{Formula["libevent"].opt_prefix}
-      --with-ssl=#{Formula["openssl"].opt_prefix}
+      --with-ssl=#{Formula["openssl@1.1"].opt_prefix}
     ]
 
-    if build.with? "python"
-      ENV.prepend "LDFLAGS", `python-config --ldflags`.chomp
-      ENV.prepend "PYTHON_VERSION", "2.7"
-
-      args << "--with-pyunbound"
-      args << "--with-pythonmodule"
-      args << "PYTHON_SITE_PKG=#{lib}/python2.7/site-packages"
-    end
-
-    args << "--with-libexpat=#{MacOS.sdk_path}/usr" unless MacOS::CLT.installed?
+    args << "--with-libexpat=#{MacOS.sdk_path}/usr" if MacOS.sdk_path_if_needed
     system "./configure", *args
 
     inreplace "doc/example.conf", 'username: "unbound"', 'username: "@@HOMEBREW-UNBOUND-USER@@"'
     system "make"
-    system "make", "test"
     system "make", "install"
   end
 
@@ -46,38 +39,40 @@ class Unbound < Formula
     conf = etc/"unbound/unbound.conf"
     return unless conf.exist?
     return unless conf.read.include?('username: "@@HOMEBREW-UNBOUND-USER@@"')
+
     inreplace conf, 'username: "@@HOMEBREW-UNBOUND-USER@@"',
                     "username: \"#{ENV["USER"]}\""
   end
 
   plist_options :startup => true
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-/Apple/DTD PLIST 1.0/EN" "http:/www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>KeepAlive</key>
-        <true/>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_sbin}/unbound</string>
-          <string>-d</string>
-          <string>-c</string>
-          <string>#{etc}/unbound/unbound.conf</string>
-        </array>
-        <key>UserName</key>
-        <string>root</string>
-        <key>StandardErrorPath</key>
-        <string>/dev/null</string>
-        <key>StandardOutPath</key>
-        <string>/dev/null</string>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>KeepAlive</key>
+          <true/>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_sbin}/unbound</string>
+            <string>-d</string>
+            <string>-c</string>
+            <string>#{etc}/unbound/unbound.conf</string>
+          </array>
+          <key>UserName</key>
+          <string>root</string>
+          <key>StandardErrorPath</key>
+          <string>/dev/null</string>
+          <key>StandardOutPath</key>
+          <string>/dev/null</string>
+        </dict>
+      </plist>
     EOS
   end
 

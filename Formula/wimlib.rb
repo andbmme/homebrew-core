@@ -1,20 +1,20 @@
 class Wimlib < Formula
   desc "Library to create, extract, and modify Windows Imaging files"
   homepage "https://wimlib.net/"
-  url "https://wimlib.net/downloads/wimlib-1.12.0.tar.gz"
-  sha256 "852cf59d682a91974f715f09fa98cab621b740226adcfea7a42360be0f86464f"
+  url "https://wimlib.net/downloads/wimlib-1.13.2.tar.gz"
+  sha256 "7295be7ef00d265aef4090c9d26af82097db651c5f8399db9d44c60f47f5a945"
 
   bottle do
     cellar :any
-    sha256 "bf98257d6f32313b3a57713ae6b2ad7c3f72ddd5b1e1ed609436fb337ba51d63" => :high_sierra
-    sha256 "32a00c25f98932b84ac5304df29eb5f6edea0a2fc3a2b33ee83938e92c488549" => :sierra
-    sha256 "6a2b65020b31dbda4499bffbe773e5596dbc130d6f91ee84c9a7c532dd858594" => :el_capitan
-    sha256 "c26d19bd6a6994fae60000f329d136c991b6a1172141c6c047792175a2c79439" => :yosemite
+    sha256 "9b1f59782b773025346f9e466926467035c3e007f54acc77caa332b73a9308bf" => :catalina
+    sha256 "9c516e253677057ba243d2d0c30894df407c5d24a23d055d8b7152f6f3267991" => :mojave
+    sha256 "543e598241edae31ae469dd6da5ceaf10f1ef658ea051e1be0d5241393d167b6" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "homebrew/fuse/ntfs-3g" => :optional
-  depends_on "openssl"
+  depends_on "openssl@1.1"
+
+  uses_from_macos "libxml2"
 
   def install
     # fuse requires librt, unavailable on OSX
@@ -22,11 +22,10 @@ class Wimlib < Formula
       --disable-debug
       --disable-dependency-tracking
       --disable-silent-rules
-      --without-fuse
       --prefix=#{prefix}
+      --without-fuse
+      --without-ntfs-3g
     ]
-
-    args << "--without-ntfs-3g" if build.without? "ntfs-3g"
 
     system "./configure", *args
     system "make", "install"

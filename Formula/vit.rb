@@ -1,45 +1,62 @@
 class Vit < Formula
-  desc "Front-end for Task Warrior"
+  include Language::Python::Virtualenv
+
+  desc "Full-screen terminal interface for Taskwarrior"
   homepage "https://taskwarrior.org/news/news.20140406.html"
-  url "https://taskwarrior.org/download/vit-1.2.tar.gz"
-  sha256 "a78dee573130c8d6bc92cf60fafac0abc78dd2109acfba587cb0ae202ea5bbd0"
+  url "https://github.com/scottkosty/vit/archive/v2.0.0.tar.gz"
+  sha256 "0c8739c16b5922880e762bd38f887240923d16181b2f85bb88c4f9f6faf38d6d"
   revision 1
-  head "https://git.tasktools.org/scm/ex/vit.git"
+  head "https://github.com/scottkosty/vit.git", :branch => "2.x"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d2ffe07bc8ede58d12bcb7401db8f3086eaba071f57b3ec4ce377e0ad18e4d3d" => :high_sierra
-    sha256 "26c2d6376f2c94d32d11972dbd061e5d4ef1edd31c889a084558339494c34b5b" => :sierra
-    sha256 "148f01bcfe731892cbfbc63eb9e8d95fded12f07c2d56a7429f8ddea27207f51" => :el_capitan
-    sha256 "e91023aac9f44f67570d248255fc61ed614091fdfafb16003b49064d90866d91" => :yosemite
-    sha256 "3f7e65dd15708aaf63ed1d3d3bc948cd020371b35c4537a1366d34a94181767e" => :mavericks
+    sha256 "6d70b6f12fc488da934b045dd9acbd3e11c275e815330da15962834d7cf897f9" => :catalina
+    sha256 "c41b171a5b91015b5b291125081f135ef2c2fc3a7025e78dfaa42fed706d8ba2" => :mojave
+    sha256 "3498a07d7d7ebc8011585ca12a60657e97f28712f77b2d35ccd54bf6acc79a5c" => :high_sierra
   end
 
+  depends_on "python@3.8"
   depends_on "task"
 
-  resource "Curses" do
-    url "https://cpan.metacpan.org/authors/id/G/GI/GIRAFFED/Curses-1.31.tgz"
-    sha256 "7bb4623ac97125c85e25f9fbf980103da7ca51c029f704f0aa129b7a2e50a27a"
+  resource "pytz" do
+    url "https://files.pythonhosted.org/packages/82/c3/534ddba230bd4fbbd3b7a3d35f3341d014cca213f369a9940925e7e5f691/pytz-2019.3.tar.gz"
+    sha256 "b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"
+  end
+
+  resource "six" do
+    url "https://files.pythonhosted.org/packages/21/9f/b251f7f8a76dec1d6651be194dfba8fb8d7781d10ab3987190de8391d08e/six-1.14.0.tar.gz"
+    sha256 "236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a"
+  end
+
+  resource "tasklib" do
+    url "https://files.pythonhosted.org/packages/ae/23/3de1856314e8aa87330c57b5c6f8c8738c4fca72bc96fa10b54f7524c752/tasklib-1.3.0.tar.gz"
+    sha256 "5b478c53d5b531e072d1374bb4763249d137a094d93621e6ebe2f3f10c52d9a7"
+  end
+
+  resource "tzlocal" do
+    url "https://files.pythonhosted.org/packages/c6/52/5ec375d4efcbe4e31805f3c4b301bdfcff9dcbdb3605d4b79e117a16b38d/tzlocal-2.0.0.tar.gz"
+    sha256 "949b9dd5ba4be17190a80c0268167d7e6c92c62b30026cf9764caf3e308e5590"
+  end
+
+  resource "urwid" do
+    url "https://files.pythonhosted.org/packages/45/dd/d57924f77b0914f8a61c81222647888fbb583f89168a376ffeb5613b02a6/urwid-2.1.0.tar.gz"
+    sha256 "0896f36060beb6bf3801cb554303fef336a79661401797551ba106d23ab4cd86"
   end
 
   def install
-    ENV.prepend_create_path "PERL5LIB", libexec+"lib/perl5"
+    virtualenv_install_with_resources
+  end
 
-    resource("Curses").stage do
-      system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-      system "make"
-      system "make", "install"
+  test do
+    (testpath/".vit").mkpath
+    touch testpath/".vit/config.ini"
+    touch testpath/".taskrc"
+
+    require "pty"
+    PTY.spawn(bin/"vit") do |_stdout, _stdin, pid|
+      sleep 3
+      Process.kill "TERM", pid
     end
-
-    system "./configure", "--prefix=#{prefix}"
-    system "make", "build"
-
-    bin.install "vit"
-    man1.install "vit.1"
-    man5.install "vitrc.5"
-    # vit-commands needs to be installed in the keg because that's where vit
-    # will look for it.
-    (prefix+"etc").install "commands" => "vit-commands"
-    bin.env_script_all_files(libexec+"bin", :PERL5LIB => ENV["PERL5LIB"])
+    assert_predicate testpath/".task", :exist?
   end
 end

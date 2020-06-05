@@ -1,19 +1,21 @@
 class Dssim < Formula
   desc "RGBA Structural Similarity Rust implementation"
-  homepage "https://github.com/pornel/dssim"
-  url "https://github.com/pornel/dssim/archive/2.8.0.tar.gz"
-  sha256 "d9fcabb74fab37cc61a7427782dea02b9af7ca34954e5491c164b62bf7b0316e"
+  homepage "https://github.com/kornelski/dssim"
+  url "https://github.com/kornelski/dssim/archive/2.10.0.tar.gz"
+  sha256 "1bc9abec552fc64d3951340d95f68212d30e6473a93694db25cf16a0baa9d854"
 
   bottle do
-    sha256 "5c95fc8ba2381b98d2e97500159fdafdb37b53e5c60a2eeb501478c3dff6d8bd" => :high_sierra
-    sha256 "5ddb367412e124a9e7cab402642e40e7bc1ed267c32ce23a04132bd1586c0cdb" => :sierra
-    sha256 "800b61fabe131e7257ddbf651e4361aa7b9ed75829c8e42c52bb1fa55bcceb66" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "d8eb6a36277a6dc7943aa09d07360e1b6f020074b8f0e98a67673d6542f77973" => :catalina
+    sha256 "c03454b7582f988de44af524a342e016b3bf63937496450365c758809e79a224" => :mojave
+    sha256 "f1284c6d8db31ce548232d0e7c0d4204249555ee5a9c92958b2c8bea4deee832" => :high_sierra
+    sha256 "61c6019667ce76ccc145381eea2131ee3119366b1d54d2878da908eca8f85339" => :sierra
   end
 
   depends_on "rust" => :build
 
   def install
-    system "cargo", "install", "--root", prefix
+    system "cargo", "install", "--root", prefix, "--path", "."
   end
 
   test do

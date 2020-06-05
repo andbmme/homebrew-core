@@ -1,24 +1,33 @@
 class SuiteSparse < Formula
   desc "Suite of Sparse Matrix Software"
   homepage "http://faculty.cse.tamu.edu/davis/suitesparse.html"
-  url "http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-4.5.5.tar.gz"
-  sha256 "b9a98de0ddafe7659adffad8a58ca3911c1afa8b509355e7aa58b02feb35d9b6"
-  revision 1
+  url "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/v5.7.2.tar.gz"
+  sha256 "fe3bc7c3bd1efdfa5cffffb5cebf021ff024c83b5daf0ab445429d3d741bd3ad"
 
   bottle do
     cellar :any
-    sha256 "9a68eb77f9488be393428952f76d7626a3fe3b9659713c74a263cacc67bc9eb7" => :high_sierra
-    sha256 "04927e85ebcc7a550d399b39cb773206e380b3d26ddb1d35f4d2e6f88e6f36ea" => :sierra
-    sha256 "df8fa69e0bedbce60be7de8c19a5164eadf51f3bdf31dc1561c2edd688a9ad2e" => :el_capitan
-    sha256 "cf849ee340a48be83e92ed588bf66cc9f0f817978dd147456ff7186fbf39d5a8" => :yosemite
+    sha256 "a58c0cffed5bb4cdb5d4d8b91e2be407d3c0d2ad89bc000281374232c9de0b5d" => :catalina
+    sha256 "c1c8fb4c8acddc05c8bc70c5fa687b7a9b4865922f97ebc91de15bd3e601e322" => :mojave
+    sha256 "083961ebb0a6e06104384e33fd29bdbdec3eed273c9a1353b28308f80cae2f9d" => :high_sierra
   end
 
+  depends_on "cmake" => :build
   depends_on "metis"
+  depends_on "openblas"
+  depends_on "tbb"
+
+  uses_from_macos "m4"
+
+  conflicts_with "mongoose", :because => "suite-sparse vendors libmongoose.dylib"
 
   def install
+    mkdir "GraphBLAS/build" do
+      system "cmake", "..", *std_cmake_args
+    end
+
     args = [
       "INSTALL=#{prefix}",
-      "BLAS=-framework Accelerate",
+      "BLAS=-L#{Formula["openblas"].opt_lib} -lopenblas",
       "LAPACK=$(BLAS)",
       "MY_METIS_LIB=-L#{Formula["metis"].opt_lib} -lmetis",
       "MY_METIS_INC=#{Formula["metis"].opt_include}",
@@ -31,7 +40,8 @@ class SuiteSparse < Formula
 
   test do
     system ENV.cc, "-o", "test", pkgshare/"klu_simple.c",
-                   "-L#{lib}", "-lsuitesparseconfig", "-lklu"
-    system "./test"
+           "-L#{lib}", "-lsuitesparseconfig", "-lklu"
+    assert_predicate testpath/"test", :exist?
+    assert_match "x [0] = 1", shell_output("./test")
   end
 end

@@ -1,60 +1,62 @@
 class Gpsd < Formula
   desc "Global Positioning System (GPS) daemon"
   homepage "http://catb.org/gpsd/"
-  url "https://download.savannah.gnu.org/releases/gpsd/gpsd-3.17.tar.gz"
-  sha256 "68e0dbecfb5831997f8b3d6ba48aed812eb465d8c0089420ab68f9ce4d85e77a"
+  url "https://download.savannah.gnu.org/releases/gpsd/gpsd-3.20.tar.xz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/gpsd/gpsd-3.20.tar.xz"
+  sha256 "3998a5cbb728e97f896f46c3c83301b1e6c5d859393e58c2fad8c5426774d571"
 
   bottle do
     cellar :any
-    sha256 "89237ff11349f301e4a41a9f1d0ad7948f9a257d91a95be6ec6b4c9e26187f72" => :high_sierra
-    sha256 "1a7912b32f3cc2d59d5d7b615ec3e8e2d14399d0256f2768b91be029f64e2438" => :sierra
-    sha256 "6fb615b0aba85f6692cf6f8ac529ee8a2777d300bba6a9d8ff8abe90784d0fa5" => :el_capitan
+    sha256 "e73790ec49d1c4f079e0584596d2126447422c3f569281eb092afc77ece1bc3a" => :catalina
+    sha256 "cf9997d1456a9ec3fa49fee4cbc189af1a60cbeb0afb1abfb59c75ede967864c" => :mojave
+    sha256 "0e4110bedb2dd77d37e116fc32f1c45775f387df1a3eb21fc870f0a86ce04262" => :high_sierra
   end
 
   depends_on "scons" => :build
-  depends_on "libusb" => :optional
 
   def install
-    scons "chrpath=False", "python=False", "strip=False", "prefix=#{prefix}/"
-    scons "install"
+    system "scons", "chrpath=False", "python=False", "strip=False", "prefix=#{prefix}/"
+    system "scons", "install"
   end
 
-  def caveats; <<-EOS.undent
-    gpsd does not automatically detect GPS device addresses. Once started, you
-    need to force it to connect to your GPS:
+  def caveats
+    <<~EOS
+      gpsd does not automatically detect GPS device addresses. Once started, you
+      need to force it to connect to your GPS:
 
-      GPSD_SOCKET="#{var}/gpsd.sock" #{sbin}/gpsdctl add /dev/tty.usbserial-XYZ
+        GPSD_SOCKET="#{var}/gpsd.sock" #{sbin}/gpsdctl add /dev/tty.usbserial-XYZ
     EOS
   end
 
   plist_options :manual => "#{HOMEBREW_PREFIX}/sbin/gpsd -N -F #{HOMEBREW_PREFIX}/var/gpsd.sock /dev/tty.usbserial-XYZ"
 
-  def plist; <<-EOS.undent
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-      <key>Label</key>
-      <string>#{plist_name}</string>
-      <key>ProgramArguments</key>
-      <array>
-        <string>#{opt_sbin}/gpsd</string>
-        <string>-N</string>
-        <string>-F</string>
-        <string>#{var}/gpsd.sock</string>
-      </array>
-      <key>RunAtLoad</key>
-      <true/>
-      <key>KeepAlive</key>
-      <true/>
-      <key>WorkingDirectory</key>
-      <string>#{HOMEBREW_PREFIX}</string>
-      <key>StandardOutPath</key>
-      <string>#{var}/log/gpsd.log</string>
-      <key>StandardErrorPath</key>
-      <string>#{var}/log/gpsd.log</string>
-    </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_sbin}/gpsd</string>
+          <string>-N</string>
+          <string>-F</string>
+          <string>#{var}/gpsd.sock</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <true/>
+        <key>WorkingDirectory</key>
+        <string>#{HOMEBREW_PREFIX}</string>
+        <key>StandardOutPath</key>
+        <string>#{var}/log/gpsd.log</string>
+        <key>StandardErrorPath</key>
+        <string>#{var}/log/gpsd.log</string>
+      </dict>
+      </plist>
     EOS
   end
 

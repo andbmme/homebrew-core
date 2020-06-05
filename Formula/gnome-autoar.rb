@@ -1,22 +1,21 @@
 class GnomeAutoar < Formula
   desc "GNOME library for archive handling"
   homepage "https://github.com/GNOME/gnome-autoar"
-  url "https://download.gnome.org/sources/gnome-autoar/0.2/gnome-autoar-0.2.2.tar.xz"
-  sha256 "e1fe2c06eed30305c38bf0939c72b0e51b4716658e2663a0cf4a4bf57874ca62"
+  url "https://download.gnome.org/sources/gnome-autoar/0.2/gnome-autoar-0.2.4.tar.xz"
+  sha256 "0a34c377f8841abbf4c29bc848b301fbd8e4e20c03d7318c777c58432033657a"
 
   bottle do
-    sha256 "30caedf2c55df01b4150be42ab971e5ef798c3d7d057058ce61dc38f924833a5" => :high_sierra
-    sha256 "ea737743690c568c3aedba7ca5807c319abcb9549d6fd41bb708ebd2ee4b17c1" => :sierra
-    sha256 "6e9d51dec3fa8330f6584a735403da1f98ac9c0e917e89f4a2aec42174f5acd6" => :el_capitan
-    sha256 "925174b30b4a5577720f30d5b1d04450e5f0c515505f589f2df3188ab36ae227" => :yosemite
+    cellar :any
+    sha256 "e98e396441864f69d9866921363bbff8fe3a0e6e7048e9fcebfa98d0f8e3100c" => :catalina
+    sha256 "8f87552420faa2d64fee8cf655a15c58eb988bba92284b00e4fcb3cf2f10ce82" => :mojave
+    sha256 "bc17062bdb3f3b299c5122ffd887ff872d22f9d3021faed94db07da9687d096c" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libarchive"
   depends_on "gtk+3"
+  depends_on "libarchive"
 
   def install
-    ENV.delete "SDKROOT"
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--disable-silent-rules",

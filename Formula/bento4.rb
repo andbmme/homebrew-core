@@ -1,24 +1,42 @@
 class Bento4 < Formula
   desc "Full-featured MP4 format and MPEG DASH library and tools"
   homepage "https://www.bento4.com/"
-  url "https://github.com/axiomatic-systems/Bento4/archive/v1.5.1-621.tar.gz"
-  version "1.5.1-621"
-  sha256 "425381f197b262a7c4f81baedf04138abb90c9b9d55b61d7d250505c2f7ac31a"
+  url "https://www.bok.net/Bento4/source/Bento4-SRC-1-6-0-632.zip"
+  version "1.6.0-632"
+  sha256 "faa3a406dc24c3d34d29661bbbe94b42c7f7deee9a5c624696a055bb9b7da6ad"
+  revision 1
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "3e7a5cb02a3dc91637782ed79380b98d4db0780b17981c341d3f5abb24f9cff0" => :high_sierra
-    sha256 "32bc7e9d96a4d00277a4114f984125527ff44ae5094b33aa6c49948b4fbca3fd" => :sierra
-    sha256 "9a764950286b76d905c030f2c5b3e39a4bf763ece1f6b6aca0b357a414206636" => :el_capitan
+    sha256 "c2a563a7f037d33921334541e706a3f98ae0556ff08ba3e33992d4c26342de19" => :catalina
+    sha256 "f74dc8941419a6fffe52606dd40e2f612a8b8713ea6249fc6d20b6f3656e1859" => :mojave
+    sha256 "39cf05c54bc595fa014196b8f0fa0847e2d39d25e720bf9c6b581a578a77631b" => :high_sierra
   end
 
+  depends_on :xcode => :build
+  depends_on "python@3.8"
+
   conflicts_with "gpac", :because => "both install `mp42ts` binaries"
+  conflicts_with "mp4v2",
+    :because => "both install `mp4extract` and `mp4info` binaries"
 
   def install
-    cd "Build/Targets/any-gnu-gcc" do
-      system "make", "AP4_BUILD_CONFIG=Release"
-      bin.install Dir["Release/*"].select { |f| File.executable?(f) }
+    cd "Build/Targets/universal-apple-macosx" do
+      xcodebuild "-target", "All", "-configuration", "Release", "SYMROOT=build"
+      programs = Dir["build/Release/*"].select do |f|
+        next if f.end_with? ".dylib"
+        next if f.end_with? "Test"
+
+        File.file?(f) && File.executable?(f)
+      end
+      bin.install programs
     end
+
+    rm Dir["Source/Python/wrappers/*.bat"]
+    inreplace Dir["Source/Python/wrappers/*"],
+              "BASEDIR=$(dirname $0)", "BASEDIR=#{libexec}/Python/wrappers"
+    libexec.install "Source/Python"
+    bin.install_symlink Dir[libexec/"Python/wrappers/*"]
   end
 
   test do

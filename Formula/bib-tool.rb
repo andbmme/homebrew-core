@@ -1,14 +1,14 @@
 class BibTool < Formula
   desc "Manipulates BibTeX databases"
   homepage "http://www.gerd-neugebauer.de/software/TeX/BibTool/en/"
-  url "https://github.com/ge-ne/bibtool/releases/download/BibTool_2_67/BibTool-2.67.tar.gz"
-  sha256 "5b6c4160975a926356e8e59d0e5c01ac2a7be337ecace2494918fc2a46d9d784"
+  url "https://github.com/ge-ne/bibtool/releases/download/BibTool_2_68/BibTool-2.68.tar.gz"
+  sha256 "e1964d199b0726f431f9a1dc4ff7257bb3dba879b9fa221803e0aa7840dee0e0"
 
   bottle do
-    sha256 "dfd0882e8a92f9d883d838261ced3085f843b6faa439df00fa8988fc719c6946" => :high_sierra
-    sha256 "9611f8ab9db1f0ae2918bf22d3169a80eeacd0a4e457437b4b131c36e7687d41" => :sierra
-    sha256 "5f7813e70bfaa668da0b3f438237e0fef7628808c3b5cc56c26012e2cf54f09d" => :el_capitan
-    sha256 "39956f91c1332b2518841436655eeb828dd7562683e5bc1f55bc7a5e7c308c80" => :yosemite
+    cellar :any_skip_relocation
+    sha256 "26f2121d720fa6ffc20547b0bfc6754930f6b8660b51f634c686279dae7e73ce" => :catalina
+    sha256 "d75a1a60204b002cc06acc025cfdc74db76a563b9bb508876d0e45d771f61dc8" => :mojave
+    sha256 "0d92e3fead68380fc84cbf5517d2ed2eecdfcbfc1fc14c6343f51ee60d43f948" => :high_sierra
   end
 
   def install

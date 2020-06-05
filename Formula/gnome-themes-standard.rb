@@ -1,20 +1,21 @@
 class GnomeThemesStandard < Formula
   desc "Default themes for the GNOME desktop environment"
-  homepage "https://git.gnome.org/browse/gnome-themes-standard/"
+  homepage "https://gitlab.gnome.org/GNOME/gnome-themes-extra"
   url "https://download.gnome.org/sources/gnome-themes-standard/3.22/gnome-themes-standard-3.22.3.tar.xz"
   sha256 "61dc87c52261cfd5b94d65e8ffd923ddeb5d3944562f84942eeeb197ab8ab56a"
+  revision 2
 
   bottle do
     cellar :any
-    sha256 "589376bcde7566b5afaa542c51fd99f20ea417f53ac37de25ca99a131b79977b" => :high_sierra
-    sha256 "628cb3dafd7c2577efe0541a200c190d4a8b7653e5e806f38f6aa4d79f4d872b" => :sierra
-    sha256 "92177002751416a5c288faa4a22343dd6b40d0bf056cce53108aa371d9dce0bb" => :el_capitan
-    sha256 "13d5ff2e6d7497d5eb32d2dcf1794c4541d0d38a00e02f00a42ad83457b507a9" => :yosemite
+    sha256 "6fb1066c6af0428fee29272851b4d7fbf10bac3bec4ed48ce6cffb780a3175f1" => :catalina
+    sha256 "0275e08061a7fc1c641729075add70362499309548d9f82a65f30397fe756073" => :mojave
+    sha256 "7c871fcd54d59a07719e5b1f22ca003921e479548ee9d13c5910af482b47891e" => :high_sierra
+    sha256 "7e5bfe5894c0498b6b9325a782e4ea1c756b042d527815547cba6e6f411095a2" => :sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "gettext" => :build
+  depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gtk+"
 
   def install

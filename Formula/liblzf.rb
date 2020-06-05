@@ -2,10 +2,12 @@ class Liblzf < Formula
   desc "Very small, very fast data compression library"
   homepage "http://oldhome.schmorp.de/marc/liblzf.html"
   url "http://dist.schmorp.de/liblzf/liblzf-3.6.tar.gz"
-  sha256 "41ed86a1bd3a9485612f7a7c1d3c9962d2fe771e55dc30fcf45bd419c39aab8d"
+  mirror "http://download.openpkg.org/components/cache/liblzf/liblzf-3.6.tar.gz"
+  sha256 "9c5de01f7b9ccae40c3f619d26a7abec9986c06c36d260c179cedd04b89fb46a"
 
   bottle do
     cellar :any_skip_relocation
+    sha256 "83b34b4b95753d9be2ae3abadf136d21d850561ca2e0b1473f560cf78153cff8" => :mojave
     sha256 "cc8f446e597ea18f409543897acf2b9704779db4904ed833d66469e09fbf0301" => :high_sierra
     sha256 "b5871cec84c0cb00b6a44fdce75ee519b243d3ea1f048b5634082279bf9234ed" => :sierra
     sha256 "1319038c7de754dd38b22ec45b616419b60a0a8c19072374da01f5ee48f9e8c8" => :el_capitan

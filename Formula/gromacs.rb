@@ -1,35 +1,37 @@
 class Gromacs < Formula
   desc "Versatile package for molecular dynamics calculations"
   homepage "http://www.gromacs.org/"
-  url "https://ftp.gromacs.org/pub/gromacs/gromacs-2016.4.tar.gz"
-  sha256 "4be9d3bfda0bdf3b5c53041e0b8344f7d22b75128759d9bfa9442fe65c289264"
+  url "https://ftp.gromacs.org/pub/gromacs/gromacs-2020.2.tar.gz"
+  sha256 "7465e4cd616359d84489d919ec9e4b1aaf51f0a4296e693c249e83411b7bd2f3"
 
   bottle do
-    sha256 "eb7f67951a1d269c87643441f92218a5f2ee670b0aca2aa1a554419bab36270a" => :high_sierra
-    sha256 "fe04d6ed6aa2992f13a8d7bd7b027313226034c7536dd0586875bbd1fb8babd3" => :sierra
-    sha256 "2c48ca08b9feaeb46d2becae8c19eace53dd68bbf7b9628ece2aff4b1020e168" => :el_capitan
+    sha256 "1d66612a7301aaf5ef4de6e75c3c3946795f08b2dc37007ac898ad1e9f22fc14" => :catalina
+    sha256 "0423b519282cdeb36dc7be9f7721534ac9f31c800fc8c425f054cb62611ddeb2" => :mojave
+    sha256 "eb63d5a06524bb0cce1ba1178b60030f8c61b50480104801c61bb6e2db5a5acb" => :high_sierra
   end
-
-  option "with-double", "Enables double precision"
 
   depends_on "cmake" => :build
   depends_on "fftw"
-  depends_on "gsl"
-  depends_on :mpi => :optional
-  depends_on :x11 => :optional
+  depends_on "gcc" # for OpenMP
+  depends_on "openblas"
 
   def install
-    args = std_cmake_args + %w[-DGMX_GSL=ON]
-    args << "-DGMX_DOUBLE=ON" if build.include? "enable-double"
-    args << "-DGMX_MPI=ON" if build.with? "mpi"
-    args << "-DGMX_X11=ON" if build.with? "x11"
+    # Non-executable GMXRC files should be installed in DATADIR
+    inreplace "scripts/CMakeLists.txt", "CMAKE_INSTALL_BINDIR",
+                                        "CMAKE_INSTALL_DATADIR"
 
-    inreplace "scripts/CMakeLists.txt", "BIN_INSTALL_DIR", "DATA_INSTALL_DIR"
+    # Avoid superenv shim reference
+    inreplace "src/gromacs/gromacs-toolchain.cmake.cmakein", "@CMAKE_LINKER@",
+                                                             "/usr/bin/ld"
+
+    args = std_cmake_args + %W[
+      -DCMAKE_C_COMPILER=gcc-#{Formula["gcc"].version_suffix}
+      -DCMAKE_CXX_COMPILER=g++-#{Formula["gcc"].version_suffix}
+    ]
 
     mkdir "build" do
       system "cmake", "..", *args
-      system "make"
-      ENV.deparallelize { system "make", "install" }
+      system "make", "install"
     end
 
     bash_completion.install "build/scripts/GMXRC" => "gromacs-completion.bash"
@@ -38,9 +40,10 @@ class Gromacs < Formula
     zsh_completion.install "build/scripts/GMXRC.zsh" => "_gromacs"
   end
 
-  def caveats; <<~EOS
-    GMXRC and other scripts installed to:
-      #{HOMEBREW_PREFIX}/share/gromacs
+  def caveats
+    <<~EOS
+      GMXRC and other scripts installed to:
+        #{HOMEBREW_PREFIX}/share/gromacs
     EOS
   end
 

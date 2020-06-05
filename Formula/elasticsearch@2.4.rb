@@ -3,12 +3,15 @@ class ElasticsearchAT24 < Formula
   homepage "https://www.elastic.co/products/elasticsearch"
   url "https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.6/elasticsearch-2.4.6.tar.gz"
   sha256 "5f7e4bb792917bb7ffc2a5f612dfec87416d54563f795d6a70637befef4cfc6f"
+  revision 1
 
   bottle :unneeded
 
   keg_only :versioned_formula
 
-  depends_on :java => "1.7+"
+  deprecate! :date => "February 28, 2018"
+
+  depends_on :java => "1.8"
 
   def cluster_name
     "elasticsearch_#{ENV["USER"]}"
@@ -25,7 +28,7 @@ class ElasticsearchAT24 < Formula
     # Set up Elasticsearch for local development:
     inreplace "#{libexec}/config/elasticsearch.yml" do |s|
       # 1. Give the cluster a unique name
-      s.gsub!(/#\s*cluster\.name\: .*/, "cluster.name: #{cluster_name}")
+      s.gsub!(/#\s*cluster\.name: .*/, "cluster.name: #{cluster_name}")
 
       # 2. Configure paths
       s.sub!(%r{#\s*path\.data: /path/to.+$}, "path.data: #{var}/elasticsearch/")
@@ -34,7 +37,7 @@ class ElasticsearchAT24 < Formula
 
     inreplace "#{libexec}/bin/elasticsearch.in.sh" do |s|
       # Configure ES_HOME
-      s.sub!(%r{#\!/bin/sh\n}, "#!/bin/sh\n\nES_HOME=#{libexec}")
+      s.sub!(%r{#!/bin/sh\n}, "#!/bin/sh\n\nES_HOME=#{libexec}")
     end
 
     inreplace "#{libexec}/bin/plugin" do |s|
@@ -49,27 +52,30 @@ class ElasticsearchAT24 < Formula
     (etc/"elasticsearch/scripts").mkpath
     (libexec/"config").rmtree
 
-    bin.write_exec_script Dir[libexec/"bin/elasticsearch"]
+    bin.install libexec/"bin/elasticsearch",
+                libexec/"bin/plugin"
+    bin.env_script_all_files(libexec/"bin", Language::Java.java_home_env("1.8"))
   end
 
   def post_install
     # Make sure runtime directories exist
     (var/"elasticsearch/#{cluster_name}").mkpath
     (var/"log/elasticsearch").mkpath
-    ln_s etc/"elasticsearch", libexec/"config"
-    (libexec/"plugins").mkdir
+    ln_s etc/"elasticsearch", libexec/"config" unless (libexec/"config").exist?
+    (libexec/"plugins").mkpath
   end
 
-  def caveats; <<~EOS
-    Data:    #{var}/elasticsearch/#{cluster_name}/
-    Logs:    #{var}/log/elasticsearch/#{cluster_name}.log
-    Plugins: #{libexec}/plugins/
-    Config:  #{etc}/elasticsearch/
-    plugin script: #{libexec}/bin/plugin
+  def caveats
+    <<~EOS
+      Data:    #{var}/elasticsearch/#{cluster_name}/
+      Logs:    #{var}/log/elasticsearch/#{cluster_name}.log
+      Plugins: #{libexec}/plugins/
+      Config:  #{etc}/elasticsearch/
+      plugin script: #{libexec}/bin/plugin
     EOS
   end
 
-  plist_options :manual => "elasticsearch"
+  plist_options :manual => "#{HOMEBREW_PREFIX}/opt/elasticsearch@2.4/bin/elasticsearch"
 
   def plist
     <<~EOS

@@ -1,30 +1,29 @@
 class Ipmiutil < Formula
   desc "IPMI server management utility"
   homepage "https://ipmiutil.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/ipmiutil/ipmiutil-2.9.5.tar.gz"
-  sha256 "eb00f0582ee75e1f8d371e398d546ddd7639595b9a0a1f27a84cc6ecb038dbe6"
+  url "https://downloads.sourceforge.net/project/ipmiutil/ipmiutil-3.1.6.tar.gz"
+  sha256 "8814828c6c245140a5c867d8def8e88a72e90f67c79282008303de1c1d598e4a"
 
   bottle do
-    cellar :any
-    sha256 "50cce938979cf77f307cb2e17e08fe6a1402b1f785561a578360d75308138288" => :high_sierra
-    sha256 "896eea4929dcd86ede955f0657424d1bb40e9a08e1aeb4d42658f4a8c00a9095" => :sierra
-    sha256 "25f46961b538e12edffb311b07cd90af6ad7e4dc323431b6e512375f243e9f21" => :el_capitan
-    sha256 "9fe09553dea21a6ea088bf0d571400da32b9826ab07263e6f9f618c34c2980b4" => :yosemite
-    sha256 "b1372295d77f7d211372bb496c856778369397fea35db58aba7262ad157e191e" => :mavericks
-    sha256 "debbe1e403702b0ee6178ca9674f7c05c4db8f1e68256152eb1c91482eaeda2d" => :mountain_lion
+    cellar :any_skip_relocation
+    sha256 "d9c1f45ad31e61093e3ba002c3494d61e762666733c6f5d03c53e6860e9aaf14" => :catalina
+    sha256 "e1862f31ab6cc95f37dda09ff7250e8b7f84750b075428e517779d37066f3c01" => :mojave
+    sha256 "e6d9bf95fd37500104f94fb640f6ac71d922227190b05b4ccbbf70abc942612c" => :high_sierra
   end
 
-  depends_on "openssl"
-
-  # Ensure ipmiutil does not try to link against (disabled) OpenSSL's MD2
-  # support. Patch submitted upstream in
-  # https://sourceforge.net/p/ipmiutil/mailman/message/33373858/
-  patch :DATA
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
+  depends_on "openssl@1.1"
 
   conflicts_with "renameutils", :because => "both install `icmd` binaries"
 
   def install
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
+    # Darwin does not exist only on PowerPC
+    inreplace "configure.ac", "test \"$archp\" = \"powerpc\"", "true"
+    system "autoreconf", "-fiv"
+
+    system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--enable-sha256",
                           "--enable-gpl"
@@ -43,26 +42,3 @@ class Ipmiutil < Formula
     system "#{bin}/ipmiutil", "delloem", "help"
   end
 end
-
-__END__
-diff -u ./configure.bak ./configure
---- ./configure.bak       2015-02-04 22:15:07.000000000 +0100
-+++ ./configure   2015-02-04 22:16:18.000000000 +0100
-@@ -20739,7 +20739,7 @@
-            echo "Detected HP-UX"
-            os=hpux
-            MD2_CFLAGS="-DSKIP_MD2"
--           OS_CFLAGS="-DHPUX"
-+           OS_CFLAGS="-DHPUX $MD2_CFLAGS"
-            OS_LFLAGS=""
-            OS_DRIVERS="ipmimv.c"
-            drivers="open"
-@@ -20748,7 +20748,7 @@
-            echo "Detected MacOSX"
-            os=macos
-            MD2_CFLAGS="-DSKIP_MD2"
--           OS_CFLAGS="-DMACOS"
-+           OS_CFLAGS="-DMACOS $MD2_CFLAGS"
-            OS_LFLAGS=""
-           OS_DRIVERS="ipmimv.c ipmidir.c"
-           drivers="open direct"

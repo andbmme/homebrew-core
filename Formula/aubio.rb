@@ -1,46 +1,36 @@
 class Aubio < Formula
   desc "Extract annotations from audio signals"
   homepage "https://aubio.org/"
-  url "https://aubio.org/pub/aubio-0.4.6.tar.bz2"
-  sha256 "bdc73be1f007218d3ea6d2a503b38a217815a0e2ccc4ed441f6e850ed5d47cfb"
+  url "https://aubio.org/pub/aubio-0.4.9.tar.bz2"
+  sha256 "d48282ae4dab83b3dc94c16cf011bcb63835c1c02b515490e1883049c3d1f3da"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "652fd72fcb0937f082213939d18acadd35d39a7c8b790ba29746f628b55d81bc" => :high_sierra
-    sha256 "65cfbadfb34422fcdc74d2d417cec9096b5289e8c4f1f18c9d4b512ada2337f2" => :sierra
-    sha256 "ef260312d855772fb09146508d4b819e0a185f510ecb73fd52e033e3afebd246" => :el_capitan
+    sha256 "933eeaef88547341ec684e7aa422dc92e6864a06caa211d8d988608da577a4b1" => :catalina
+    sha256 "0680687b55f8de23fde5c71d0dd1767552ef87642dba588ce572de441029c493" => :mojave
+    sha256 "e98d68d3cb9a8576990b5c3ba75a2b7acb71e4f3196365a0c560878ab5258141" => :high_sierra
   end
 
-  option "with-python", "Build with python support"
-
-  depends_on :macos => :lion
-  depends_on "pkg-config" => :build
   depends_on "libtool" => :build
-  depends_on "libav" => :optional
-  depends_on "libsndfile" => :optional
-  depends_on "libsamplerate" => :optional
-  depends_on "fftw" => :optional
-  depends_on "jack" => :optional
-  depends_on "numpy" if build.with? "python"
+  depends_on "pkg-config" => :build
+  depends_on "numpy"
+  depends_on "python@3.8"
 
   def install
-    # Needed due to issue with recent cland (-fno-fused-madd))
+    # Needed due to issue with recent clang (-fno-fused-madd))
     ENV.refurbish_args
 
-    system "./waf", "configure", "--prefix=#{prefix}"
-    system "./waf", "build"
-    system "./waf", "install"
+    system Formula["python@3.8"].opt_bin/"python3", "./waf", "configure", "--prefix=#{prefix}"
+    system Formula["python@3.8"].opt_bin/"python3", "./waf", "build"
+    system Formula["python@3.8"].opt_bin/"python3", "./waf", "install"
 
-    if build.with? "python"
-      system "python", *Language::Python.setup_install_args(prefix)
-      bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
-    end
+    system Formula["python@3.8"].opt_bin/"python3", *Language::Python.setup_install_args(prefix)
+    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
   end
 
   test do
-    if build.with? "python"
-      system "#{bin}/aubiocut", "--verbose", "/System/Library/Sounds/Glass.aiff"
-    end
+    system "#{bin}/aubiocut", "--verbose", "/System/Library/Sounds/Glass.aiff"
     system "#{bin}/aubioonset", "--verbose", "/System/Library/Sounds/Glass.aiff"
   end
 end

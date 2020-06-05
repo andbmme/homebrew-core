@@ -1,32 +1,23 @@
 class Wolfssl < Formula
   desc "Embedded SSL Library written in C"
-  homepage "https://www.wolfssl.com/wolfSSL/Home.html"
-  url "https://github.com/wolfSSL/wolfssl/archive/v3.12.2-stable.tar.gz"
-  version "3.12.2"
-  sha256 "0e0750705ceb0b42d83e609a1c35c3203734af50a92b15e2706bc06a6e50a439"
+  homepage "https://www.wolfssl.com"
+  url "https://github.com/wolfSSL/wolfssl.git",
+      :tag      => "v4.4.0-stable",
+      :revision => "e116c89a58af750421d82ece13f80516d2bde02e"
   head "https://github.com/wolfSSL/wolfssl.git"
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "f53b715c64dee2cd4682abb2875bd011d84b773664b81676eba316ad0afc9f22" => :high_sierra
-    sha256 "85c6876e4121a4169a8547220a6db6346e54918b1306e3144fa679a558b622ef" => :sierra
-    sha256 "efb65da07880f8104f7258a3b98160a97b4b5679378a9da265f986338396f458" => :el_capitan
+    sha256 "0be0aa725d9cd9d9a127d574a3e63548ad7176d03613913e714175af1a91eae9" => :catalina
+    sha256 "44add33b67e8f1d4e48f5130e9f0c73cbeda7277f8c43aa5fddbd8e9dccba657" => :mojave
+    sha256 "e3220ea7176729c24f817900a45002a8502defeba7ef4a1001cff1b342b3c487" => :high_sierra
   end
-
-  option "without-test", "Skip compile-time tests"
-
-  deprecated_option "without-check" => "without-test"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
 
   def install
-    # https://github.com/Homebrew/homebrew-core/pull/1046
-    # https://github.com/Homebrew/brew/pull/251
-    ENV.delete("SDKROOT")
-
     args = %W[
       --disable-silent-rules
       --disable-dependency-tracking
@@ -76,25 +67,20 @@ class Wolfssl < Formula
       --enable-sni
       --enable-supportedcurves
       --enable-tls13
+      --enable-sp
+      --enable-fastmath
+      --enable-fasthugemath
     ]
 
-    if MacOS.prefer_64_bit?
-      args << "--enable-fastmath" << "--enable-fasthugemath"
-    else
-      args << "--disable-fastmath" << "--disable-fasthugemath"
-    end
-
-    args << "--enable-aesni" if Hardware::CPU.aes? && !build.bottle?
-
     # Extra flag is stated as a needed for the Mac platform.
-    # https://wolfssl.com/wolfSSL/Docs-wolfssl-manual-2-building-wolfssl.html
+    # https://www.wolfssl.com/docs/wolfssl-manual/ch2/
     # Also, only applies if fastmath is enabled.
-    ENV.append_to_cflags "-mdynamic-no-pic" if MacOS.prefer_64_bit?
+    ENV.append_to_cflags "-mdynamic-no-pic"
 
     system "./autogen.sh"
     system "./configure", *args
     system "make"
-    system "make", "check" if build.with? "test"
+    system "make", "check"
     system "make", "install"
   end
 

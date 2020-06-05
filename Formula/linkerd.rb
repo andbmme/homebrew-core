@@ -1,83 +1,46 @@
 class Linkerd < Formula
-  desc "Drop-in RPC proxy designed for microservices"
-  homepage "https://linkerd.io/"
-  url "https://github.com/linkerd/linkerd/releases/download/1.3.2/linkerd-1.3.2.tgz"
-  sha256 "c91f080e3287908c6133298279a25e483a9425c126f3114ff4262b20e247756d"
+  desc "Command-line utility to interact with linkerd"
+  homepage "https://linkerd.io"
 
-  bottle :unneeded
+  url "https://github.com/linkerd/linkerd2.git",
+    :tag      => "stable-2.7.1",
+    :revision => "4a91892387d422755e66a76995ecf77f060a06e2"
 
-  depends_on :java => "1.8+"
+  bottle do
+    cellar :any_skip_relocation
+    sha256 "c2524d3d7e38131d29fe508341fd9e019457d93ee90813523af37d534404e365" => :catalina
+    sha256 "d6aedab76f0ccf04f286c2d595b2fccd6808bbd7a635d6db9d9facae6b00cb71" => :mojave
+    sha256 "ca2e21fce5fe672a7587ea31724e8945ed5928c138692e31a8078754021d24a2" => :high_sierra
+  end
+
+  depends_on "go" => :build
 
   def install
-    inreplace "config/linkerd.yaml", "disco", etc/"linkerd/disco"
+    ENV["CI_FORCE_CLEAN"] = "1"
 
-    libexec.install "linkerd-#{version}-exec"
-    bin.install_symlink libexec/"linkerd-#{version}-exec" => "linkerd"
+    system "bin/build-cli-bin"
+    bin.install "target/cli/darwin/linkerd"
 
-    pkgshare.mkpath
-    cp buildpath/"config/linkerd.yaml", pkgshare/"default.yaml"
+    # Install bash completion
+    output = Utils.popen_read("#{bin}/linkerd completion bash")
+    (bash_completion/"linkerd").write output
 
-    etc.install "config" => "linkerd"
-    etc.install "disco" => "linkerd/disco"
-    libexec.install_symlink etc/"linkerd" => "config"
-    libexec.install_symlink etc/"linkerd/disco" => "disco"
+    # Install zsh completion
+    output = Utils.popen_read("#{bin}/linkerd completion zsh")
+    (zsh_completion/"linkerd").write output
 
-    share.install "docs"
-  end
-
-  def post_install
-    (var/"log/linkerd").mkpath
-  end
-
-  plist_options :manual => "linkerd #{HOMEBREW_PREFIX}/etc/linkerd/linkerd.yaml"
-
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>WorkingDirectory</key>
-        <string>#{HOMEBREW_PREFIX}</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>#{opt_bin}/linkerd</string>
-            <string>#{etc}/linkerd/linkerd.yaml</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <true/>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/linkerd/linkerd.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/linkerd/linkerd.log</string>
-    </dict>
-    </plist>
-    EOS
+    prefix.install_metafiles
   end
 
   test do
-    (testpath/"index.html").write "It works!"
+    run_output = shell_output("#{bin}/linkerd 2>&1")
+    assert_match "linkerd manages the Linkerd service mesh.", run_output
 
-    simple_http_pid = fork do
-      exec "python -m SimpleHTTPServer 9999"
-    end
-    linkerd_pid = fork do
-      exec "#{bin}/linkerd #{pkgshare}/default.yaml"
-    end
+    version_output = shell_output("#{bin}/linkerd version --client 2>&1")
+    assert_match "Client version: ", version_output
+    stable_resource = stable.instance_variable_get(:@resource)
+    assert_match stable_resource.instance_variable_get(:@specs)[:tag], version_output if build.stable?
 
-    sleep 10
-
-    begin
-      assert_match /It works!/, shell_output("curl -s -H 'Host: web' http://localhost:4140")
-      assert_match /Bad Gateway/, shell_output("curl -s -I -H 'Host: foo' http://localhost:4140")
-    ensure
-      Process.kill("TERM", linkerd_pid)
-      Process.wait(linkerd_pid)
-      Process.kill("TERM", simple_http_pid)
-      Process.wait(simple_http_pid)
-    end
+    system "#{bin}/linkerd", "install", "--ignore-cluster"
   end
 end

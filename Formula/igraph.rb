@@ -1,16 +1,14 @@
 class Igraph < Formula
   desc "Network analysis package"
-  homepage "http://igraph.org"
-  url "http://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz"
-  sha256 "d978030e27369bf698f3816ab70aa9141e9baf81c56cc4f55efbe5489b46b0df"
-  revision 6
+  homepage "https://igraph.org/"
+  url "https://github.com/igraph/igraph/releases/download/0.8.2/igraph-0.8.2.tar.gz"
+  sha256 "718a471e7b8cbf02e3e8006153b7be6a22f85bb804283763a0016280e8a60e95"
 
   bottle do
     cellar :any
-    sha256 "f660cb85c0fc5ad020fca593b311c50078e1345fe85bc2cb5292646d1d0d6fa5" => :high_sierra
-    sha256 "63d5ac34c831bfb3bdcdc89a408a6ad004198fb784a50facb3f898a567f7b9b1" => :sierra
-    sha256 "8718c7a6cd3ffed8ee706f6991f2791c6d02f663db93beadd56e592c3edf544d" => :el_capitan
-    sha256 "bf929af83b33d8a00fc52b72fcae9fa0636fcc506ee0cbf2bf7ab267d9ee14d2" => :yosemite
+    sha256 "3005e637b6cb7cbed28b6dc997d480f8a1917c4118852a107ae0b59936d20698" => :catalina
+    sha256 "81181b904e63af33766a9c967f5ae42a11dadc8e72ba80604804636e663414ce" => :mojave
+    sha256 "40791d18478711af9cc497917ce7b34af179538bd719108d04be073faec57db9" => :high_sierra
   end
 
   depends_on "glpk"
@@ -38,7 +36,7 @@ class Igraph < Formula
         printf("Diameter = %d\\n", (int) diameter);
         igraph_destroy(&graph);
       }
-      EOS
+    EOS
     system ENV.cc, "test.c", "-I#{include}/igraph", "-L#{lib}",
                    "-ligraph", "-o", "test"
     assert_match "Diameter = 9", shell_output("./test")

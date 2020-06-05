@@ -1,33 +1,23 @@
 class Zookeeper < Formula
   desc "Centralized server for distributed coordination of services"
   homepage "https://zookeeper.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"
-  mirror "http://mirror.nbtelecom.com.br/apache/zookeeper/zookeeper-3.4.10/zookeeper-3.4.10.tar.gz"
-  sha256 "7f7f5414e044ac11fee2a1e0bc225469f51fb0cdf821e67df762a43098223f27"
+  url "https://www.apache.org/dyn/closer.lua?path=zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"
+  mirror "https://archive.apache.org/dist/zookeeper/zookeeper-3.5.8/apache-zookeeper-3.5.8.tar.gz"
+  sha256 "bafc0abe7da696a2020ba11b8ce7d06f6e28e9bf1e5504de09be25b8b589777d"
+  head "https://gitbox.apache.org/repos/asf/zookeeper.git"
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "08431d9c2f04f5a735149f374975df4f2e0d8140b1cc901f505d379ef7e20fe0" => :high_sierra
-    sha256 "8c7304be183d4c28c0f5d88e22626188c76794bee004e1b330c3e79bf5ae9d53" => :sierra
-    sha256 "2d792cb3963a7caf57922635888ae4e3cf363ef5a81d23f13a11d0ee42a780cf" => :el_capitan
+    sha256 "e22e36c7f02c5c57703d90d8a594896d0335311fc016130db2716822c750373f" => :catalina
+    sha256 "8a108199968e633827d46cc43bebef94bce9fd0f81cf05b1d61c2ad6b41a8fc4" => :mojave
+    sha256 "272323746835859d1f1181e79893fc16b0f48ee8ea401b6412fa5266f6439f6d" => :high_sierra
   end
 
-  head do
-    url "https://svn.apache.org/repos/asf/zookeeper/trunk"
-
-    depends_on "ant" => :build
-    depends_on "cppunit" => :build
-    depends_on "libtool" => :build
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-  end
-
-  option "with-perl", "Build Perl bindings"
-
-  deprecated_option "perl" => "with-perl"
-
-  depends_on :python => :optional
+  depends_on "ant" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
 
   def shim_script(target)
     <<~EOS
@@ -56,49 +46,21 @@ class Zookeeper < Formula
   end
 
   def install
-    # Don't try to build extensions for PPC
-    if Hardware::CPU.is_32_bit?
-      ENV["ARCHFLAGS"] = "-arch #{Hardware::CPU.arch_32_bit}"
-    else
-      ENV["ARCHFLAGS"] = Hardware::CPU.universal_archs.as_arch_flags
-    end
+    system "ant", "compile_jute"
 
-    if build.head?
-      system "ant", "compile_jute"
-      system "autoreconf", "-fvi", "src/c"
-    end
-
-    cd "src/c" do
+    cd "zookeeper-client/zookeeper-client-c" do
+      system "autoreconf", "-fiv"
       system "./configure", "--disable-dependency-tracking",
                             "--prefix=#{prefix}",
                             "--without-cppunit"
       system "make", "install"
     end
 
-    if build.with? "python"
-      cd "src/contrib/zkpython" do
-        system "python", "src/python/setup.py", "build"
-        system "python", "src/python/setup.py", "install", "--prefix=#{prefix}"
-      end
-    end
-
-    if build.with? "perl"
-      cd "src/contrib/zkperl" do
-        system "perl", "Makefile.PL", "PREFIX=#{prefix}",
-                                      "--zookeeper-include=#{include}",
-                                      "--zookeeper-lib=#{lib}"
-        system "make", "install"
-      end
-    end
-
     rm_f Dir["bin/*.cmd"]
 
-    if build.head?
-      system "ant"
-      libexec.install Dir["bin", "src/contrib", "src/java/lib", "build/*.jar"]
-    else
-      libexec.install Dir["bin", "contrib", "lib", "*.jar"]
-    end
+    system "ant"
+    libexec.install "bin", "build/lib", "zookeeper-contrib"
+    libexec.install Dir["build/*.jar"]
 
     bin.mkpath
     (etc/"zookeeper").mkpath
@@ -107,6 +69,7 @@ class Zookeeper < Formula
 
     Pathname.glob("#{libexec}/bin/*.sh") do |path|
       next if path == libexec+"bin/zkEnv.sh"
+
       script_name = path.basename
       bin_name    = path.basename ".sh"
       (bin+bin_name).write shim_script(script_name)
@@ -126,34 +89,35 @@ class Zookeeper < Formula
 
   plist_options :manual => "zkServer start"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>EnvironmentVariables</key>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-           <key>SERVER_JVMFLAGS</key>
-           <string>-Dapple.awt.UIElement=true</string>
+          <key>EnvironmentVariables</key>
+          <dict>
+             <key>SERVER_JVMFLAGS</key>
+             <string>-Dapple.awt.UIElement=true</string>
+          </dict>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/zkServer</string>
+            <string>start-foreground</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
         </dict>
-        <key>KeepAlive</key>
-        <dict>
-          <key>SuccessfulExit</key>
-          <false/>
-        </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/zkServer</string>
-          <string>start-foreground</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-      </dict>
-    </plist>
+      </plist>
     EOS
   end
 

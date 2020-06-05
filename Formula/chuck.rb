@@ -1,39 +1,25 @@
 class Chuck < Formula
   desc "Concurrent, on-the-fly audio programming language"
-  homepage "http://chuck.cs.princeton.edu/"
-  url "http://chuck.cs.princeton.edu/release/files/chuck-1.3.5.2.tgz"
-  sha256 "e900b8545ffcb69c6d49354b18c43a9f9b8f789d3ae822f34b408eaee8d3e70b"
+  homepage "https://chuck.cs.princeton.edu/"
+  url "https://chuck.cs.princeton.edu/release/files/chuck-1.4.0.1.tgz"
+  sha256 "11a20c34b385e132bf43d5ae6a562c652f631828cc6b1562a4c029bc9a850ed4"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "927a15abf98d767576584c0656688196e643ca9a15969b0e54e58bccc42f37f6" => :high_sierra
-    sha256 "4322101b14bb7c235ddd6fb2f102a8f182acb0106ece63bc53d64f3a77224998" => :sierra
-    sha256 "4322101b14bb7c235ddd6fb2f102a8f182acb0106ece63bc53d64f3a77224998" => :el_capitan
-    sha256 "c34fd149bd7c3a419087f963ecea469b953b5eebd8099457fbf5ed2bb0876357" => :yosemite
+    sha256 "95574b4ee2d10154b683e9b506e3ea83f7038e5b8a8a5b8eacfabd80006ffba0" => :catalina
+    sha256 "d55689ced88b9cf3a280b39b6a0a92ab33f7b834f6d6c704b5ac57fe755f0dc3" => :mojave
+    sha256 "bf6caf2f7ecd22b43afca372f0fd7e26fab5145aee922725ddbb237039cd1883" => :high_sierra
   end
 
   depends_on :xcode => :build
 
-  # Fix pointer comparison error with Xcode 9
-  # Reported by email to chuck-dev@lists.cs.princeton.edu on 2017-09-04
-  if DevelopmentTools.clang_build_version >= 900
-    patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/b052485f5d/chuck/xcode9.patch"
-      sha256 "fa2e008c8d90321c8876a49f83d7566dead362740711442f8e983d07e98a220b"
-    end
-  end
-
   def install
-    # issue caused by the new macOS version, patch submitted upstream
-    # to the chuck-dev mailing list
-    inreplace "src/makefile.osx", '10\.(6|7|8|9|10|11)(\\.[0-9]+)?', MacOS.version
     system "make", "-C", "src", "osx"
     bin.install "src/chuck"
     pkgshare.install "examples"
   end
 
   test do
-    assert_match /probe \[success\]/m, shell_output("#{bin}/chuck --probe 2>&1")
+    assert_match "device", shell_output("#{bin}/chuck --probe 2>&1")
   end
 end

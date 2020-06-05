@@ -1,22 +1,25 @@
 class Orc < Formula
   desc "Oil Runtime Compiler (ORC)"
   homepage "https://cgit.freedesktop.org/gstreamer/orc/"
-  url "https://gstreamer.freedesktop.org/src/orc/orc-0.4.27.tar.xz"
-  sha256 "51e53e58fc8158e5986a1f1a49a6d970c5b16493841cf7b9de2c2bde7ce36b93"
+  url "https://gstreamer.freedesktop.org/src/orc/orc-0.4.31.tar.xz"
+  sha256 "a0ab5f10a6a9ae7c3a6b4218246564c3bf00d657cbdf587e6d34ec3ef0616075"
 
   bottle do
     cellar :any
-    sha256 "0d14acdd8539f1aaf104c8e72a0cde4e7d163afb9d5afb58df3a04babd0094aa" => :high_sierra
-    sha256 "6e9283bf3a50c68724965b8abbf7ee1084d3e086bb50d96af7ee5fca420a078c" => :sierra
-    sha256 "6ce6a66ae7ff4321144f66e02f6d71be139336ea5256fd28d0d78be2188eee29" => :el_capitan
-    sha256 "39aec42200bf5957c7b8d6c1c4357c9397eddd82f0df7b7acb36f146734c3b3f" => :yosemite
+    sha256 "c4a11fbf1e2d645b0bbcbabc467c6f7fe604282833ece90264b063806a1e4909" => :catalina
+    sha256 "b9c58730d763ca611867504ff7005245e95ca435b027d85ff7f7471dc7431b59" => :mojave
+    sha256 "b732bc9e7fa9825222b0dda3dfdbe7f38cf45aeb46c239f432fc646d98079e76" => :high_sierra
   end
 
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--disable-gtk-doc"
-    system "make", "install"
+    mkdir "build" do
+      system "meson", *std_meson_args, "-Dgtk_doc=disabled", ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   test do

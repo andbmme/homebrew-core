@@ -1,14 +1,14 @@
 class Znc < Formula
   desc "Advanced IRC bouncer"
   homepage "https://wiki.znc.in/ZNC"
-  url "https://znc.in/releases/archive/znc-1.6.5.tar.gz"
-  sha256 "2f0225d49c53a01f8d94feea4619a6fe92857792bb3401a4eb1edd65f0342aca"
+  url "https://znc.in/releases/archive/znc-1.8.0.tar.gz"
+  sha256 "94fdb227c1afa3abff468e0b7b1309120ad99d6aa64c4fd35bef02928171bd54"
+  revision 1
 
   bottle do
-    sha256 "282e0fddf7f3e13d891b92ca31b2fc3d9f216ffd8771550cc4551d3e21b3b547" => :high_sierra
-    sha256 "c1d6ddcd9078631bcd94484f3796e95f32bf9e7b8d0886d9e2802b955b624cbf" => :sierra
-    sha256 "fe47b2288ee78acd11b5d4dc5a4a43a255153a211775875975f458cfc370c7a9" => :el_capitan
-    sha256 "61a0afcfcb021a7005d59f6d0a352fe27f05a6b2617eadb4482172d673666a67" => :yosemite
+    sha256 "c11d95f765f40565bb52f9211fb990de4d281008d31b006abd47cfc65f7a2455" => :catalina
+    sha256 "7627ce2bb4aaf5743ab29b6e15743541f86ed202bef48878aa8164275382f008" => :mojave
+    sha256 "d5ed764c5f1c9deed1b3bb099f522aa09082f995a224d325b8cd719c6e005866" => :high_sierra
   end
 
   head do
@@ -19,18 +19,12 @@ class Znc < Formula
     depends_on "libtool" => :build
   end
 
-  option "with-debug", "Compile ZNC with debug support"
-  option "with-icu4c", "Build with icu4c for charset support"
-  option "with-python3", "Build with mod_python support, allowing Python ZNC modules"
-
-  deprecated_option "enable-debug" => "with-debug"
-
   depends_on "pkg-config" => :build
-  depends_on "openssl"
-  depends_on "icu4c" => :optional
-  depends_on :python3 => :optional
+  depends_on "icu4c"
+  depends_on "openssl@1.1"
+  depends_on "python@3.8"
 
-  needs :cxx11
+  uses_from_macos "zlib"
 
   def install
     ENV.cxx11
@@ -40,39 +34,36 @@ class Znc < Formula
     ENV.append "CXXFLAGS", "-std=c++11"
     ENV.append "CXXFLAGS", "-stdlib=libc++" if ENV.compiler == :clang
 
-    args = ["--prefix=#{prefix}"]
-    args << "--enable-debug" if build.with? "debug"
-    args << "--enable-python" if build.with? "python3"
-
     system "./autogen.sh" if build.head?
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--enable-python"
     system "make", "install"
   end
 
   plist_options :manual => "znc --foreground"
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/znc</string>
-          <string>--foreground</string>
-        </array>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/znc.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/znc.log</string>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>StartInterval</key>
-        <integer>300</integer>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/znc</string>
+            <string>--foreground</string>
+          </array>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/znc.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/znc.log</string>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>StartInterval</key>
+          <integer>300</integer>
+        </dict>
+      </plist>
     EOS
   end
 

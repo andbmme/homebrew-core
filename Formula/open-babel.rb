@@ -1,60 +1,37 @@
 class OpenBabel < Formula
   desc "Chemical toolbox"
   homepage "https://openbabel.org"
-  url "https://github.com/openbabel/openbabel/archive/openbabel-2-4-1.tar.gz"
-  version "2.4.1"
-  sha256 "594c7f8a83f3502381469d643f7b185882da1dd4bc2280c16502ef980af2a776"
+  url "https://github.com/openbabel/openbabel/archive/openbabel-3-1-1.tar.gz"
+  version "3.1.1"
+  sha256 "c97023ac6300d26176c97d4ef39957f06e68848d64f1a04b0b284ccff2744f02"
   head "https://github.com/openbabel/openbabel.git"
 
   bottle do
-    sha256 "2e830e6b8a7ae79015bb06e05b04935f6a63525cac28cca53dcb72f49334bc83" => :high_sierra
-    sha256 "28bb84f75639741efbbf3a19ebffc1fc122d15fa74584440b84e265cdfd18db0" => :sierra
-    sha256 "d2ca98556d58c6268b6be3f93cfc9a00a79559d081d7713ed14bc7882212b2ef" => :el_capitan
-    sha256 "48724ff8b63ea446ea0f2095361ea93de0647eec2e220c8369b9910a11450213" => :yosemite
+    sha256 "997886c087d6c342ea47649bb6de0e50fa807a2116aaad2119490b8921b85edf" => :catalina
+    sha256 "d8bf12ee10f070e6ca4396fa37d02da80f5449f5c3927a0050ffbb028331a01a" => :mojave
+    sha256 "035d300440fbfaaf20939137db63e8f78246983a16db563dcd1b66f4980685f4" => :high_sierra
   end
 
-  option "with-cairo", "Support PNG depiction"
-  option "with-java", "Compile Java language bindings"
-  option "with-python", "Compile Python language bindings"
-  option "with-wxmac", "Build with GUI"
-
-  depends_on "pkg-config" => :build
   depends_on "cmake" => :build
-  depends_on :python => :optional
-  depends_on "wxmac" => :optional
-  depends_on "cairo" => :optional
+  depends_on "pkg-config" => :build
+  depends_on "rapidjson" => :build
+  depends_on "swig" => :build
+  depends_on "cairo"
   depends_on "eigen"
-  depends_on "swig" if build.with?("python") || build.with?("java")
+  depends_on "python@3.8"
 
   def install
-    args = std_cmake_args
-    args << "-DRUN_SWIG=ON" if build.with?("python") || build.with?("java")
-    args << "-DJAVA_BINDINGS=ON" if build.with? "java"
-    args << "-DBUILD_GUI=ON" if build.with? "wxmac"
-
-    # Point cmake towards correct python
-    if build.with? "python"
-      pypref = `python -c 'import sys;print(sys.prefix)'`.strip
-      pyinc = `python -c 'from distutils import sysconfig;print(sysconfig.get_python_inc(True))'`.strip
-      args << "-DPYTHON_BINDINGS=ON"
-      args << "-DPYTHON_INCLUDE_DIR='#{pyinc}'"
-      args << "-DPYTHON_LIBRARY='#{pypref}/lib/libpython2.7.dylib'"
-    end
-
-    args << "-DCAIRO_LIBRARY:FILEPATH=" if build.without? "cairo"
+    args = std_cmake_args + %W[
+      -DRUN_SWIG=ON
+      -DPYTHON_BINDINGS=ON
+      -DPYTHON_EXECUTABLE=#{Formula["python@3.8"].opt_bin}/python3
+    ]
 
     mkdir "build" do
       system "cmake", "..", *args
       system "make"
       system "make", "install"
     end
-  end
-
-  def caveats
-    <<~EOS
-      Java libraries are installed to #{HOMEBREW_PREFIX}/lib so this path should be
-      included in the CLASSPATH environment variable.
-    EOS
   end
 
   test do

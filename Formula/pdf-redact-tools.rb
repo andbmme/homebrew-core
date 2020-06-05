@@ -3,20 +3,20 @@ class PdfRedactTools < Formula
   homepage "https://github.com/firstlookmedia/pdf-redact-tools"
   url "https://github.com/firstlookmedia/pdf-redact-tools/archive/v0.1.2.tar.gz"
   sha256 "5874a7b76be15ccaa4c20874299ef51fbaf520a858229a58678bc72a305305fc"
+  revision 1
   head "https://github.com/firstlookmedia/pdf-redact-tools.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "7f079c910f0bc8287cfdabfcafd92c57662b0d40c07e2d3fb6b55a953631c330" => :high_sierra
-    sha256 "80b4e04bd761bad0cfdea11abfcd19cf96b785cf4e2877998f17bb8a8136afb0" => :sierra
-    sha256 "b462fadc539b2c646c9ff8a59b98df344d0a6cb2fb010c2d4a82785d2f0007e6" => :el_capitan
-    sha256 "b462fadc539b2c646c9ff8a59b98df344d0a6cb2fb010c2d4a82785d2f0007e6" => :yosemite
+    sha256 "d36fd54bdf0fecba50c0d2e4c8ec7c4702bc626b7228f55482fa04527837e80a" => :catalina
+    sha256 "1d5dddb4adc486d89537a5368550c787b9dbae0c6cd9cddba9b2e45820b025e1" => :mojave
+    sha256 "1d5dddb4adc486d89537a5368550c787b9dbae0c6cd9cddba9b2e45820b025e1" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
-  depends_on "imagemagick"
   depends_on "exiftool"
   depends_on "ghostscript"
+  depends_on "imagemagick"
+  depends_on :macos # Due to Python 2 (https://github.com/firstlookmedia/pdf-redact-tools/pull/34)
 
   def install
     ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"

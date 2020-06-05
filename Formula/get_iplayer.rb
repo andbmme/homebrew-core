@@ -1,22 +1,23 @@
 class GetIplayer < Formula
   desc "Utility for downloading TV and radio programmes from BBC iPlayer"
   homepage "https://github.com/get-iplayer/get_iplayer"
-  url "https://github.com/get-iplayer/get_iplayer/archive/v3.06.tar.gz"
-  sha256 "fba3f1abd01ca6f9aaed30f9650e1e520fd3b2147fe6aa48fe7c747725b205f7"
-  revision 1
+  url "https://github.com/get-iplayer/get_iplayer/archive/v3.25.tar.gz"
+  sha256 "2ae278a812494d6289224e6d347c8761ec815ad84f4daf41fd0a4f62832b7d63"
   head "https://github.com/get-iplayer/get_iplayer.git", :branch => "develop"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "4113bdf731e4d06b6873dc4e14c3bfb8aa12b5532b5e25e26308e1657f60f91b" => :high_sierra
-    sha256 "a2bdef5acce8128f0890ca8fe9a3d1e80fe790374aa84f3e808f02fb525429c6" => :sierra
-    sha256 "713b87dd2c684257b270da96cdf6acea40b820fe492c4342796a20cbee58bff0" => :el_capitan
+    sha256 "039b49cd5c543dfa6d6a72ca1102aad3b1524b8d4a48cba0253c513bddbc1129" => :catalina
+    sha256 "4f46d21efe29329f06b853e744609a45acb64074376777ba5661ef4f925c95f5" => :mojave
+    sha256 "447f3960eb18c8b0779d98c93e187b3e9009995466b0c228ef6157a45115bdaf" => :high_sierra
   end
 
-  depends_on "atomicparsley" => :recommended
-  depends_on "ffmpeg" => :recommended
-
+  depends_on "atomicparsley"
+  depends_on "ffmpeg"
   depends_on :macos => :yosemite
+
+  uses_from_macos "libxml2"
+  uses_from_macos "perl"
 
   resource "IO::Socket::IP" do
     url "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/IO-Socket-IP-0.39.tar.gz"
@@ -24,13 +25,18 @@ class GetIplayer < Formula
   end
 
   resource "IO::Socket::SSL" do
-    url "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.052.tar.gz"
-    sha256 "e4897a9b17cb18a3c44aa683980d52cef534cdfcb8063d6877c879bfa2f26673"
+    url "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.066.tar.gz"
+    sha256 "0d47064781a545304d5dcea5dfcee3acc2e95a32e1b4884d80505cde8ee6ebcd"
   end
 
   resource "Mojolicious" do
-    url "https://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-7.48.tar.gz"
-    sha256 "86d28e66a352e808ab1eae64ef93b90a9a92b3c1b07925bd2d3387a9e852388e"
+    url "https://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-7.94.tar.gz"
+    sha256 "171a1741f3ea57519657bfb1e40a5290149d7c7d69a1131464c7db23029e8f6e"
+  end
+
+  resource "Mozilla::CA" do
+    url "https://cpan.metacpan.org/authors/id/A/AB/ABH/Mozilla-CA-20180117.tar.gz"
+    sha256 "f2cc9fbe119f756313f321e0d9f1fac0859f8f154ac9d75b1a264c1afdf4e406"
   end
 
   def install
@@ -55,7 +61,7 @@ class GetIplayer < Formula
   end
 
   test do
-    output = shell_output("\"#{bin}/get_iplayer\" --refresh --refresh-include=\"BBC None\" --quiet dontshowanymatches 2>&1")
+    output = shell_output("\"#{bin}/get_iplayer\" -f --refresh-include=\"BBC None\" -q dontshowanymatches 2>&1")
     assert_match "get_iplayer #{pkg_version}-homebrew", output, "Unexpected version"
     assert_match "INFO: 0 matching programmes", output, "Unexpected output"
     assert_match "INFO: Indexing tv programmes (concurrent)", output,

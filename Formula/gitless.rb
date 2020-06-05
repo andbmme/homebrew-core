@@ -2,30 +2,36 @@ class Gitless < Formula
   include Language::Python::Virtualenv
 
   desc "Simplified version control system on top of git"
-  homepage "http://gitless.com/"
-  url "https://github.com/sdg-mit/gitless/archive/v0.8.5.tar.gz"
-  sha256 "c93f8f558d05f41777ae36fab7434cfcdb13035ae2220893d5ee222ced1e7b9f"
-  revision 2
+  homepage "https://gitless.com/"
+  url "https://github.com/gitless-vcs/gitless/archive/v0.8.8.tar.gz"
+  sha256 "470aab13d51baec2ab54d7ceb6d12b9a2937f72d840516affa0cb34a6360523c"
+  revision 4
 
   bottle do
     cellar :any
-    sha256 "52637bc78639b0b7d95a92fdc2e5616311728d7c52a662afbd257452067801ca" => :high_sierra
-    sha256 "cbcebd2cc10c536e6c2c64090a780a6809e41ea073d129ba421fbd26e1653948" => :sierra
-    sha256 "187b3ecd7f650a7f56e035210b102dc575c1d42a662e8b3757c9dd767861856d" => :el_capitan
-    sha256 "345542f3356bea13faad1fbf9ba82a9b41d196e08f86ec40d80457a51a76ca2f" => :yosemite
+    sha256 "c0ffed9f5228aecb14175929167812114176ac2df5b9583161c4f3c0f7785da0" => :catalina
+    sha256 "f72efc4323f531adcb1a38c8d864a4bd464b4a7d67400623479f05d37a4332cd" => :mojave
+    sha256 "aa526af3aaa79be5c7d86d4265589194e331766ba138e5b74894ad8037224c5c" => :high_sierra
   end
 
-  depends_on :python if MacOS.version <= :snow_leopard
   depends_on "libgit2"
+  depends_on "python@3.8"
+
+  uses_from_macos "libffi"
 
   resource "args" do
     url "https://files.pythonhosted.org/packages/e5/1c/b701b3f4bd8d3667df8342f311b3efaeab86078a840fb826bd204118cc6b/args-0.1.0.tar.gz"
     sha256 "a785b8d837625e9b61c39108532d95b85274acd679693b71ebb5156848fcf814"
   end
 
+  resource "cached-property" do
+    url "https://files.pythonhosted.org/packages/57/8e/0698e10350a57d46b3bcfe8eff1d4181642fd1724073336079cb13c5cf7f/cached-property-1.5.1.tar.gz"
+    sha256 "9217a59f14a5682da7c4b8829deadbfc194ac22e9908ccf7c8820234e80a1504"
+  end
+
   resource "cffi" do
-    url "https://files.pythonhosted.org/packages/5b/b9/790f8eafcdab455bcd3bd908161f802c9ce5adbf702a83aa7712fcc345b7/cffi-1.10.0.tar.gz"
-    sha256 "b3b02911eb1f6ada203b0763ba924234629b51586f72a21faacc638269f4ced5"
+    url "https://files.pythonhosted.org/packages/93/1a/ab8c62b5838722f29f3daffcc8d4bd61844aa9b5f437341cc890ceee483b/cffi-1.12.3.tar.gz"
+    sha256 "041c81822e9f84b1d9c401182e174996f0bae9991f33725d059b771744290774"
   end
 
   resource "clint" do
@@ -39,8 +45,8 @@ class Gitless < Formula
   end
 
   resource "pygit2" do
-    url "https://files.pythonhosted.org/packages/84/fa/867aec49165bd119b215d997e4d1211875e398d956b26888cd47070145a7/pygit2-0.26.0.tar.gz"
-    sha256 "a7f06d61f25ab644c39e0e9bd4846a6cc4af81ae27f889473e6f0e9511226cb1"
+    url "https://files.pythonhosted.org/packages/1d/c4/e0ba65178512a724a86b39565d7f9286c16d7f8e45e2f665973065c4a495/pygit2-1.1.1.tar.gz"
+    sha256 "9255d507d5d87bf22dfd57997a78908010331fc21f9a83eca121a53f657beb3c"
   end
 
   resource "sh" do
@@ -49,8 +55,15 @@ class Gitless < Formula
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/b3/b2/238e2590826bfdd113244a40d9d3eb26918bd798fc187e2360a8367068db/six-1.10.0.tar.gz"
-    sha256 "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a"
+    url "https://files.pythonhosted.org/packages/16/d8/bc6316cf98419719bd59c91742194c111b6f2e85abac88e496adefaf7afe/six-1.11.0.tar.gz"
+    sha256 "70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9"
+  end
+
+  # Allow to be dependent on pygit2 1.1.1
+  # Remove for next version
+  patch do
+    url "https://github.com/gitless-vcs/gitless/pull/230.patch?full_index=1"
+    sha256 "fd4ef60552add5f95944083a8ba867a3b34a197bdbad6b13afcf5ab29ebe09be"
   end
 
   def install
@@ -58,9 +71,9 @@ class Gitless < Formula
   end
 
   test do
+    system "git", "config", "--global", "user.email", '"test@example.com"'
+    system "git", "config", "--global", "user.name", '"Test"'
     system bin/"gl", "init"
-    system "git", "config", "user.name", "Gitless Install"
-    system "git", "config", "user.email", "Gitless@Install"
     %w[haunted house].each { |f| touch testpath/f }
     system bin/"gl", "track", "haunted", "house"
     system bin/"gl", "commit", "-m", "Initial Commit"

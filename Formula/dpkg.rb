@@ -4,21 +4,26 @@ class Dpkg < Formula
   # Please always keep the Homebrew mirror as the primary URL as the
   # dpkg site removes tarballs regularly which means we get issues
   # unnecessarily and older versions of the formula are broken.
-  url "https://dl.bintray.com/homebrew/mirror/dpkg-1.18.24.tar.xz"
-  mirror "https://mirrors.ocf.berkeley.edu/debian/pool/main/d/dpkg/dpkg_1.18.24.tar.xz"
-  sha256 "d853081d3e06bfd46a227056e591f094e42e78fa8a5793b0093bad30b710d7b4"
+  url "https://dl.bintray.com/homebrew/mirror/dpkg-1.20.0.tar.xz"
+  mirror "https://deb.debian.org/debian/pool/main/d/dpkg/dpkg_1.20.0.tar.xz"
+  sha256 "b633cc2b0e030efb61e11029d8a3fb1123f719864c9992da2e52b471c96d0900"
 
   bottle do
-    sha256 "d26032f3e3a0ef5674aab0a64d182187bee880dd4e8b8cbee39ae1068242dfba" => :high_sierra
-    sha256 "9e8db9fe18ba33977e4fd45375248da847c481d2f1b58b82b18c90671bace287" => :sierra
-    sha256 "d830b2d5460fce38ab859d8d3d3a4ce618e32b3ad08ea3d7020a0ecc214aeb18" => :el_capitan
-    sha256 "9bf757d4e0e3902bbbc97a28a2532ac1a3c8220ad487c5a18a38925483e43062" => :yosemite
+    sha256 "41dcad707b4741c74282184d8eda0e2d02121dd5cb52ad4ef816bfb842725994" => :catalina
+    sha256 "f1c7f9c37c420dee585d634fe0c29fb968d9d379a5be4f56d94a48b51666bcd4" => :mojave
+    sha256 "de1c3a3f1f2042699e6df4e9a793fb1e0fff1d194e2eff56c37d9cf4d24ab025" => :high_sierra
   end
 
   depends_on "pkg-config" => :build
   depends_on "gnu-tar"
   depends_on "gpatch"
+  depends_on "perl"
   depends_on "xz" # For LZMA
+
+  uses_from_macos "bzip2"
+  uses_from_macos "zlib"
+
+  patch :DATA
 
   def install
     # We need to specify a recent gnutar, otherwise various dpkg C programs will
@@ -27,7 +32,7 @@ class Dpkg < Formula
 
     # Since 1.18.24 dpkg mandates the use of GNU patch to prevent occurrences
     # of the CVE-2017-8283 vulnerability.
-    # http://www.openwall.com/lists/oss-security/2017/04/20/2
+    # https://www.openwall.com/lists/oss-security/2017/04/20/2
     ENV["PATCH"] = Formula["gpatch"].opt_bin/"patch"
 
     # Theoretically, we could reinsert a patch here submitted upstream previously
@@ -62,9 +67,10 @@ class Dpkg < Formula
     (var/"log").mkpath
   end
 
-  def caveats; <<~EOS
-    This installation of dpkg is not configured to install software, so
-    commands such as `dpkg -i`, `dpkg --configure` will fail.
+  def caveats
+    <<~EOS
+      This installation of dpkg is not configured to install software, so
+      commands such as `dpkg -i`, `dpkg --configure` will fail.
     EOS
   end
 
@@ -88,3 +94,21 @@ class Dpkg < Formula
     assert_predicate testpath/"data/homebrew.txt", :exist?
   end
 end
+
+__END__
+diff --git a/lib/dpkg/i18n.c b/lib/dpkg/i18n.c
+index 4952700..81533ff 100644
+--- a/lib/dpkg/i18n.c
++++ b/lib/dpkg/i18n.c
+@@ -23,6 +23,11 @@
+
+ #include <dpkg/i18n.h>
+
++#ifdef __APPLE__
++#include <string.h>
++#include <xlocale.h>
++#endif
++
+ #ifdef HAVE_USELOCALE
+ static locale_t dpkg_C_locale;
+ #endif

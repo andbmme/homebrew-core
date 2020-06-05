@@ -1,29 +1,42 @@
 class Ilmbase < Formula
   desc "OpenEXR ILM Base libraries (high dynamic-range image file format)"
-  homepage "http://www.openexr.com/"
-  url "https://savannah.nongnu.org/download/openexr/ilmbase-2.2.0.tar.gz"
-  mirror "https://mirrorservice.org/sites/download.savannah.gnu.org/releases/openexr/ilmbase-2.2.0.tar.gz"
-  sha256 "ecf815b60695555c1fbc73679e84c7c9902f4e8faa6e8000d2f905b8b86cedc7"
+  homepage "https://www.openexr.com/"
+  url "https://github.com/openexr/openexr/archive/v2.5.1.tar.gz"
+  sha256 "11f806bf256453e39fc33bd1cf1fa576a54f144cedcdd3e6935a177e5a89d02e"
 
   bottle do
-    cellar :any
-    rebuild 3
-    sha256 "f53b502c8a59462466c610d127cdc2be288b472c4fbe76fa6affbff9498dac44" => :high_sierra
-    sha256 "6fee028cc8dc306fc1c48b9015c48c02049f3c281e496af1448ca65d13c8405c" => :sierra
-    sha256 "a18e2d6ecd45ff0ea78f856374aa11386b5fd2c2e82a335271b62c917f33caf4" => :el_capitan
+    sha256 "4748d38413303488484f98d5fbb94bb90a3f2e6a7fc9830fe5ce12463ef6812b" => :catalina
+    sha256 "c3645960e26293a38a9ed68996c21f9bdd00bf138c66a187d97b3be9a6f63247" => :mojave
+    sha256 "833b56397ee633635ae29f4b7c5f526590038cdda44bf1250fbee59bbada4013" => :high_sierra
   end
 
+  depends_on "cmake" => :build
+
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
-    system "make", "install"
-    pkgshare.install %w[Half HalfTest Iex IexMath IexTest IlmThread Imath ImathTest]
+    cd "IlmBase" do
+      system "cmake", ".", *std_cmake_args, "-DBUILD_TESTING=OFF"
+      system "make", "install"
+    end
   end
 
   test do
-    cd pkgshare/"IexTest" do
-      system ENV.cxx, "-I#{include}/OpenEXR", "-I./", "-c",
-             "testBaseExc.cpp", "-o", testpath/"test"
-    end
+    (testpath/"test.cpp").write <<~'EOS'
+      #include <ImathRoots.h>
+      #include <algorithm>
+      #include <iostream>
+
+      int main(int argc, char *argv[])
+      {
+        double x[2] = {0.0, 0.0};
+        int n = IMATH_NAMESPACE::solveQuadratic(1.0, 3.0, 2.0, x);
+
+        if (x[0] > x[1])
+          std::swap(x[0], x[1]);
+
+        std::cout << n << ", " << x[0] << ", " << x[1] << "\n";
+      }
+    EOS
+    system ENV.cxx, "-I#{include}/OpenEXR", "-o", testpath/"test", "test.cpp"
+    assert_equal "2, -2, -1\n", shell_output("./test")
   end
 end

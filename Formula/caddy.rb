@@ -1,41 +1,79 @@
 class Caddy < Formula
-  desc "Alternative general-purpose HTTP/2 web server"
+  desc "Powerful, enterprise-ready, open source web server with automatic HTTPS"
   homepage "https://caddyserver.com/"
-  url "https://github.com/mholt/caddy/archive/v0.10.10.tar.gz"
-  sha256 "aafaeb092e7b1bcff8ec31f19a1ded1253ff95cfdd4441378e5a530508614e8d"
-  head "https://github.com/mholt/caddy.git"
+  url "https://github.com/caddyserver/caddy/archive/v2.0.0.tar.gz"
+  sha256 "620e2a58ff904ae8bb9543cd5000d5806ba720f275dd6f4774cdc2abba0a746f"
+  head "https://github.com/caddyserver/caddy.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "764556624afede510c1b9d0617fe49fc0df27b5cd03115e1d7c636ec94d41dc6" => :high_sierra
-    sha256 "af2fcc1f10c1acab8b45cc0a6673298c44507532d4a82fb30d87fb41241ee438" => :sierra
-    sha256 "ca6b157091c8b09eec98f04c73a03cf21f68d1af46dfe93916c8429b10902179" => :el_capitan
+    sha256 "25fa330449c4557aae58459abe83f2f267ea318c160d4928ec45c1dafd15ab0c" => :catalina
+    sha256 "2ed20d39a8156af3063375368aaa0bcba76ea30a7315ea411bbc303016b341eb" => :mojave
+    sha256 "db75aa7d107b856930afed85918a4981c1bda90fba996171ac16e81c53963afb" => :high_sierra
   end
 
   depends_on "go" => :build
 
+  resource "xcaddy" do
+    url "https://github.com/caddyserver/xcaddy/archive/v0.1.3.tar.gz"
+    sha256 "160244a67fca5a9ba448b98f4a94c6023e9ac64e3456a76ceea444d7a1f00767"
+  end
+
   def install
-    ENV["GOPATH"] = buildpath
-    ENV["GOOS"] = "darwin"
-    ENV["GOARCH"] = MacOS.prefer_64_bit? ? "amd64" : "386"
+    revision = build.head? ? version.commit : "v#{version}"
 
-    (buildpath/"src/github.com/mholt").mkpath
-    ln_s buildpath, "src/github.com/mholt/caddy"
+    resource("xcaddy").stage do
+      system "go", "run", "cmd/xcaddy/main.go", "build", revision, "--output", bin/"caddy"
+    end
+  end
 
-    system "go", "build", "-ldflags",
-           "-X github.com/mholt/caddy/caddy/caddymain.gitTag=#{version}",
-           "-o", bin/"caddy", "github.com/mholt/caddy/caddy"
+  plist_options :manual => "caddy run --config #{HOMEBREW_PREFIX}/etc/Caddyfile"
+
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <true/>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/caddy</string>
+            <string>run</string>
+            <string>--config</string>
+            <string>#{etc}/Caddyfile</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+        </dict>
+      </plist>
+    EOS
   end
 
   test do
-    begin
-      io = IO.popen("#{bin}/caddy")
-      sleep 2
-    ensure
-      Process.kill("SIGINT", io.pid)
-      Process.wait(io.pid)
-    end
+    port1 = free_port
+    port2 = free_port
 
-    io.read =~ /0\.0\.0\.0:2015/
+    (testpath/"Caddyfile").write <<~EOS
+      {
+        admin 127.0.0.1:#{port1}
+      }
+
+      http://127.0.0.1:#{port2} {
+        respond "Hello, Caddy!"
+      }
+    EOS
+
+    fork do
+      exec bin/"caddy", "run", "--config", testpath/"Caddyfile"
+    end
+    sleep 2
+
+    assert_match "\":#{port2}\"",
+      shell_output("curl -s http://127.0.0.1:#{port1}/config/apps/http/servers/srv0/listen/0")
+    assert_match "Hello, Caddy!", shell_output("curl -s http://127.0.0.1:#{port2}")
   end
 end

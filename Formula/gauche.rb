@@ -1,14 +1,13 @@
 class Gauche < Formula
   desc "R7RS Scheme implementation, developed to be a handy script interpreter"
   homepage "https://practical-scheme.net/gauche/"
-  url "https://downloads.sourceforge.net/gauche/Gauche/Gauche-0.9.5.tgz"
-  sha256 "4c8a53213de112708bbda5fa9648c21497d43ebf809ed5b32b15f21266b4e73c"
+  url "https://downloads.sourceforge.net/gauche/Gauche/Gauche-0.9.9.tgz"
+  sha256 "4ca9325322a7efadb9680d156eb7b53521321c9ca4955c4cbe738bc2e1d7f7fb"
 
   bottle do
-    sha256 "7833855dcc680ac0617171d68bb063a193d74e3133f12bd06a01dd221201fa51" => :high_sierra
-    sha256 "0bfbcbb0f5066b939712e3eed33f0ed221f1e6ba096aca95bc6ad1d69b92c74d" => :sierra
-    sha256 "2959fc3962fe83ac5d66f522d0be8b5abb7d86f43594c47b0ea34bf9c4db7e5d" => :el_capitan
-    sha256 "31baa1ce9e676f98f708b9d2ec84fdeab7ca8a61a7153c90fefc120fd298b66c" => :yosemite
+    sha256 "0d2bc0fa954237af130845e904c6c1680018c52c0fe60ccdcbb25000ed5b5408" => :catalina
+    sha256 "bb0bee61ddd5726151e4569d8ea2c7b5797a82543bb13e45a6fec66a521cdcae" => :mojave
+    sha256 "719f5826572a2aec1383ef5501ee4f92580f8a769205c03e47f9e610fa0b5abd" => :high_sierra
   end
 
   def install

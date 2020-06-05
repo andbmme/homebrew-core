@@ -1,25 +1,31 @@
 class Dub < Formula
   desc "Build tool for D projects"
   homepage "https://code.dlang.org/getting_started"
-  url "https://github.com/dlang/dub/archive/v1.6.0.tar.gz"
-  sha256 "4b6a13232deeed60b262fcad95e8d45449e6407308f2962b08b3d9ecbcb80126"
+  url "https://github.com/dlang/dub/archive/v1.21.0.tar.gz"
+  sha256 "320d96453b4a9a36a2d8716307cebe44f53638e06f425a7cc0d7d4dc9379bbe7"
   version_scheme 1
-
   head "https://github.com/dlang/dub.git"
 
   bottle do
-    sha256 "02dca616f9005a97e8a808132e4db53a7b09a7c68b57ba1b7c617bf2548fe9af" => :high_sierra
-    sha256 "93a16cf901414234c4345df869c818cadced49f50d15f54ee3e75100e5b16641" => :sierra
-    sha256 "dfc6c60757b75435bb16018ae05e4ea8c3de8137922bfdc7043a33492a985a7e" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "cfa1ed65889521a635bcdd69945d9d4b77aa72cce963c544286e76dbc85b2cb2" => :catalina
+    sha256 "3d818daf0852931d00d7780838f1c60b8907a3b0eecfbccba1166a9bf26d2834" => :mojave
+    sha256 "e0abff9d8011d7bdbd603fe27e226e8f11b3d33c536947ce944b577bb5a34a64" => :high_sierra
   end
 
-  depends_on "pkg-config" => [:recommended, :run]
   depends_on "dmd" => :build
+  depends_on "pkg-config"
+
+  uses_from_macos "curl"
 
   def install
     ENV["GITVER"] = version.to_s
-    system "./build.sh"
+    system "./build.d"
+    system "bin/dub", "scripts/man/gen_man.d"
     bin.install "bin/dub"
+    man1.install Dir["scripts/man/*.1"]
+    zsh_completion.install "scripts/zsh-completion/_dub"
+    fish_completion.install "scripts/fish-completion/dub.fish"
   end
 
   test do

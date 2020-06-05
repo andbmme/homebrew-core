@@ -1,27 +1,31 @@
 class Rocksdb < Formula
   desc "Embeddable, persistent key-value store for fast storage"
-  homepage "http://rocksdb.org"
-  url "https://github.com/facebook/rocksdb/archive/v5.8.tar.gz"
-  sha256 "d8361d19b3d3e5d7a97c6427b7e39d136541dd88ee58b239ee730bb506a6c9f2"
+  homepage "https://rocksdb.org/"
+  url "https://github.com/facebook/rocksdb/archive/v6.7.3.tar.gz"
+  sha256 "c4d1397b58e4801b5fd7c3dd9175e6ae84541119cbebb739fe17d998f1829e81"
 
   bottle do
     cellar :any
-    sha256 "21ac5764abb6652293668952caa3e09e87d073d2d752585573e80727b24782e1" => :high_sierra
-    sha256 "3bfd94bf7077e4c892d79d73a9f72b44695658e871960cc90c2e11aa9db7029b" => :sierra
-    sha256 "44189a915787d3735d547bf1a26dc13ba5e26087e971151626af9b9bb1cd4750" => :el_capitan
+    sha256 "d0bf91474177980de65bf72f41fbdfe60d5e5c934cfbb56011a0636e9dee1717" => :catalina
+    sha256 "3fc961b8a51c6e5e2a85e43d1dc5fad0c59db80315784bb75e82345bc240b9c3" => :mojave
+    sha256 "9c1a3a6ee74fda67c2af84f25f41bd9c9769513b6d48bc222db1baceeb527ba8" => :high_sierra
   end
 
-  needs :cxx11
-  depends_on "snappy"
-  depends_on "lz4"
   depends_on "gflags"
-  depends_on "jemalloc"
+  depends_on "lz4"
+  depends_on "snappy"
+  depends_on "zstd"
+
+  uses_from_macos "bzip2"
+  uses_from_macos "zlib"
 
   def install
     ENV.cxx11
-    ENV["PORTABLE"] = "1" if build.bottle?
+    ENV["PORTABLE"] = "1"
     ENV["DEBUG_LEVEL"] = "0"
     ENV["USE_RTTI"] = "1"
+    ENV["ROCKSDB_DISABLE_ALIGNED_NEW"] = "1" if MacOS.version <= :sierra
+    ENV["DISABLE_JEMALLOC"] = "1" # prevent opportunistic linkage
 
     # build regular rocksdb
     system "make", "clean"
@@ -65,7 +69,8 @@ class Rocksdb < Formula
                                 "-lz", "-lbz2",
                                 "-L#{lib}", "-lrocksdb_lite",
                                 "-L#{Formula["snappy"].opt_lib}", "-lsnappy",
-                                "-L#{Formula["lz4"].opt_lib}", "-llz4"
+                                "-L#{Formula["lz4"].opt_lib}", "-llz4",
+                                "-L#{Formula["zstd"].opt_lib}", "-lzstd"
     system "./db_test"
 
     assert_match "sst_dump --file=", shell_output("#{bin}/rocksdb_sst_dump --help 2>&1", 1)

@@ -1,18 +1,19 @@
 class Sngrep < Formula
   desc "Command-line tool for displaying SIP calls message flows"
   homepage "https://github.com/irontec/sngrep"
-  url "https://github.com/irontec/sngrep/archive/v1.4.4.tar.gz"
-  sha256 "2379b8b3e9498d426a0bc03b90d74170a80f98f167f89c126d53dcc66bc5f60b"
+  url "https://github.com/irontec/sngrep/archive/v1.4.7.tar.gz"
+  sha256 "3c96aadd8b8c6b7adb5552d6fb4234f2000f15109b0f6c5feb632c81306cc49b"
 
   bottle do
-    sha256 "035b453e0a13dadfb3c23b55b57c923f28f4940aef05dd93cdb2f591fe416929" => :high_sierra
-    sha256 "68d0733f5e1b07ebb3e63f8a7f72cfccbb196477a460d545769d21eab6568ff4" => :sierra
-    sha256 "bbfd86b19188591ba77f89ef44dd4bd1fcbcc60d2bc709a3b1dfc5e538f17086" => :el_capitan
+    sha256 "28a9d6bf75bdc1a95d3878b0f081abf44d743d916b6d15a9ed4dba2a872b6cdf" => :catalina
+    sha256 "5e75eef195f7bae03c030391f4f21f5ab5f1eb36e444a90d70833eb40e8cc4fb" => :mojave
+    sha256 "03b884145f781a12ad892765a61f743093fc2477f51faff426c7226d6617ed2e" => :high_sierra
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "openssl"
+  depends_on "ncurses" if DevelopmentTools.clang_build_version >= 1000
+  depends_on "openssl@1.1"
 
   def install
     system "./bootstrap.sh"
@@ -20,7 +21,7 @@ class Sngrep < Formula
                           "--disable-dependency-tracking",
                           "--disable-silent-rules",
                           "--prefix=#{prefix}",
-                          "--with-openssl=#{Formula["openssl"].opt_prefix}"
+                          "--with-openssl=#{Formula["openssl@1.1"].opt_prefix}"
     system "make", "install"
   end
 

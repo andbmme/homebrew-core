@@ -1,15 +1,15 @@
 class TranslateShell < Formula
   desc "Command-line translator using Google Translate and more"
   homepage "https://www.soimort.org/translate-shell"
-  url "https://github.com/soimort/translate-shell/archive/v0.9.6.5.tar.gz"
-  sha256 "6d9ae244e6dbf42466dec00dd0b955659ba275d7e780bbd101c27c9325d413ef"
+  url "https://github.com/soimort/translate-shell/archive/v0.9.6.12.tar.gz"
+  sha256 "4c4843a8c66276190535b8435775ecb5d9c8286083a33cdbe2db608eba93ca97"
   head "https://github.com/soimort/translate-shell.git", :branch => "develop"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "b31f0952d8dfe8829a80a86547bca825a3f6ffcce2a7d101fc0219b6e600f9f7" => :high_sierra
-    sha256 "b31f0952d8dfe8829a80a86547bca825a3f6ffcce2a7d101fc0219b6e600f9f7" => :sierra
-    sha256 "b31f0952d8dfe8829a80a86547bca825a3f6ffcce2a7d101fc0219b6e600f9f7" => :el_capitan
+    sha256 "858d52386202bbcb1313a72b642d9d5f4cbfe2ca35fd9556f6cf5275d7d2b9a1" => :catalina
+    sha256 "858d52386202bbcb1313a72b642d9d5f4cbfe2ca35fd9556f6cf5275d7d2b9a1" => :mojave
+    sha256 "858d52386202bbcb1313a72b642d9d5f4cbfe2ca35fd9556f6cf5275d7d2b9a1" => :high_sierra
   end
 
   depends_on "fribidi"
@@ -22,11 +22,12 @@ class TranslateShell < Formula
     man1.install "man/trans.1"
   end
 
-  def caveats; <<~EOS
-    By default, text-to-speech functionality is provided by macOS's builtin
-    `say' command. This functionality may be improved in certain cases by
-    installing one of mplayer, mpv, or mpg123, all of which are available
-    through `brew install'.
+  def caveats
+    <<~EOS
+      By default, text-to-speech functionality is provided by macOS's builtin
+      `say' command. This functionality may be improved in certain cases by
+      installing one of mplayer, mpv, or mpg123, all of which are available
+      through `brew install'.
     EOS
   end
 

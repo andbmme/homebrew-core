@@ -1,45 +1,49 @@
 class Ed < Formula
   desc "Classic UNIX line editor"
   homepage "https://www.gnu.org/software/ed/ed.html"
-  url "https://ftp.gnu.org/gnu/ed/ed-1.14.2.tar.lz"
-  mirror "https://ftpmirror.gnu.org/ed/ed-1.14.2.tar.lz"
-  sha256 "f57962ba930d70d02fc71d6be5c5f2346b16992a455ab9c43be7061dec9810db"
+  url "https://ftp.gnu.org/gnu/ed/ed-1.16.tar.lz"
+  mirror "https://ftpmirror.gnu.org/ed/ed-1.16.tar.lz"
+  sha256 "cfc07a14ab048a758473ce222e784fbf031485bcd54a76f74acfee1f390d8b2c"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "8f81d744b94ceb94b3042369ff93321b2cbd1904cf04f0289b22542d6b68d0cf" => :high_sierra
-    sha256 "2bcab4bf26dae3b57ffe1097744191315941b6e26c6a43157e2595bb64f40c17" => :sierra
-    sha256 "b891b87205fbfcc593673726193ceb44535155237d09dc17b38359ed5abee125" => :el_capitan
-    sha256 "d8d925d35a5e3a08353960f029423b4f6e7427b2ecc916407ae7e541b0ba3cfa" => :yosemite
+    sha256 "aac457bc746b5eca91da8f460d07c78eb82ad0d12918c0a51299c14d94a5856e" => :catalina
+    sha256 "639a5594fbb41ac9481087e7ab76fdcca0f0a61be34dd1e0d24cc8b4786636ef" => :mojave
+    sha256 "ff2c9457fb43d7785ffadf3b15a95f31c9c77758ccfb97cc3cbac2651309064d" => :high_sierra
   end
-
-  deprecated_option "default-names" => "with-default-names"
-  option "with-default-names", "Don't prepend 'g' to the binaries"
 
   def install
     ENV.deparallelize
 
-    args = ["--prefix=#{prefix}"]
-    args << "--program-prefix=g" if build.without? "default-names"
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--program-prefix=g"
     system "make"
     system "make", "install"
+
+    %w[ed red].each do |prog|
+      (libexec/"gnubin").install_symlink bin/"g#{prog}" => prog
+      (libexec/"gnuman/man1").install_symlink man1/"g#{prog}.1" => "#{prog}.1"
+    end
+
+    libexec.install_symlink "gnuman" => "man"
   end
 
   def caveats
-    if build.without? "default-names" then <<~EOS
-      The command has been installed with the prefix "g".
-      If you do not want the prefix, reinstall using the "with-default-names" option.
-      EOS
-    end
+    <<~EOS
+      All commands have been installed with the prefix "g".
+      If you need to use these commands with their normal names, you
+      can add a "gnubin" directory to your PATH from your bashrc like:
+        PATH="#{opt_libexec}/gnubin:$PATH"
+    EOS
   end
 
   test do
     testfile = testpath/"test"
     testfile.write "Hello world\n"
-    cmd = build.with?("default-names") ? "ed" : "ged"
-    pipe_output("#{bin}/#{cmd} -s #{testfile}", ",s/o//\nw\n", 0)
+
+    pipe_output("#{bin}/ged -s #{testfile}", ",s/o//\nw\n", 0)
     assert_equal "Hell world\n", testfile.read
+
+    pipe_output("#{opt_libexec}/gnubin/ed -s #{testfile}", ",s/l//g\nw\n", 0)
+    assert_equal "He word\n", testfile.read
   end
 end

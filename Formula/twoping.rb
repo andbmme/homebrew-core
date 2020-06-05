@@ -1,19 +1,19 @@
 class Twoping < Formula
   desc "Ping utility to determine directional packet loss"
   homepage "https://www.finnie.org/software/2ping/"
-  url "https://www.finnie.org/software/2ping/2ping-4.1.tar.gz"
-  sha256 "85331ae57f445bc8895ba4e61da4c7300b67fde55642f5e42ea02f2daf07b1ed"
+  url "https://www.finnie.org/software/2ping/2ping-4.3.tar.gz"
+  sha256 "d729c021ed5bcd29137da520a465632e19cf4c4339e0426546593379a570327e"
+  revision 1
   head "https://github.com/rfinnie/2ping.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "d6d55717d2d8a88de05fe7ca002f2d0767948b8bc09bc9817124969b1a7e4636" => :high_sierra
-    sha256 "104e2f8bebcfd2ab3504d80170733a91eefd8c64fe70d1ba6086c48f1757926b" => :sierra
-    sha256 "104e2f8bebcfd2ab3504d80170733a91eefd8c64fe70d1ba6086c48f1757926b" => :el_capitan
-    sha256 "104e2f8bebcfd2ab3504d80170733a91eefd8c64fe70d1ba6086c48f1757926b" => :yosemite
+    sha256 "8d8ff40ccff243a282ebd2b342f1546a99ea439aed1dae81abc25926fb8185a2" => :catalina
+    sha256 "8d8ff40ccff243a282ebd2b342f1546a99ea439aed1dae81abc25926fb8185a2" => :mojave
+    sha256 "8d8ff40ccff243a282ebd2b342f1546a99ea439aed1dae81abc25926fb8185a2" => :high_sierra
   end
 
-  depends_on :python3
+  depends_on "python@3.8"
 
   def install
     pyver = Language::Python.major_minor_version "python3"
@@ -27,31 +27,32 @@ class Twoping < Formula
 
   plist_options :manual => "2ping --listen", :startup => true
 
-  def plist; <<~EOS
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/2ping</string>
-          <string>--listen</string>
-          <string>--quiet</string>
-        </array>
-        <key>UserName</key>
-        <string>nobody</string>
-        <key>StandardErrorPath</key>
-        <string>/dev/null</string>
-        <key>StandardOutPath</key>
-        <string>/dev/null</string>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <true/>
-      </dict>
-    </plist>
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/2ping</string>
+            <string>--listen</string>
+            <string>--quiet</string>
+          </array>
+          <key>UserName</key>
+          <string>nobody</string>
+          <key>StandardErrorPath</key>
+          <string>/dev/null</string>
+          <key>StandardOutPath</key>
+          <string>/dev/null</string>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>KeepAlive</key>
+          <true/>
+        </dict>
+      </plist>
     EOS
   end
 

@@ -1,31 +1,35 @@
 class Clamav < Formula
   desc "Anti-virus software"
   homepage "https://www.clamav.net/"
-  url "https://www.clamav.net/downloads/production/clamav-0.99.2.tar.gz"
-  sha256 "167bd6a13e05ece326b968fdb539b05c2ffcfef6018a274a10aeda85c2c0027a"
-  revision 1
+  url "https://www.clamav.net/downloads/production/clamav-0.102.3.tar.gz"
+  mirror "https://fossies.org/linux/misc/clamav-0.102.3.tar.gz"
+  sha256 "ed3050c4569989ee7ab54c7b87246b41ed808259632849be0706467442dc0693"
 
   bottle do
-    sha256 "804bf3a1e0ad84d78e46fe9e0ed5555fa9a2c3d1e866d312fa9a0f8645baef29" => :high_sierra
-    sha256 "a5bc9cce487de2b2d65f536f088343507e7e3b4f6918810624d02a2f21c24a89" => :sierra
-    sha256 "0e8fa7cfafc6a8c2fefd2f0c2044d7ef6c7efa3839444609c326c4ed0cf5520f" => :el_capitan
-    sha256 "7f0d14eb642997a856796366e8ff6c1b17fb6076aa198d1255c6bf73c0862a33" => :yosemite
-    sha256 "6b82bf35cd1cc06cf6f736e69763397ed6225f71217c780ae91ebc30df8f1c70" => :mavericks
+    sha256 "14f69086a768c2a4a30fd5c4316201363b5265eb4a303159fd7773bc44d42e05" => :catalina
+    sha256 "1de7b34afbff07514302deb8ea6f3fb79095509911be98e3ab4f5d674f0f8ef2" => :mojave
+    sha256 "7d2140eef1f3af64ec2dc22c78d4a8f1778f56eb9ae84ee3a38fa1814d70d98a" => :high_sierra
   end
 
   head do
-    url "https://github.com/vrtadmin/clamav-devel.git"
+    url "https://github.com/Cisco-Talos/clamav-devel.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
   depends_on "pkg-config" => :build
-  depends_on "openssl"
-  depends_on "pcre" => :recommended
-  depends_on "yara" => :optional
-  depends_on "json-c" => :optional
+  depends_on "json-c"
+  depends_on "libiconv"
+  depends_on "openssl@1.1"
+  depends_on "pcre2"
+  depends_on "yara"
+
+  uses_from_macos "bzip2"
+  uses_from_macos "curl"
+  uses_from_macos "libxml2"
+  uses_from_macos "zlib"
 
   skip_clean "share/clamav"
 
@@ -37,15 +41,16 @@ class Clamav < Formula
       --libdir=#{lib}
       --sysconfdir=#{etc}/clamav
       --disable-zlib-vcheck
-      --with-zlib=#{MacOS.sdk_path}/usr
-      --with-openssl=#{Formula["openssl"].opt_prefix}
-      --enable-llvm=no
+      --with-llvm=no
+      --with-libiconv-prefix=#{Formula["libiconv"].opt_prefix}
+      --with-iconv=#{Formula["libiconv"].opt_prefix}
+      --with-libjson-static=#{Formula["json-c"].opt_prefix}/lib/libjson-c.a
+      --with-openssl=#{Formula["openssl@1.1"].opt_prefix}
+      --with-pcre=#{Formula["pcre2"].opt_prefix}
+      --with-zlib=#{MacOS.sdk_path_if_needed}/usr
+      --with-libbz2-prefix=#{MacOS.sdk_path_if_needed}/usr
+      --with-xml=#{MacOS.sdk_path_if_needed}/usr
     ]
-
-    args << "--with-libjson=#{Formula["json-c"].opt_prefix}" if build.with? "json-c"
-    args << "--with-pcre=#{Formula["pcre"].opt_prefix}" if build.with? "pcre"
-    args << "--disable-yara" if build.without? "yara"
-    args << "--without-pcre" if build.without? "pcre"
 
     pkgshare.mkpath
     system "autoreconf", "-fvi" if build.head?
@@ -53,9 +58,10 @@ class Clamav < Formula
     system "make", "install"
   end
 
-  def caveats; <<~EOS
-    To finish installation & run clamav you will need to edit
-    the example conf files at #{etc}/clamav/
+  def caveats
+    <<~EOS
+      To finish installation & run clamav you will need to edit
+      the example conf files at #{etc}/clamav/
     EOS
   end
 

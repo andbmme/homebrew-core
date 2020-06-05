@@ -1,47 +1,40 @@
 class Sleuthkit < Formula
   desc "Forensic toolkit"
   homepage "https://www.sleuthkit.org/"
-  url "https://github.com/sleuthkit/sleuthkit/releases/download/sleuthkit-4.5.0/sleuthkit-4.5.0.tar.gz"
-  sha256 "f74eb16e717598056a5664ae842d8acd276acfc340e8ebbd87d0948167e789ac"
+  url "https://github.com/sleuthkit/sleuthkit/releases/download/sleuthkit-4.9.0/sleuthkit-4.9.0.tar.gz"
+  sha256 "7bc5ee9130b1ed8d645e446e0f63bd34ad018a93c1275688fa38cfda28bde9d0"
 
   bottle do
     cellar :any
-    sha256 "abbed8f1e02a2da3259481fac0a7583102f694e81afd757b4b7fc82102eb1e26" => :high_sierra
-    sha256 "ea17c0cafff9eca82611837ce3d440dc7b66dd39a091dbd3b0286b95f84e2dda" => :sierra
-    sha256 "0ae85140753e439df39bcfdf4abe0a25c779fadd5692dd214cb937b2f042adc6" => :el_capitan
+    sha256 "e3bb514d3df5d19a066b27a455f04066dbaefbf0bfd80f3a10d5cbf73f7549f5" => :catalina
+    sha256 "9f912c67f95edfa547d9fcc03d63920d3b47964aeb5e8f548d2df5e2635ef0ed" => :mojave
+    sha256 "1234854d9ae4a77d083d94d9a1d0f21891d479bf80a87191f6df68076506de2d" => :high_sierra
   end
 
-  option "with-jni", "Build Sleuthkit with JNI bindings"
-  option "with-debug", "Build debug version"
+  depends_on "ant" => :build
+  depends_on "afflib"
+  depends_on "libewf"
+  depends_on "libpq"
+  depends_on "openjdk"
 
-  depends_on "afflib" => :optional
-  depends_on "libewf" => :optional
+  uses_from_macos "sqlite"
 
-  if build.with? "jni"
-    depends_on :java
-    depends_on :ant => :build
-  end
-
-  conflicts_with "irods", :because => "both install `ils`"
   conflicts_with "ffind",
     :because => "both install a 'ffind' executable."
 
   def install
-    ENV.append_to_cflags "-DNDEBUG" if build.without? "debug"
+    ENV["JAVA_HOME"] = Formula["openjdk"].opt_libexec/"openjdk.jdk/Contents/Home"
+    ENV["ANT_FOUND"]=Formula["ant"].opt_bin/"ant"
+    ENV["SED"]="/usr/bin/sed"
+    ENV.append_to_cflags "-DNDEBUG"
 
-    args = ["--disable-dependency-tracking", "--prefix=#{prefix}"]
-    args << "--disable-java" if build.without? "jni"
-
-    system "./configure", *args
-    system "make"
+    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
     system "make", "install"
 
-    if build.with? "jni"
-      cd "bindings/java" do
-        system "ant"
-      end
-      prefix.install "bindings"
+    cd "bindings/java" do
+      system "ant"
     end
+    prefix.install "bindings"
   end
 
   test do

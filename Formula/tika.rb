@@ -1,35 +1,31 @@
 class Tika < Formula
   desc "Content analysis toolkit"
   homepage "https://tika.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=tika/tika-app-1.16.jar"
-  sha256 "4f377b42e122f92c3f1f3b4702029cf0642c7d6f3ce872a0dfb1472eac65be44"
+  url "https://www.apache.org/dyn/closer.lua?path=tika/tika-app-1.24.1.jar"
+  mirror "https://archive.apache.org/dist/tika/tika-app-1.24.1.jar"
+  sha256 "e56d2e38be4755c78b511f316bda2a55af5c3b3b36e7e5536d3584c71239b187"
 
   bottle :unneeded
 
-  depends_on :java => "1.7+"
+  depends_on "openjdk"
 
   resource "server" do
-    url "https://search.maven.org/remotecontent?filepath=org/apache/tika/tika-server/1.16/tika-server-1.16.jar"
-    sha256 "d25c1851b3d448cc025666a6193cc1636ab412ecc5bea40e31431a16fe472fed"
+    url "https://www.apache.org/dyn/closer.lua?path=tika/tika-server-1.24.1.jar"
+    mirror "https://archive.apache.org/dist/tika/tika-server-1.24.1.jar"
+    sha256 "466ae64b3f6fa52fe08bfa2b0339671e69988e84fd8bb0a359d345ff0ae024a3"
   end
 
   def install
     libexec.install "tika-app-#{version}.jar"
-    bin.write_jar_script libexec/"tika-app-#{version}.jar", "tika"
+    (bin/"tika").write <<~EOS
+      #!/bin/bash
+      exec "#{Formula["openjdk"].opt_bin}/java" -jar "#{libexec}/tika-app-#{version}.jar" "$@"
+    EOS
 
     libexec.install resource("server")
-    bin.write_jar_script libexec/"tika-server-#{version}.jar", "tika-rest-server"
-  end
-
-  def caveats; <<~EOS
-    To run Tika:
-      tika
-
-    To run Tika's REST server:
-      tika-rest-server
-
-    See the Tika homepage for more documentation:
-      brew home tika
+    (bin/"tika-rest-server").write <<~EOS
+      #!/bin/bash
+      exec "#{Formula["openjdk"].opt_bin}/java" -jar "#{libexec}/tika-server-#{version}.jar" "$@"
     EOS
   end
 

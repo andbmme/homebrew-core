@@ -4,13 +4,15 @@ class Gabedit < Formula
   url "https://downloads.sourceforge.net/project/gabedit/gabedit/Gabedit250/GabeditSrc250.tar.gz"
   version "2.5.0"
   sha256 "45cdde213a09294bbf2df5f324ea11fc4c4045b3f9d58e4d67979e6f071c7689"
+  revision 2
 
   bottle do
     cellar :any
-    sha256 "5c4b24ec80ff5e567a7b50e4a2c62aad0d70009179534363bc8be60c66cc3484" => :high_sierra
-    sha256 "22d5d4524dae2675c9184b322c6554331112fd799d1a8466b9e9d6338ada7ca5" => :sierra
-    sha256 "2e8e35a860589f035a40ddde03bfabc6908308ec5fac3fcefeb1e0a8a5a0f053" => :el_capitan
-    sha256 "3dcde0ef2c31cc12898b477370d571d2091d8f2a1c858e8deb71a4fa8b52bf09" => :yosemite
+    rebuild 1
+    sha256 "af6b9870f2b34921313f3f38329a507e450462bf74055880f8c572e153c78932" => :catalina
+    sha256 "c8bd86798356203a2e554310149b51299c2221827a030fd74763c9237996fc9f" => :mojave
+    sha256 "83b205bd7a01eb782a9346f048c3c2e217ba4dc425f620853a4da066563e6b5c" => :high_sierra
+    sha256 "72d3d9bda815ffda49197241c46139686fbc0a4b2c9aeab2dce258573e5ea17b" => :sierra
   end
 
   depends_on "pkg-config" => :build

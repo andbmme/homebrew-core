@@ -1,19 +1,29 @@
 class Crowdin < Formula
   desc "Command-line tool that allows to manage your resources with crowdin.com"
   homepage "https://support.crowdin.com/cli-tool/"
-  url "https://downloads.crowdin.com/cli/v2/crowdin-cli-2.0.20.zip"
-  sha256 "c6af1dfe3267f0f0e9417b5792ee2c492a61ad2618b70bb14d2ae944b75c2975"
+  url "https://downloads.crowdin.com/cli/v2/crowdin-cli-2.0.31.zip"
+  sha256 "93defe16706783e92cbe3b32e528e495ddffa9e2a68471c3b70a2eb6c487e245"
+  revision 1
 
   bottle :unneeded
 
-  depends_on :java => "1.7+"
+  depends_on "openjdk"
 
   def install
     libexec.install "crowdin-cli.jar"
-    bin.write_jar_script libexec/"crowdin-cli.jar", "crowdin"
+    (bin/"crowdin").write <<~EOS
+      #!/bin/bash
+      exec "#{Formula["openjdk"].opt_bin}/java" -jar "#{libexec}/crowdin-cli.jar" "$@"
+    EOS
   end
 
   test do
-    system bin/"crowdin"
+    generate_output = shell_output("#{bin}/crowdin generate").chomp
+    assert_predicate testpath/"crowdin.yml", :exist?
+    assert_match /^Generates Crowdin CLI configuration skeleton .*crowdin\.yml'- OK$/, generate_output
+    lint_output = shell_output("#{bin}/crowdin lint", 1).split("\n")
+    lint_output.each do |line|
+      assert_match /^Project [^ ]+ is empty$/, line
+    end
   end
 end

@@ -1,15 +1,15 @@
 class Dehydrated < Formula
   desc "LetsEncrypt/acme client implemented as a shell-script"
-  homepage "https://dehydrated.de"
-  url "https://github.com/lukas2511/dehydrated/archive/v0.4.0.tar.gz"
-  sha256 "611da321330ffd43d1dc497990b486b2dec12c59149803ad7d156980c8527f48"
+  homepage "https://dehydrated.io"
+  url "https://github.com/lukas2511/dehydrated/archive/v0.6.5.tar.gz"
+  sha256 "10aabd0027450bc70a18e49acaca7a9697e0cfb92368d3e508b7a4d6d69bfa35"
 
   bottle do
     cellar :any_skip_relocation
-    rebuild 1
-    sha256 "7d80caaed26d1f6adcdfc0b403f00efce945860b1e6699432891f752355492ca" => :high_sierra
-    sha256 "7d80caaed26d1f6adcdfc0b403f00efce945860b1e6699432891f752355492ca" => :sierra
-    sha256 "7d80caaed26d1f6adcdfc0b403f00efce945860b1e6699432891f752355492ca" => :el_capitan
+    sha256 "844e6e0618f99e44fb74c86abfed902f82e6c67ac9879f41a1f1bd0922554730" => :catalina
+    sha256 "376b14fa1047117a1779c583cd73139b7e4e8d3dafae240bac62912580aae571" => :mojave
+    sha256 "376b14fa1047117a1779c583cd73139b7e4e8d3dafae240bac62912580aae571" => :high_sierra
+    sha256 "1b4042e46b66cb78a1f4a423d742bfe3110f12ea8d26177ff0f05d2aea24d6b2" => :sierra
   end
 
   def install

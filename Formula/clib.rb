@@ -1,18 +1,18 @@
 class Clib < Formula
   desc "Package manager for C programming"
   homepage "https://github.com/clibs/clib"
-  url "https://github.com/clibs/clib/archive/1.8.1.tar.gz"
-  sha256 "f5718e316771571971cb4e5a0142f91b47c6bfe32997fd869fc5a90ec091a066"
-
+  url "https://github.com/clibs/clib/archive/1.11.3.tar.gz"
+  sha256 "93af31d1bccfc828c185c012ab1f737d60408bd8402bcef20ed96ac337270afe"
   head "https://github.com/clibs/clib.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "0dee597cc5870323ea38804337d3c3bd7b681a53303031399d31c12e1c1f1f55" => :high_sierra
-    sha256 "054b42c0cb78315e454759303b7f25945a9ed18ee76f32a14d58a6911861f37d" => :sierra
-    sha256 "64a97a9de695bc96f596d5a626428b8758ae0365b67c161bcd9519ccdf7dcfc4" => :el_capitan
-    sha256 "ea221a1093f4bdb63209c30fc29a888ae5312baa9f50f1bc8c5b56dac75cbb46" => :yosemite
+    sha256 "26f1ebdd9169e1921150b2286f643efbffcbb65630a45f8d5c35a6421eab20e0" => :catalina
+    sha256 "6f6c1c922dc56b1b3c99d2021705799a4714f9c6e6dd83daddcb3b300b191b28" => :mojave
+    sha256 "997100150595e54147ffb1fe2b006f0bec1e581e34779a9f42a2327037db6e0d" => :high_sierra
   end
+
+  uses_from_macos "curl"
 
   def install
     ENV["PREFIX"] = prefix

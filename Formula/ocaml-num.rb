@@ -1,32 +1,33 @@
 class OcamlNum < Formula
   desc "OCaml legacy Num library for arbitrary-precision arithmetic"
   homepage "https://github.com/ocaml/num"
-  url "https://github.com/ocaml/num/archive/v1.1.tar.gz"
-  sha256 "04ac85f6465b9b2bf99e814ddc798a25bcadb3cca2667b74c1af02b6356893f6"
+  url "https://github.com/ocaml/num/archive/v1.3.tar.gz"
+  sha256 "4f79c30e81ea9553c5b2c5b5b57bb19968ccad1e85256b3c446b5df58f33e94d"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "91fe9987b76ad40318368ab127bbdb82c74c176ccba723a3fe5ebd3a13fb5523" => :high_sierra
-    sha256 "d73e9d1b6601fcdbcede7c74cc0326897ebcbd566860f6ae796be0f215d6ce97" => :sierra
-    sha256 "c114181c1020d48f475ac78a78c29cc7a9c24baa68d8527170708d0f54439425" => :el_capitan
+    sha256 "7890616190d8d7071d8c3cf2ea494885a115fc3b2d4058cb4be81132622e6cf2" => :catalina
+    sha256 "e6feb685e5bc9486eee9c9a3a8f8712a6df05bc6564c518b0549052e835500c0" => :mojave
+    sha256 "16e31884645c7deca510218f7611d6c2ed105ef5229efcf3f17b4ab7a5f6330c" => :high_sierra
   end
 
+  depends_on "ocaml-findlib" => :build
   depends_on "ocaml"
 
   def install
+    ENV["OCAMLFIND_DESTDIR"] = lib/"ocaml"
+
     (lib/"ocaml").mkpath
     cp Formula["ocaml"].opt_lib/"ocaml/Makefile.config", lib/"ocaml"
 
     # install in #{lib}/ocaml not #{HOMEBREW_PREFIX}/lib/ocaml
-    inreplace lib/"ocaml/Makefile.config", /^PREFIX=#{HOMEBREW_PREFIX}$/,
-                                           "PREFIX=#{prefix}"
+    inreplace lib/"ocaml/Makefile.config", /^prefix=#{HOMEBREW_PREFIX}$/,
+                                           "prefix=#{prefix}"
 
     system "make"
-
     (lib/"ocaml/stublibs").mkpath # `make install` assumes this directory exists
-
-    # Set OCAMLFIND to echo to avoid an unnecessary dependency
-    system "make", "install", "OCAMLFIND=echo", "STDLIBDIR=#{lib}/ocaml"
+    system "make", "install", "STDLIBDIR=#{lib}/ocaml"
 
     pkgshare.install "test"
 

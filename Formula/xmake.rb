@@ -1,27 +1,27 @@
 class Xmake < Formula
-  desc "Make-like build utility based on Lua"
-  homepage "http://xmake.io"
-  url "https://github.com/tboox/xmake/archive/v2.1.8.tar.gz"
-  sha256 "d7bcbec48f60164ffcdf7fe3116b3f05b83ebf94d6d861ee9eaf9f2224e81432"
-  head "https://github.com/waruqi/xmake.git"
+  desc "Cross-platform build utility based on Lua"
+  homepage "https://xmake.io/"
+  url "https://github.com/xmake-io/xmake/releases/download/v2.3.3/xmake-v2.3.3.tar.gz"
+  sha256 "851e01256c89cb9c86b6bd7327831b45809a3255daa234d3162b1db061ca44ae"
+  head "https://github.com/xmake-io/xmake.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "8341bd08dee1d816fca4004a0fa49c3b23e1da256b6e94d0c2270a45c425b261" => :high_sierra
-    sha256 "0988d7d00679b9454a24adf213134f0a54c0b26f3a65c67386905523199c89b2" => :sierra
-    sha256 "7a75b6b6fa23ea952354744706963d207e81a730ca13e38d3f7eb160c77d2828" => :el_capitan
+    sha256 "64730570a22a08c43182c2f78c10072079df6b3c2bad5b77e8a6f4b480fd231b" => :catalina
+    sha256 "bb2637686962b81df84cd9e4e12b6bfc33b536a883494ec4cc60839234bb4fce" => :mojave
+    sha256 "b5d31f8c33b2bdd3631122774b81bd0ac1997336aa170ff6b49014f8e237f41a" => :high_sierra
   end
 
   def install
-    system "./install", "output"
-    pkgshare.install Dir["xmake/*"]
-    bin.install "output/share/xmake/xmake"
-    bin.env_script_all_files(libexec, :XMAKE_PROGRAM_DIR => pkgshare)
+    system "make", "build"
+    system "make", "install", "prefix=#{prefix}"
   end
 
   test do
-    system bin/"xmake", "create", "-P", testpath
-    system bin/"xmake"
-    assert_equal "hello world!", shell_output("#{bin}/xmake run").chomp
+    system bin/"xmake", "create", "test"
+    cd "test" do
+      system bin/"xmake"
+      assert_equal "hello world!", shell_output("#{bin}/xmake run").chomp
+    end
   end
 end

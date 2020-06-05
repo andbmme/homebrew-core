@@ -1,22 +1,20 @@
 class Pioneers < Formula
   desc "Settlers of Catan clone"
   homepage "https://pio.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/pio/Source/pioneers-15.4.tar.gz"
-  sha256 "9a0d3198dc0ddf131d9e6d6e9992347fe2a2d99f508f1be1b30c5797210a2ddc"
+  url "https://downloads.sourceforge.net/project/pio/Source/pioneers-15.5.tar.gz"
+  sha256 "3ee1415e7c48dc144fbdb99105a6ef8a818e67ed34e9d0f8e01224c3636cef0c"
+  revision 1
 
   bottle do
-    sha256 "96e83542f86672e1b874b2dad3441333ad65d9b687262fc126da1a9b189dd52d" => :high_sierra
-    sha256 "814dfc13c0cb4096ae6d84ab1b7210c1ef1c49e3f542bcb0adcac03e72e7384b" => :sierra
-    sha256 "c6799c8d4de3d80c55a81b66b726dafdab710a16b40cf704cc6dadb5a96fba3f" => :el_capitan
+    sha256 "6b991f3c68a368a205f15742f65273ab9aef56d06a5918a05a7312513f8c7dbf" => :catalina
+    sha256 "6dc8e606ea4f6264f662d0516cb67bbf04f661adab74406f34d4b908faf1c91a" => :mojave
+    sha256 "a7e66d500a9a0787038c1449da19471f451e350d35a1a4035e84144820c2c8df" => :high_sierra
+    sha256 "b58b5deb27c32495b244527947330028e1d69b1000b6453727dab16ff7572b09" => :sierra
   end
 
-  fails_with :clang do
-    build 318
-    cause "'#line directive requires a positive integer' argument in generated file"
-  end
-
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
+  depends_on "itstool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gtk+3"
   depends_on "librsvg" # svg images for gdk-pixbuf
@@ -27,7 +25,7 @@ class Pioneers < Formula
 
     # GNU ld-only options
     inreplace Dir["configure{,.ac}"] do |s|
-      s.gsub!(/ -Wl\,--as-needed/, "")
+      s.gsub!(/ -Wl,--as-needed/, "")
       s.gsub!(/ -Wl,-z,(relro|now)/, "")
     end
 

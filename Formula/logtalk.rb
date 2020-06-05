@@ -1,28 +1,18 @@
 class Logtalk < Formula
-  desc "Object-oriented logic programming language"
-  homepage "http://logtalk.org"
-  url "https://github.com/LogtalkDotOrg/logtalk3/archive/lgt3130stable.tar.gz"
-  version "3.13.0"
-  sha256 "8fd66df7c0ec1682121fb0e0f4e5eb2296caa3663b093c166b88c252737734d3"
+  desc "Declarative object-oriented logic programming language"
+  homepage "https://logtalk.org/"
+  url "https://github.com/LogtalkDotOrg/logtalk3/archive/lgt3380stable.tar.gz"
+  version "3.38.0"
+  sha256 "201c19fbcdd017ab376719ce052afba04263652f5766f2a423de2554814ecda8"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "612c3649aadc5c9fbf6b4793c785e7e67d567df3e2a917034db44b4c55b673e1" => :high_sierra
-    sha256 "e572ad9e4e49ea055ef6bb76a55b81a282cbdbb0c0d236ca22ee9ef1da1f9163" => :sierra
-    sha256 "89acc8982d080f8cf7b91604b57061fa90c2bfb577c908da23b725923ee372f8" => :el_capitan
+    sha256 "73649c788fd6ebc4f6ab1456734c431c62475167acb8156b9dba5839ce29951a" => :catalina
+    sha256 "30be3d195521c8c7da84fa717f932a660220805e4cdb2f9e526b7ceb4669b47d" => :mojave
+    sha256 "c333d71a7427c66e92c296cbec0abe67ad481a5a940065207f60ef9274577d99" => :high_sierra
   end
 
-  option "with-swi-prolog", "Build using SWI Prolog as backend"
-  option "with-gnu-prolog", "Build using GNU Prolog as backend (Default)"
-
-  deprecated_option "swi-prolog" => "with-swi-prolog"
-  deprecated_option "gnu-prolog" => "with-gnu-prolog"
-
-  if build.with? "swi-prolog"
-    depends_on "swi-prolog"
-  else
-    depends_on "gnu-prolog"
-  end
+  depends_on "gnu-prolog"
 
   def install
     cd("scripts") { system "./install.sh", "-p", prefix }

@@ -1,25 +1,22 @@
 class MitScheme < Formula
   desc "MIT/GNU Scheme development tools and runtime library"
   homepage "https://www.gnu.org/software/mit-scheme/"
-  url "https://ftp.gnu.org/gnu/mit-scheme/stable.pkg/9.2/mit-scheme-c-9.2.tar.gz"
-  mirror "https://ftpmirror.gnu.org/mit-scheme/stable.pkg/9.2/mit-scheme-c-9.2.tar.gz"
-  sha256 "4f6a16f9c7d4b4b7bb3aa53ef523cad39b54ae1eaa3ab3205930b6a87759b170"
-  revision 1
+  url "https://ftp.gnu.org/gnu/mit-scheme/stable.pkg/10.1.10/mit-scheme-10.1.10-svm1.tar.gz"
+  mirror "https://ftpmirror.gnu.org/mit-scheme/stable.pkg/10.1.10/mit-scheme-10.1.10-svm1.tar.gz"
+  version "10.1.10"
+  sha256 "36ad0aba50d60309c21e7f061c46c1aad1dda0ad73d2bb396684e49a268904e4"
 
   bottle do
-    rebuild 2
-    sha256 "715a8d56b6b6b0debe6aac7e968c369555b210863da6f7514999307c9df348a8" => :high_sierra
-    sha256 "6b7a6ecec12a5a856b795ce634c0ceb8e87714f9cdd272a912e312c3bc5cb9d4" => :sierra
-    sha256 "23df7103a75311ba33fed035413892b73f1e724e1df5b63bd677709d29bfdb92" => :el_capitan
-    sha256 "be2b340bb25c87141bae94010e4f6ec0234ac3c237e66ffbdb5ae98e2cb7462f" => :yosemite
+    sha256 "aeec8e0d463f173b7e1bf1aa5840d7d119559379c9c4024f72ccbcc18649ee40" => :catalina
+    sha256 "c8815c908efaeeb60ae5591c39432b82dd54193fc823ef2c1da3c4dcb0a7c16c" => :mojave
+    sha256 "81ed1c679028078098b3b77a37886660e97748a75e153f498d7038e4b2600fcc" => :high_sierra
   end
 
   # Has a hardcoded compile check for /Applications/Xcode.app
   # Dies on "configure: error: SIZEOF_CHAR is not 1" without Xcode.
   # https://github.com/Homebrew/homebrew-x11/issues/103#issuecomment-125014423
   depends_on :xcode => :build
-  depends_on "openssl"
-  depends_on :x11 => :optional
+  depends_on "openssl@1.1"
 
   def install
     # Setting -march=native, which is what --build-from-source does, can fail
@@ -46,9 +43,6 @@ class MitScheme < Formula
       compiler/etc/disload.scm
       edwin/techinfo.scm
       edwin/unix.scm
-      swat/c/tk3.2-custom/Makefile
-      swat/c/tk3.2-custom/tcl/Makefile
-      swat/scheme/other/btest.scm
     ].each do |f|
       inreplace f, "/usr/local", prefix
     end
@@ -57,23 +51,20 @@ class MitScheme < Formula
       s.gsub! "/usr/local", prefix
       # Fixes "configure: error: No MacOSX SDK for version: 10.10"
       # Reported 23rd Apr 2016: https://savannah.gnu.org/bugs/index.php?47769
-      s.gsub! /SDK=MacOSX\${MACOSX}$/, "SDK=MacOSX#{MacOS.sdk.version}"
+      s.gsub! /SDK=MacOSX\$\{MACOS\}$/, "SDK=MacOSX#{MacOS.sdk.version}"
     end
 
-    if build.without? "x11"
-      inreplace "etc/make-liarc.sh" do |s|
-        # Allows us to build without X11
-        # https://savannah.gnu.org/bugs/?47887
-        s.gsub! "run_configure", "run_configure --without-x"
-      end
+    inreplace "edwin/compile.sh" do |s|
+      s.gsub! "mit-scheme", "#{bin}/mit-scheme"
     end
 
-    system "etc/make-liarc.sh", "--prefix=#{prefix}", "--mandir=#{man}"
+    system "./configure", "--prefix=#{prefix}", "--mandir=#{man}", "--without-x"
+    system "make"
     system "make", "install"
   end
 
   test do
-    # ftp://ftp.cs.indiana.edu/pub/scheme-repository/code/num/primes.scm
+    # https://www.cs.indiana.edu/pub/scheme-repository/code/num/primes.scm
     (testpath/"primes.scm").write <<~EOS
       ;
       ; primes
@@ -108,7 +99,7 @@ class MitScheme < Formula
       "#{bin}/mit-scheme --load primes.scm --eval '(primes<= 72)' < /dev/null",
     )
     assert_match(
-      /;Value 2: \(2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71\)/,
+      /;Value: \(2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71\)/,
       output,
     )
   end

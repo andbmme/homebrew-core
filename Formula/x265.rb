@@ -1,23 +1,25 @@
 class X265 < Formula
   desc "H.265/HEVC encoder"
-  homepage "http://x265.org"
-  url "https://bitbucket.org/multicoreware/x265/downloads/x265_2.5.tar.gz"
-  sha256 "2e53259b504a7edb9b21b9800163b1ff4c90e60c74e23e7001d423c69c5d3d17"
-  revision 1
+  homepage "https://bitbucket.org/multicoreware/x265"
+  url "https://bitbucket.org/multicoreware/x265/downloads/x265_3.4.tar.gz"
+  sha256 "c2047f23a6b729e5c70280d23223cb61b57bfe4ad4e8f1471eeee2a61d148672"
   head "https://bitbucket.org/multicoreware/x265", :using => :hg
 
   bottle do
     cellar :any
-    sha256 "e09e6c6d0e51d956e6b1ab5396db3a8fa8201cd1efdb35d11391d29c294fe263" => :high_sierra
-    sha256 "541de69ba422c79fd0782833b5edb941d42b97dd6ae1d1a767688270dad4bfb5" => :sierra
-    sha256 "2ef0de7bef2e973a695f6839472b5be6ba4ff87c098e6199b2b2589bfc68618d" => :el_capitan
+    sha256 "51c759fb1ae6220caca443ef28171e94e387c5358ff5d8803716dc7d80d0b7d0" => :catalina
+    sha256 "f17d8ecd707aac0fd61354432adf63bc7e4a2513c4cf5d38af7813e4c59e628c" => :mojave
+    sha256 "68430356df947fbe78480d737180b3129c3a4b1e5fcec90762df19d14de30b1c" => :high_sierra
   end
 
   depends_on "cmake" => :build
-  depends_on "yasm" => :build
-  depends_on :macos => :lion
+  depends_on "nasm" => :build
 
   def install
+    # Work around Xcode 11 clang bug
+    # https://bitbucket.org/multicoreware/x265/issues/514/wrong-code-generated-on-macos-1015
+    ENV.append_to_cflags "-fno-stack-check" if DevelopmentTools.clang_build_version >= 1010
+
     # Build based off the script at ./build/linux/multilib.sh
     args = std_cmake_args + %w[
       -DLINKED_10BIT=ON

@@ -1,28 +1,40 @@
 class Libpeas < Formula
   desc "GObject plugin library"
   homepage "https://developer.gnome.org/libpeas/stable/"
-  url "https://download.gnome.org/sources/libpeas/1.22/libpeas-1.22.0.tar.xz"
-  sha256 "5b2fc0f53962b25bca131a5ec0139e6fef8e254481b6e777975f7a1d2702a962"
+  url "https://download.gnome.org/sources/libpeas/1.26/libpeas-1.26.0.tar.xz"
+  sha256 "a976d77e20496479a8e955e6a38fb0e5c5de89cf64d9f44e75c2213ee14f7376"
+  revision 1
 
   bottle do
-    sha256 "2ea4bc3ecb98d714926827f205ec7a38023c99809e6c76112966c46ca029560e" => :high_sierra
-    sha256 "761fe27f39245b4e7604d8dc49872a659432e788c179209b63b3a993f273071a" => :sierra
-    sha256 "0f521913ca0eaf13b55aacb75e4b87a730be1f527215741ae2ba207caac523b2" => :el_capitan
+    sha256 "651336617036378ee99c5c7115a03d3f77c08b8f6bd6d58af3b8ac942663a70f" => :catalina
+    sha256 "e29d6d1f62ff47096b8e112b20c894dd5d96fdc52527636b3d1337b7b0be805a" => :mojave
+    sha256 "85b98c01fe647be16fd635743a4a14e48423da2bafeabd2aff32bfcd087de45c" => :high_sierra
   end
 
-  depends_on "gettext" => :build
-  depends_on "intltool" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "vala" => :build
   depends_on "glib"
   depends_on "gobject-introspection"
   depends_on "gtk+3"
+  depends_on "pygobject3"
+  depends_on "python@3.8"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--enable-gtk"
-    system "make", "install"
+    args = std_meson_args + %w[
+      -Dpython3=true
+      -Dintrospection=true
+      -Dvapi=true
+      -Dwidgetry=true
+      -Ddemos=false
+    ]
+
+    mkdir "build" do
+      system "meson", *args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   test do

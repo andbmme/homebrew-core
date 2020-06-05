@@ -3,26 +3,25 @@ class Qrupdate < Formula
   homepage "https://sourceforge.net/projects/qrupdate/"
   url "https://downloads.sourceforge.net/qrupdate/qrupdate-1.1.2.tar.gz"
   sha256 "e2a1c711dc8ebc418e21195833814cb2f84b878b90a2774365f0166402308e08"
-  revision 6
+  revision 12
 
   bottle do
     cellar :any
-    sha256 "cc98f58515cad95967f6ef0ec7e7dd6b7a00b0365f465c05d04c8b2d3908dd96" => :high_sierra
-    sha256 "6ed6531659001d949538c70ccfc4380b7cfaa4cae7be40947baba1cce596c005" => :sierra
-    sha256 "00f285ea5819d6dc6b5000c835b9b12da725c5a4c7e8049368581e7071fa087d" => :el_capitan
-    sha256 "773cb82bd7665e6948ca0a3d9dae7d2bcaf79c384b219a6bc1de5b0451e1d876" => :yosemite
+    sha256 "a889b3e1cc1687c9c66d4a211af53eca5b8e2df93f83bdd8d7f0e93d03181921" => :catalina
+    sha256 "9777925cc61c2c29a9d0bae3681ac3afaa00de667c34b5fc2f37f4872acd1016" => :mojave
+    sha256 "67079bff23bf70ed8688b65d18096f55f9f19eb405b1ef4e2b297072e4ea3c91" => :high_sierra
   end
 
-  depends_on :fortran
-  depends_on "veclibfort"
+  depends_on "gcc" # for gfortran
+  depends_on "openblas"
 
   def install
     # Parallel compilation not supported. Reported on 2017-07-21 at
     # https://sourceforge.net/p/qrupdate/discussion/905477/thread/d8f9c7e5/
     ENV.deparallelize
 
-    system "make", "lib", "solib", "FC=#{ENV.fc}",
-                   "BLAS=-L#{Formula["veclibfort"].opt_lib} -lvecLibFort"
+    system "make", "lib", "solib",
+                   "BLAS=-L#{Formula["openblas"].opt_lib} -lopenblas"
 
     # Confuses "make install" on case-insensitive filesystems
     rm "INSTALL"
@@ -37,9 +36,9 @@ class Qrupdate < Formula
   end
 
   test do
-    ENV.fortran
-    system ENV.fc, "-o", "test", pkgshare/"tch1dn.f", pkgshare/"utils.f",
-                   "-L#{lib}", "-lqrupdate", "-lvecLibFort"
+    system "gfortran", "-o", "test", pkgshare/"tch1dn.f", pkgshare/"utils.f",
+                       "-L#{lib}", "-lqrupdate",
+                       "-L#{Formula["openblas"].opt_lib}", "-lopenblas"
     assert_match "PASSED   4     FAILED   0", shell_output("./test")
   end
 end

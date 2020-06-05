@@ -1,15 +1,14 @@
 class Lilv < Formula
   desc "C library to use LV2 plugins"
   homepage "https://drobilla.net/software/lilv/"
-  url "https://download.drobilla.net/lilv-0.24.2.tar.bz2"
-  sha256 "f7ec65b1c1f1734ded3a6c051bbaf50f996a0b8b77e814a33a34e42bce50a522"
+  url "https://download.drobilla.net/lilv-0.24.8.tar.bz2"
+  sha256 "cadc3654c481aec6a6db504439cf8c0572c06128a6fbca1953a30df77e89c300"
 
   bottle do
     cellar :any
-    sha256 "ea7d9e940e919d52ac64f21364a7498b0c25642ddc2056d83220e14eab4b01a3" => :high_sierra
-    sha256 "4ee314969758f0d53d10eae544d858cca171cceacb5119698368ac9c6b8d7765" => :sierra
-    sha256 "860fd323f1c16c13857584328ebd97b4603986d405e6f8fe64cfc2394084243d" => :el_capitan
-    sha256 "e31927820fa0da477314a4756497cfc2ac6f96d0c279c14e69985725e31f792e" => :yosemite
+    sha256 "b772a0b962e14b7ae737f3bdf5778b34092e86eeca19e2c520395777b87be9cd" => :catalina
+    sha256 "01c5b495e5c288e19a325164f482cc3058865b118f2d5c05a52e44db5deec302" => :mojave
+    sha256 "63c518910af136ca8b4f685924ccd3e6f2687cd061cd561c4aab69af7fa62361" => :high_sierra
   end
 
   depends_on "pkg-config" => :build

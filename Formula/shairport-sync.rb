@@ -1,35 +1,37 @@
 class ShairportSync < Formula
   desc "AirTunes emulator that adds multi-room capability"
   homepage "https://github.com/mikebrady/shairport-sync"
-  url "https://github.com/mikebrady/shairport-sync/archive/3.1.3.tar.gz"
-  sha256 "dd0484d7e8ee7631aee78c78b3762abbdba7ec3f2ee8cd6c1e361544c1414da3"
-  revision 1
+  url "https://github.com/mikebrady/shairport-sync/archive/3.3.6.tar.gz"
+  sha256 "a8382affd25c473fa38ead5690148c6c3902098f359f9c881eefe139e1f49f49"
   head "https://github.com/mikebrady/shairport-sync.git", :branch => "development"
 
   bottle do
-    sha256 "9174235ef8340d4b8f160e0fcf052c233a2c6e66d5879d45ee3a858dd1ab1545" => :high_sierra
-    sha256 "b607275ef422390cfdecbf262f88871f7f964f849d8060348154b616730f3754" => :sierra
-    sha256 "b69cbc09b42d2ca57edfdc00e6dd041c6d810ca9248a9f61beb596f1c8578e8d" => :el_capitan
+    sha256 "3c2a973fbbe200704e35737226fd4e7ed6edad9f389253602fe5d14c50bb171e" => :catalina
+    sha256 "afe30af9e783c581888b525d7e3aab13e09e9812e9f717ad258c9cbb996da8a4" => :mojave
+    sha256 "d08952f97ce3a3f7e10a602322d0fdb23d8553586b4a7ad6b01af927f9969e1f" => :high_sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "openssl"
-  depends_on "popt"
-  depends_on "libsoxr"
+  depends_on "pkg-config" => :build
   depends_on "libao"
-  depends_on "libdaemon"
   depends_on "libconfig"
+  depends_on "libdaemon"
+  depends_on "libsoxr"
+  depends_on "openssl@1.1"
+  depends_on "popt"
+  depends_on "pulseaudio"
 
   def install
     system "autoreconf", "-fvi"
     args = %W[
       --with-os=darwin
+      --with-libdaemon
       --with-ssl=openssl
       --with-dns_sd
       --with-ao
       --with-stdout
+      --with-pa
       --with-pipe
       --with-soxr
       --with-metadata
@@ -46,7 +48,7 @@ class ShairportSync < Formula
   end
 
   test do
-    output = shell_output("#{bin}/shairport-sync -V", 1)
-    assert_match "OpenSSL-ao-stdout-pipe-soxr-metadata", output
+    output = shell_output("#{bin}/shairport-sync -V")
+    assert_match "libdaemon-OpenSSL-dns_sd-ao-pa-stdout-pipe-soxr-metadata", output
   end
 end

@@ -1,9 +1,9 @@
 class Repo < Formula
   desc "Repository tool for Android development"
   homepage "https://source.android.com/source/developing.html"
-  url "https://gerrit.googlesource.com/git-repo.git",
-      :tag => "v1.12.37",
-      :revision => "eceeb1b1f5edb0f42e690bffdf81828abd8ea7fe"
+  url "https://github.com/GerritCodeReview/git-repo.git",
+      :tag      => "v2.8",
+      :revision => "60fc51bb1dcf8970189a544c2ca75f2cdcfdb6f8"
   version_scheme 1
 
   bottle :unneeded
@@ -14,6 +14,6 @@ class Repo < Formula
   end
 
   test do
-    assert_match "usage:", shell_output("#{bin}/repo help 2>&1", 1)
+    assert_match "usage:", shell_output("#{bin}/repo help 2>&1")
   end
 end

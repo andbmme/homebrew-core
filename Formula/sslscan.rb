@@ -1,18 +1,16 @@
 class Sslscan < Formula
   desc "Test SSL/TLS enabled services to discover supported cipher suites"
   homepage "https://github.com/rbsec/sslscan"
-  url "https://github.com/rbsec/sslscan/archive/1.11.10-rbsec.tar.gz"
-  version "1.11.10"
-  sha256 "fbb26fdbf2cf5b2f3f8c88782721b7875f206552cf83201981411e0af9521204"
-  revision 1
+  url "https://github.com/rbsec/sslscan/archive/1.11.13-rbsec.tar.gz"
+  sha256 "8a09c4cd1400af2eeeec8436a2f645ed0aae5576f4de045a09ea9ff099f56f4a"
   head "https://github.com/rbsec/sslscan.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e16e4f98c3e89c371a96add21fbfa14fd44303ddd7a36c2125fb8cf8e4d762da" => :high_sierra
-    sha256 "760493b1794996041d47caf811b09cd3724b6ca7b7918594b7eb308d8bcfa793" => :sierra
-    sha256 "29e4cdd913a4b684fabd70f58d4be444e1a38b7aefc8d15e00e02b1c286a41d2" => :el_capitan
-    sha256 "4ac19a3ddd29aa89fbc69758399c4a5c18b63ca01795643ec35c354a7454b2f0" => :yosemite
+    sha256 "788f9752e795f4ff95e1251a243a5829a6f9b40facbdca40e4819de5f9d7dc4c" => :catalina
+    sha256 "8a8826da03dbbaa9ee89c8e6b95496c178f5a93d86468402fb6e432ebc7f2c68" => :mojave
+    sha256 "e0735e75b58b7cb0ef72cc79089df545e0140e52bc206c1791ab979192251d22" => :high_sierra
+    sha256 "4b00ee57ccf8dfbc890bbc7ca978dd4f310e7f73dfc022c78c33b69b9b3449dc" => :sierra
   end
 
   resource "insecure-openssl" do

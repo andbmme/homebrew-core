@@ -1,35 +1,23 @@
 class Treefrog < Formula
   desc "High-speed C++ MVC Framework for Web Application"
-  homepage "http://www.treefrogframework.org/"
-  url "https://github.com/treefrogframework/treefrog-framework/archive/v1.19.0.tar.gz"
-  sha256 "7e1017c00dba4aa111882aa7ac334956a3b8b64466bf1137379b2b326caf4047"
+  homepage "https://www.treefrogframework.org/"
+  url "https://github.com/treefrogframework/treefrog-framework/archive/v1.29.0.tar.gz"
+  sha256 "e5c0dbd6e317d27289bd9f500fae3bd84c74c1e982b914ae193b279c35e1bc0f"
   head "https://github.com/treefrogframework/treefrog-framework.git"
 
   bottle do
-    sha256 "ec2359159e02bf595d0cbf91a23e3975b9cd59e5655fe8d157b95ffb8e8d62a2" => :high_sierra
-    sha256 "a808d24e338c2e8c0b80e34ca00aa539b8b0a26912c493cdfabf7f4c33d1a619" => :sierra
-    sha256 "7b015baad146c53ab210c931c99710b41b5a9c62b2c09a0d5eb7a4ed832f6427" => :el_capitan
+    sha256 "b60083bd0a5e7ae3d938d10fd44b22ec00a49efdf984294f02cfd88fd859af52" => :catalina
+    sha256 "e87f7b1ff88ed2cff824039ac6acbf1437e9adcc4599cd0dc6162194fc861733" => :mojave
+    sha256 "a690eac1c340e7695a25b2f561d86b33cb5d2c970f6b6961799257787af89a65" => :high_sierra
   end
 
-  deprecated_option "with-qt5" => "with-qt"
-
-  option "with-mysql", "enable --with-mysql option for Qt build"
-  option "with-postgresql", "enable --with-postgresql option for Qt build"
-  option "with-qt", "build and link with QtGui module"
-
+  depends_on :xcode => ["8.0", :build]
   depends_on :macos => :el_capitan
-  depends_on :xcode => [:build, "8.0"]
-
-  qt_build_options = []
-  qt_build_options << "with-mysql" if build.with?("mysql")
-  qt_build_options << "with-postgresql" if build.with?("postgresql")
-  depends_on "qt" => qt_build_options
+  depends_on "mongo-c-driver"
+  depends_on "qt"
 
   def install
-    args = ["--prefix=#{prefix}"]
-    args << "--enable-gui-mod" if build.with? "qt"
-
-    system "./configure", *args
+    system "./configure", "--prefix=#{prefix}", "--enable-shared-mongoc"
 
     cd "src" do
       system "make"
